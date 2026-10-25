@@ -1,0 +1,19 @@
+ColumnLimit: 100
+IndentWidth: 4
+UseTab: Never
+MaxEmptyLinesToKeep: 1
+
+Language: C
+
+SortIncludes:
+    Enabled: true
+    IgnoreCase: true
+PointerAlignment: Right
+AlwaysBreakAfterReturnType: All
+AllowShortFunctionsOnASingleLine: None
+BreakBeforeBraces: Allman
+BinPackArguments: false
+BinPackParameters: OnePerLine
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveAssignments: Consecutive
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse

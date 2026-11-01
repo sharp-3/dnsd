@@ -1,0 +1,7 @@
+FIELD(uint16_t,      id, 16, "0x%04X", id)
+FIELD(uint16_t,   flags, 16, "0x%016b", flags)
+FIELD(uint16_t, qdcount, 16, "%d", qdcount)
+FIELD(uint16_t, ancount, 16, "%d", ancount)
+FIELD(uint16_t, nscount, 16, "%d", nscount)
+FIELD(uint16_t, arcount, 16, "%d", arcount)
+ARRAY(          payload, bytes, hexdump)

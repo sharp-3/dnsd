@@ -15,7 +15,15 @@ set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "${HEADER_DIR}/*.h")
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.c")
 
+set(LIB_SOURCES ${SOURCES})
+list(FILTER LIB_SOURCES EXCLUDE REGEX "^${SOURCE_DIR}/(main\\.c|bin/)")
+
+add_library(${PROJECT_NAME}_core STATIC ${LIB_SOURCES} ${HEADERS})
+target_include_directories(${PROJECT_NAME}_core PUBLIC "${HEADER_DIR}")
+target_compile_options(${PROJECT_NAME}_core PUBLIC -Wall -Wextra)
+
 add_executable(${PROJECT_NAME} "${SOURCE_DIR}/main.c")
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_core)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 
 add_format(format EXCLUDE_FROM_ALL ${SOURCES} ${HEADERS})

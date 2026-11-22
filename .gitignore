@@ -1,0 +1,12 @@
+/*
+!/.gitignore
+
+# Files
+!/CMakeLists.txt
+!/.clang-format
+
+# Directories
+!/cmake/
+!/include/
+!/src/
+!/test/

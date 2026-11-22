@@ -1,0 +1,27 @@
+# Requires clang-format 21 or later (tested with 21.1.8).
+BasedOnStyle: LLVM
+Language: C
+
+UseTab: Never
+IndentWidth: 4
+ColumnLimit: 100
+
+BreakBeforeBraces: Allman
+BreakAfterReturnType: All
+SpaceBeforeParens: Always
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+
+BinPackArguments: false
+BinPackParameters: OnePerLine
+AlignConsecutiveAssignments:
+  Enabled: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AlignFunctionDeclarations: true
+AlignTrailingComments:
+  Kind: Always
+PointerAlignment: Right
+
+SortIncludes:
+  Enabled: true
+  IgnoreCase: true

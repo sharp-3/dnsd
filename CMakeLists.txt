@@ -26,4 +26,8 @@ add_executable(${PROJECT_NAME} "${SOURCE_DIR}/main.c")
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_core)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 
+add_executable(query "${SOURCE_DIR}/bin/query.c")
+target_link_libraries(query PRIVATE ${PROJECT_NAME}_core)
+target_compile_options(query PRIVATE -Wall -Wextra)
+
 add_format(format EXCLUDE_FROM_ALL ${SOURCES} ${HEADERS})

@@ -3,17 +3,25 @@
 
 typedef enum
 {
-    DNS_OK = 0,             // success
-    DNS_OK_NAME_TOO_LONG,   // success, but a name is longer than DNS_NAME_MAX octets
-    DNS_ERR_TRUNCATED,      // the data ends before the item does
-    DNS_ERR_BAD_POINTER,    // pointer not to an earlier label start
-    DNS_ERR_RESERVED_LABEL, // label type 0b01 / 0b10
-    DNS_ERR_BAD_RDATA,      // RDATA does not fit its TYPE / CLASS
-    DNS_ERR_NOMEM,          // memory allocation failed
-    DNS_ERR_LABEL_TOO_LONG, // label longer than 63 octets
-    DNS_ERR_BAD_TEXT,       // malformed text form
-    DNS_ERR_COMPRESSED,     // name contains a compression pointer
-    DNS_ERR_NO_SPACE,       // output buffer too small
+    DNS_OK = 0,              // success
+    DNS_OK_NAME_TOO_LONG,    // success, but a name is longer than DNS_NAME_MAX octets
+    DNS_ERR_TRUNCATED,       // the data ends before the item does
+    DNS_ERR_BAD_POINTER,     // pointer not to an earlier label start
+    DNS_ERR_RESERVED_LABEL,  // label type 0b01 / 0b10
+    DNS_ERR_BAD_RDATA,       // RDATA does not fit its TYPE / CLASS
+    DNS_ERR_NOMEM,           // memory allocation failed
+    DNS_ERR_LABEL_TOO_LONG,  // label longer than 63 octets
+    DNS_ERR_BAD_TEXT,        // malformed text form
+    DNS_ERR_COMPRESSED,      // name contains a compression pointer
+    DNS_ERR_NO_SPACE,        // output buffer too small
+    DNS_ERR_NOT_QUERY,       // QR is set in a message expected to be a query
+    DNS_ERR_NOT_IMPLEMENTED, // OPCODE not supported
+    DNS_ERR_BAD_QDCOUNT,     // QDCOUNT not allowed (query: must be 1)
+    DNS_ERR_BAD_ANCOUNT,     // ANCOUNT not allowed (query: must be 0)
+    DNS_ERR_BAD_NSCOUNT,     // NSCOUNT not allowed (query: must be 0)
+    DNS_ERR_BAD_ARCOUNT,     // ARCOUNT not allowed (query: must be 0)
+    DNS_ERR_NAME_TOO_LONG,   // name longer than DNS_NAME_MAX octets where that is not allowed
+    DNS_ERR_TRAILING_DATA,   // octets left after the last section
 } dns_error_t;
 
 // Whether err means success: the output is filled and the position advanced. DNS_OK_*
@@ -35,6 +43,14 @@ dns_is_ok (dns_error_t err)
     case DNS_ERR_BAD_TEXT:
     case DNS_ERR_COMPRESSED:
     case DNS_ERR_NO_SPACE:
+    case DNS_ERR_NOT_QUERY:
+    case DNS_ERR_NOT_IMPLEMENTED:
+    case DNS_ERR_BAD_QDCOUNT:
+    case DNS_ERR_BAD_ANCOUNT:
+    case DNS_ERR_BAD_NSCOUNT:
+    case DNS_ERR_BAD_ARCOUNT:
+    case DNS_ERR_NAME_TOO_LONG:
+    case DNS_ERR_TRAILING_DATA:
         return false;
     }
     return false;

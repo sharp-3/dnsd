@@ -4,8 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "dns/class.h"
 #include "dns/error.h"
+#include "dns/params/class.h"
+#include "dns/params/type.h"
 #include "dns/parser.h"
 #include "dns/rdata/a.h"
 #include "dns/rdata/aaaa.h"
@@ -18,7 +19,6 @@
 #include "dns/rdata/srv.h"
 #include "dns/rdata/txt.h"
 #include "dns/rdata/unknown.h"
-#include "dns/type.h"
 
 // Each RR type has its own header under dns/rdata/ with its RDATA struct and
 // dns_rdata_<type>_from_bytes / dns_rdata_<type>_to_bytes. Names in them are in wire format

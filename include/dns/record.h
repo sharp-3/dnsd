@@ -4,12 +4,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "dns/class.h"
 #include "dns/error.h"
 #include "dns/name.h"
+#include "dns/params/class.h"
+#include "dns/params/type.h"
 #include "dns/parser.h"
 #include "dns/rdata.h"
-#include "dns/type.h"
 
 #define DNS_RECORD_DISPLAY_SIZE 4096
 

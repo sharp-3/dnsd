@@ -1,8 +1,10 @@
-#ifndef DNSD_DNS_TYPE_H
-#define DNSD_DNS_TYPE_H
+#ifndef DNSD_DNS_PARAMS_TYPE_H
+#define DNSD_DNS_PARAMS_TYPE_H
 
 #include <stddef.h>
 #include <stdint.h>
+
+#include "dns/error.h"
 
 #define DNS_TYPE_SIZE 2 // octets in wire format
 #define DNS_TYPE_DISPLAY_SIZE sizeof "TYPE65535"
@@ -37,6 +39,12 @@ typedef enum : uint16_t
     DNS_TYPE_ANY        = 255, // all records (QTYPE only)
     DNS_TYPE_CAA        = 257, // certification authority authorization (RFC 8659)
 } dns_type_t;
+
+// Parses the mnemonic (e.g. "AAAA", ignoring ASCII case) or the generic form "TYPE<n>"
+// (RFC 3597; n decimal, 0..65535) into *out.
+// DNS_ERR_BAD_TEXT: neither form; *out is unchanged.
+dns_error_t
+dns_type_from_string (const char *str, dns_type_t *out);
 
 const char *
 dns_type_display_r (dns_type_t value, char *buf, size_t len);

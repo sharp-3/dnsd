@@ -5,9 +5,9 @@
 #include <stdint.h>
 
 #include "dns/error.h"
-#include "dns/opcode.h"
+#include "dns/params/opcode.h"
+#include "dns/params/rcode.h"
 #include "dns/parser.h"
-#include "dns/rcode.h"
 
 #define DNS_HEADER_SIZE 12
 #define DNS_HEADER_DISPLAY_SIZE                                                                    \

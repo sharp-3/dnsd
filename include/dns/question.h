@@ -4,11 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "dns/class.h"
 #include "dns/error.h"
 #include "dns/name.h"
+#include "dns/params/class.h"
+#include "dns/params/type.h"
 #include "dns/parser.h"
-#include "dns/type.h"
 
 #define DNS_QUESTION_DISPLAY_SIZE                                                                  \
     (sizeof "\t\t" + (DNS_NAME_DEBUG_SIZE - 1) + (DNS_TYPE_DISPLAY_SIZE - 1) +                     \

@@ -5,17 +5,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <sys/socket.h>
 #include <time.h>
 #include <unistd.h>
 
-#include "dns/class.h"
 #include "dns/header.h"
 #include "dns/name.h"
+#include "dns/params/class.h"
+#include "dns/params/type.h"
 #include "dns/question.h"
 #include "dns/record.h"
-#include "dns/type.h"
 
 #define TIMEOUT_MS 3000
 #define TRIES 3
@@ -67,34 +66,6 @@ parse_flag (const char *a, dns_header_t *hdr)
         if (strcmp (f, flags[i].name) == 0)
         {
             *flags[i].bit = on;
-            return true;
-        }
-    }
-    return false;
-}
-
-static bool
-parse_type (const char *s, dns_type_t *out)
-{
-    for (unsigned v = 0; v <= UINT16_MAX; v++)
-    {
-        if (strcasecmp (dns_type_display ((dns_type_t)v), s) == 0)
-        {
-            *out = (dns_type_t)v;
-            return true;
-        }
-    }
-    return false;
-}
-
-static bool
-parse_class (const char *s, dns_class_t *out)
-{
-    for (unsigned v = 0; v <= UINT16_MAX; v++)
-    {
-        if (strcasecmp (dns_class_display ((dns_class_t)v), s) == 0)
-        {
-            *out = (dns_class_t)v;
             return true;
         }
     }
@@ -352,8 +323,8 @@ main (int argc, char **argv)
         else if (parse_flag (a, &hdr)) continue;
         else if (a[0] == '+') usage ();
         else if (!qname) qname = a;
-        else if (!have_type && parse_type (a, &qtype)) have_type = true;
-        else if (!have_class && parse_class (a, &qclass)) have_class = true;
+        else if (!have_type && dns_type_from_string (a, &qtype) == DNS_OK) have_type = true;
+        else if (!have_class && dns_class_from_string (a, &qclass) == DNS_OK) have_class = true;
         else usage ();
     }
     if (!qname) usage ();

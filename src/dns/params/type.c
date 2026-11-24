@@ -1,14 +1,7 @@
-#include <stdio.h>
-
-#include "common.h"
 #include "dns/params/type.h"
-#include "utils/string.h"
+#include "common.h"
 
-static const struct
-{
-    dns_type_t  value;
-    const char *name;
-} names[] = {
+static const params_name_t names[] = {
     {DNS_TYPE_A, "A"},         {DNS_TYPE_NS, "NS"},
     {DNS_TYPE_CNAME, "CNAME"}, {DNS_TYPE_SOA, "SOA"},
     {DNS_TYPE_PTR, "PTR"},     {DNS_TYPE_HINFO, "HINFO"},
@@ -24,6 +17,8 @@ static const struct
     {DNS_TYPE_AXFR, "AXFR"},   {DNS_TYPE_ANY, "ANY"},
     {DNS_TYPE_CAA, "CAA"},
 };
+
+static const params_table_t table = PARAMS_TABLE (names, "TYPE", UINT16_MAX);
 
 bool
 dns_type_is_reserved (dns_type_t type)
@@ -46,26 +41,14 @@ dns_type_is_normal (dns_type_t type)
 const char *
 dns_type_display_r (dns_type_t value, char *buf, size_t len)
 {
-    for (size_t i = 0; i < sizeof names / sizeof names[0]; i++)
-        if (names[i].value == value) return names[i].name;
-    snprintf (buf, len, "TYPE%d", value);
-    return buf;
+    return params_display_r (&table, value, buf, len);
 }
 
 dns_error_t
 dns_type_from_string (const char *str, dns_type_t *out)
 {
-    for (size_t i = 0; i < sizeof names / sizeof names[0]; i++)
-    {
-        if (str_equal_nocase (str, names[i].name))
-        {
-            *out = names[i].value;
-            return DNS_OK;
-        }
-    }
-
     uint32_t value;
-    if (!params_generic_from_string (str, "TYPE", UINT16_MAX, &value)) return DNS_ERR_BAD_TEXT;
+    if (!params_from_string (&table, str, &value)) return DNS_ERR_BAD_TEXT;
     *out = (dns_type_t)value;
     return DNS_OK;
 }

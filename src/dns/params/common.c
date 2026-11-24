@@ -1,10 +1,22 @@
+#include <stdio.h>
+
 #include "common.h"
 #include "utils/string.h"
 
-bool
-params_generic_from_string (const char *str, const char *prefix, uint32_t max, uint32_t *out)
+const char *
+params_display_r (const params_table_t *t, uint32_t value, char *buf, size_t len)
 {
-    for (; *prefix; prefix++, str++)
+    for (size_t i = 0; i < t->count; i++)
+        if (t->names[i].value == value) return t->names[i].name;
+    snprintf (buf, len, "%s%lu", t->prefix, (unsigned long)value);
+    return buf;
+}
+
+// Parses the generic form of t into *out; see params_from_string.
+static bool
+generic_from_string (const params_table_t *t, const char *str, uint32_t *out)
+{
+    for (const char *prefix = t->prefix; *prefix; prefix++, str++)
         if (ascii_tolower (*str) != ascii_tolower (*prefix)) return false;
 
     if (*str == '\0') return false;
@@ -13,9 +25,25 @@ params_generic_from_string (const char *str, const char *prefix, uint32_t max, u
     for (; *str; str++)
     {
         if (!ascii_isdigit (*str)) return false;
-        value = value * 10 + (uint32_t)(*str - '0');
-        if (value > max) return false; // also stops before value can overflow
+        uint32_t digit = (uint32_t)(*str - '0');
+        // value * 10 + digit > max, checked without overflow
+        if (digit > t->max || value > (t->max - digit) / 10) return false;
+        value = value * 10 + digit;
     }
     *out = value;
     return true;
+}
+
+bool
+params_from_string (const params_table_t *t, const char *str, uint32_t *out)
+{
+    for (size_t i = 0; i < t->count; i++)
+    {
+        if (str_equal_nocase (str, t->names[i].name))
+        {
+            *out = t->names[i].value;
+            return true;
+        }
+    }
+    return generic_from_string (t, str, out);
 }

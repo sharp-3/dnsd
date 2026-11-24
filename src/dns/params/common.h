@@ -6,10 +6,35 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Parses the generic form <prefix><decimal> (RFC 3597, e.g. "TYPE65535"), prefix matched
-// ignoring ASCII case, into *out. Only digits may follow the prefix, and the value must be at
-// most max. Returns false (leaving *out unchanged) otherwise.
+typedef struct
+{
+    uint32_t    value;
+    const char *name; // mnemonic
+} params_name_t;
+
+// One parameter: its mnemonics and its generic form <prefix><decimal> (e.g. "TYPE65535").
+typedef struct
+{
+    const params_name_t *names;
+    size_t               count;  // entries in names
+    const char          *prefix; // of the generic form
+    uint32_t             max;    // largest value the generic form may give
+} params_table_t;
+
+#define PARAMS_TABLE(names_, prefix_, max_)                                                        \
+    {.names  = (names_),                                                                           \
+     .count  = sizeof (names_) / sizeof (names_)[0],                                               \
+     .prefix = (prefix_),                                                                          \
+     .max    = (max_)}
+
+// The mnemonic of value, or the generic form written to buf when it has none.
+const char *
+params_display_r (const params_table_t *t, uint32_t value, char *buf, size_t len);
+
+// Parses a mnemonic (ignoring ASCII case) or the generic form (prefix ignoring ASCII case, then
+// one or more decimal digits with a value of at most t->max) into *out. Returns false (leaving
+// *out unchanged) when str is neither.
 bool
-params_generic_from_string (const char *str, const char *prefix, uint32_t max, uint32_t *out);
+params_from_string (const params_table_t *t, const char *str, uint32_t *out);
 
 #endif

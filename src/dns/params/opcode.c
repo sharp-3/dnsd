@@ -1,14 +1,7 @@
-#include <stdio.h>
-
-#include "common.h"
 #include "dns/params/opcode.h"
-#include "utils/string.h"
+#include "common.h"
 
-static const struct
-{
-    dns_opcode_t value;
-    const char  *name;
-} names[] = {
+static const params_name_t names[] = {
     {DNS_OPCODE_QUERY, "QUERY"},
     {DNS_OPCODE_IQUERY, "IQUERY"},
     {DNS_OPCODE_STATUS, "STATUS"},
@@ -17,30 +10,19 @@ static const struct
     {DNS_OPCODE_DSO, "DSO"},
 };
 
+static const params_table_t table = PARAMS_TABLE (names, "OPCODE", DNS_OPCODE_MAX);
+
 const char *
 dns_opcode_display_r (dns_opcode_t value, char *buf, size_t len)
 {
-    for (size_t i = 0; i < sizeof names / sizeof names[0]; i++)
-        if (names[i].value == value) return names[i].name;
-    snprintf (buf, len, "OPCODE%d", value);
-    return buf;
+    return params_display_r (&table, value, buf, len);
 }
 
 dns_error_t
 dns_opcode_from_string (const char *str, dns_opcode_t *out)
 {
-    for (size_t i = 0; i < sizeof names / sizeof names[0]; i++)
-    {
-        if (str_equal_nocase (str, names[i].name))
-        {
-            *out = names[i].value;
-            return DNS_OK;
-        }
-    }
-
     uint32_t value;
-    if (!params_generic_from_string (str, "OPCODE", DNS_OPCODE_MAX, &value))
-        return DNS_ERR_BAD_TEXT;
+    if (!params_from_string (&table, str, &value)) return DNS_ERR_BAD_TEXT;
     *out = (dns_opcode_t)value;
     return DNS_OK;
 }

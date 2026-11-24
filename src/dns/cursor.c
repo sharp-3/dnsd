@@ -27,10 +27,10 @@ dns_cursor_clear_labels (dns_cursor_t *p, size_t from)
     memset (p->label_bitmap + byte + 1, 0, sizeof p->label_bitmap - byte - 1);
 }
 
-int
+bool
 dns_cursor_test_label (const dns_cursor_t *p, size_t nbytes_off)
 {
     if (nbytes_off <= DNS_LABEL_POINTER_MAX)
         return (p->label_bitmap[nbytes_off >> 3] & (1 << (nbytes_off & 0b111))) != 0;
-    return 0;
+    return false;
 }

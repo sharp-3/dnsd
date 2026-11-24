@@ -53,7 +53,7 @@ parse_flag (const char *a, dns_header_t *hdr)
     struct
     {
         const char *name;
-        uint8_t    *bit;
+        bool       *bit;
     } flags[] = {
         {"qr", &hdr->qr},
         {"aa", &hdr->aa},
@@ -317,7 +317,7 @@ main (int argc, char **argv)
     bool         have_type = false, have_class = false;
     dns_type_t   qtype  = DNS_TYPE_A;
     dns_class_t  qclass = DNS_CLASS_IN;
-    dns_header_t hdr    = {.id = random_id (), .opcode = DNS_OPCODE_QUERY, .rd = 1, .qdcount = 1};
+    dns_header_t hdr = {.id = random_id (), .opcode = DNS_OPCODE_QUERY, .rd = true, .qdcount = 1};
 
     for (int i = 1; i < argc; i++)
     {

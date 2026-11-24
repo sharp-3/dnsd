@@ -21,7 +21,7 @@ void
 dns_cursor_mark_label (dns_cursor_t *p, size_t nbytes_off);
 void
 dns_cursor_clear_labels (dns_cursor_t *p, size_t from);
-int
+bool
 dns_cursor_test_label (const dns_cursor_t *p, size_t nbytes_off);
 
 #endif

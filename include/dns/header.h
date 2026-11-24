@@ -17,15 +17,15 @@
 typedef struct
 {
     uint16_t     id;      // query identifier
-    uint8_t      qr;      // 0 = query, 1 = response
+    bool         qr;      // false = query, true = response
     dns_opcode_t opcode;  // kind of query
-    uint8_t      aa;      // authoritative answer
-    uint8_t      tc;      // truncated
-    uint8_t      rd;      // recursion desired
-    uint8_t      ra;      // recursion available
-    uint8_t      z;       // reserved, must be 0
-    uint8_t      ad;      // authentic data (RFC 4035)
-    uint8_t      cd;      // checking disabled (RFC 4035)
+    bool         aa;      // authoritative answer
+    bool         tc;      // truncated
+    bool         rd;      // recursion desired
+    bool         ra;      // recursion available
+    bool         z;       // reserved, must be 0
+    bool         ad;      // authentic data (RFC 4035)
+    bool         cd;      // checking disabled (RFC 4035)
     dns_rcode_t  rcode;   // response code
     uint16_t     qdcount; // entries in the question section
     uint16_t     ancount; // records in the answer section

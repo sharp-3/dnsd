@@ -24,6 +24,24 @@ static const struct
     {DNS_TYPE_CAA, "CAA"},
 };
 
+bool
+dns_type_is_reserved (dns_type_t type)
+{
+    return type == 0 || (type >= 0xF000 && type <= 0xFEFF) || type == 0xFFFF;
+}
+
+bool
+dns_type_is_qonly_or_meta (dns_type_t type)
+{
+    return (type >= 0x0080 && type <= 0x00FF) || type == DNS_TYPE_OPT;
+}
+
+bool
+dns_type_is_normal (dns_type_t type)
+{
+    return !dns_type_is_reserved (type) && !dns_type_is_qonly_or_meta (type);
+}
+
 const char *
 dns_type_display_r (dns_type_t value, char *buf, size_t len)
 {

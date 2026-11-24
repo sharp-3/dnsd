@@ -40,6 +40,19 @@ typedef enum : uint16_t
     DNS_TYPE_CAA        = 257, // certification authority authorization (RFC 8659)
 } dns_type_t;
 
+// RRTYPE categories (RFC 6895 3.1). Every value is in exactly one of them:
+// reserved:      0, 0xF000-0xFEFF (reserved for future use), 0xFFFF
+// qonly_or_meta: 0x0080-0x00FF (QTYPEs such as AXFR / ANY and Meta-TYPEs such as TSIG),
+//                plus OPT (41), a Meta-TYPE allocated before that range
+// normal:        all other values, i.e. data TYPEs that can be stored in a zone
+//                (0x0001-0x007F, 0x0100-0xEFFF and private use 0xFF00-0xFFFE)
+bool
+dns_type_is_normal (dns_type_t type);
+bool
+dns_type_is_qonly_or_meta (dns_type_t type);
+bool
+dns_type_is_reserved (dns_type_t type);
+
 // Parses the mnemonic (e.g. "AAAA", ignoring ASCII case) or the generic form "TYPE<n>"
 // (RFC 3597; n decimal, 0..65535) into *out.
 // DNS_ERR_BAD_TEXT: neither form; *out is unchanged.

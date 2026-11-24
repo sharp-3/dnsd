@@ -34,4 +34,35 @@ dns_label_to_string (const uint8_t *label, char *buf, size_t len, size_t *out);
 dns_error_t
 dns_label_from_string (const char **str, uint8_t *label, size_t len);
 
+// Walks the labels of a name in buf (len octets), starting at offset pos, without following
+// compression pointers:
+//
+//     dns_label_iter_t it;
+//     dns_label_iter_init (&it, buf, len, 0);
+//     while (dns_label_iter_next (&it))
+//         use (it.label, it.off);
+//     if (it.err != DNS_OK) ...
+//
+// Each label it yields is whole within buf and of type NORMAL or POINTER. The name ends after
+// the root label or a pointer, which are yielded too; to go on at the target of a pointer,
+// init the iterator again there.
+typedef struct
+{
+    const uint8_t *buf;
+    size_t         len;   // octets in buf
+    size_t         pos;   // offset of the next label
+    const uint8_t *label; // current label (valid after dns_label_iter_next returned true)
+    size_t         off;   // offset of label in buf
+    bool           end;   // the name has ended (root label or pointer yielded)
+    dns_error_t    err;   // DNS_OK, or why the walk stopped before the name ended:
+                          // DNS_ERR_TRUNCATED (buf ends within a label) or
+                          // DNS_ERR_RESERVED_LABEL (label type 0b01 / 0b10)
+} dns_label_iter_t;
+
+void
+dns_label_iter_init (dns_label_iter_t *it, const uint8_t *buf, size_t len, size_t pos);
+// Moves to the next label; false when the name has ended or on error (see it->err).
+bool
+dns_label_iter_next (dns_label_iter_t *it);
+
 #endif

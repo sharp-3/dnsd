@@ -148,3 +148,45 @@ dns_label_from_string (const char **str, uint8_t *label, size_t len)
     *str     = p;
     return DNS_OK;
 }
+
+void
+dns_label_iter_init (dns_label_iter_t *it, const uint8_t *buf, size_t len, size_t pos)
+{
+    *it = (dns_label_iter_t){.buf = buf, .len = len, .pos = pos};
+}
+
+bool
+dns_label_iter_next (dns_label_iter_t *it)
+{
+    if (it->end || it->err != DNS_OK) return false;
+    if (it->pos >= it->len)
+    {
+        it->err = DNS_ERR_TRUNCATED;
+        return false;
+    }
+
+    const uint8_t *label = it->buf + it->pos;
+    switch (dns_label_type (label))
+    {
+    case DNS_LABEL_TYPE_NORMAL:
+        it->end = label[0] == 0;
+        break;
+    case DNS_LABEL_TYPE_POINTER:
+        it->end = true;
+        break;
+    default:
+        it->err = DNS_ERR_RESERVED_LABEL;
+        return false;
+    }
+    if (it->len - it->pos < dns_label_size (label))
+    {
+        it->end = false;
+        it->err = DNS_ERR_TRUNCATED;
+        return false;
+    }
+
+    it->label = label;
+    it->off   = it->pos;
+    it->pos += dns_label_size (label);
+    return true;
+}

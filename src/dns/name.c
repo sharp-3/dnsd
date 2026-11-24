@@ -5,13 +5,11 @@
 #include "dns/label.h"
 #include "dns/name.h"
 
-// Checks the compression pointer at label, which has avail octets left: it must be whole and
-// go back before offset bound to a recorded label start. Stores its target in *target.
+// Checks the (whole) compression pointer at label: it must go back before offset bound to a
+// recorded label start. Stores its target in *target.
 static dns_error_t
-check_pointer (
-    const dns_cursor_t *p, const uint8_t *label, size_t avail, size_t bound, size_t *target)
+check_pointer (const dns_cursor_t *p, const uint8_t *label, size_t bound, size_t *target)
 {
-    if (avail < DNS_LABEL_POINTER_SIZE) return DNS_ERR_TRUNCATED;
     *target = dns_label_pointer_target (label);
     if (*target >= bound || !dns_cursor_test_label (p, *target)) return DNS_ERR_BAD_POINTER;
     return DNS_OK;
@@ -27,8 +25,10 @@ dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out)
     const uint8_t *ptr   = cursor_ptr (&p->cur);
     size_t         start = cursor_bytes (&p->cur);
     dns_cursor_clear_labels (p, start);
-    for (size_t i = 0; i < len; i += dns_label_size (ptr + i))
-        dns_cursor_mark_label (p, start + i);
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, ptr, len, 0);
+    while (dns_label_iter_next (&it))
+        dns_cursor_mark_label (p, start + it.off);
     cursor_add_bytes (&p->cur, len);
 
     out->ptr = ptr;
@@ -40,41 +40,21 @@ dns_error_t
 dns_name_length (const dns_cursor_t *p, size_t *size)
 {
     assert (cursor_is_aligned (&p->cur));
-
-    const uint8_t *pkt     = p->cur.buf;
-    size_t         pkt_len = p->cur.len;
-    size_t         start   = cursor_bytes (&p->cur);
-    size_t         pos     = start;
-
     if (cursor_is_overflow (&p->cur)) return DNS_ERR_TRUNCATED;
 
-    for (;;)
+    size_t           start = cursor_bytes (&p->cur);
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, p->cur.buf, p->cur.len, start);
+    while (dns_label_iter_next (&it))
     {
-        if (pos >= pkt_len) return DNS_ERR_TRUNCATED;
-
-        const uint8_t *label = pkt + pos;
-        switch (dns_label_type (label))
-        {
-        case DNS_LABEL_TYPE_NORMAL:
-            if (pkt_len - pos < dns_label_size (label)) return DNS_ERR_TRUNCATED;
-            pos += dns_label_size (label);
-            if (label[0] == 0) goto done;
-            break;
-        case DNS_LABEL_TYPE_POINTER:
-        {
-            size_t      target;
-            dns_error_t err = check_pointer (p, label, pkt_len - pos, start, &target);
-            if (err != DNS_OK) return err;
-            pos += DNS_LABEL_POINTER_SIZE;
-            goto done;
-        }
-        default:
-            return DNS_ERR_RESERVED_LABEL;
-        }
+        if (dns_label_type (it.label) != DNS_LABEL_TYPE_POINTER) continue;
+        size_t      target;
+        dns_error_t err = check_pointer (p, it.label, start, &target);
+        if (err != DNS_OK) return err;
     }
+    if (it.err != DNS_OK) return it.err;
 
-done:
-    *size = pos - start;
+    *size = it.pos - start;
     return *size > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
@@ -113,44 +93,29 @@ expand (const dns_cursor_t *p,
         size_t              cap,
         size_t             *out_len)
 {
-    size_t pos   = 0;
-    size_t len   = 0;
-    size_t bound = limit;
-
-    for (;;)
+    size_t           len   = 0;
+    size_t           bound = limit;
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, src, end, 0);
+    while (dns_label_iter_next (&it))
     {
-        if (pos >= end) return DNS_ERR_TRUNCATED;
-
-        const uint8_t *label = src + pos;
-        size_t         size  = dns_label_size (label);
-        switch (dns_label_type (label))
-        {
-        case DNS_LABEL_TYPE_NORMAL:
-            if (end - pos < size) return DNS_ERR_TRUNCATED;
-            if (len + size <= cap) memcpy (out + len, label, size);
-            len += size;
-            pos += size;
-            if (label[0] == 0)
-            {
-                *out_len = len;
-                return len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
-            }
-            break;
-        case DNS_LABEL_TYPE_POINTER:
+        if (dns_label_type (it.label) == DNS_LABEL_TYPE_POINTER)
         {
             size_t      target;
-            dns_error_t err = check_pointer (p, label, end - pos, bound, &target);
+            dns_error_t err = check_pointer (p, it.label, bound, &target);
             if (err != DNS_OK) return err;
             bound = target;
-            src   = p->cur.buf;
-            end   = limit;
-            pos   = target;
-            break;
+            dns_label_iter_init (&it, p->cur.buf, limit, target);
+            continue;
         }
-        default:
-            return DNS_ERR_RESERVED_LABEL;
-        }
+        size_t size = dns_label_size (it.label);
+        if (len + size <= cap) memcpy (out + len, it.label, size);
+        len += size;
     }
+    if (it.err != DNS_OK) return it.err;
+
+    *out_len = len;
+    return len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 dns_error_t
@@ -173,16 +138,16 @@ dns_name_expand (
     return err;
 }
 
+// Whether the uncompressed names a and b, len octets each, are equal ignoring ASCII case.
 static bool
-labels_equal (const uint8_t *a, const uint8_t *b)
+labels_equal (const uint8_t *a, const uint8_t *b, size_t len)
 {
-    for (;;)
-    {
-        if (!dns_label_equal (a, b)) return false;
-        if (a[0] == 0) return true;
-        a += dns_label_size (a);
-        b += dns_label_size (b);
-    }
+    dns_label_iter_t ia, ib;
+    dns_label_iter_init (&ia, a, len, 0);
+    dns_label_iter_init (&ib, b, len, 0);
+    while (dns_label_iter_next (&ia))
+        if (!dns_label_iter_next (&ib) || !dns_label_equal (ia.label, ib.label)) return false;
+    return ia.err == DNS_OK;
 }
 
 static bool
@@ -198,7 +163,7 @@ find_suffix (
         if (dns_cursor_test_label (p, t) &&
             dns_is_ok (
                 expand (p, p->cur.buf + t, nbytes_off - t, nbytes_off, name, sizeof name, &n)) &&
-            n == len && n <= sizeof name && labels_equal (name, suffix))
+            n == len && n <= sizeof name && labels_equal (name, suffix, len))
         {
             *target = t;
             return true;
@@ -210,17 +175,12 @@ find_suffix (
 static dns_error_t
 check_labels (const dns_name_t *name)
 {
-    size_t end = 0;
-    for (;;)
-    {
-        if (end >= name->len) return DNS_ERR_TRUNCATED;
-        const uint8_t *label = name->ptr + end;
-        if (dns_label_type (label) == DNS_LABEL_TYPE_POINTER) return DNS_ERR_COMPRESSED;
-        if (dns_label_type (label) != DNS_LABEL_TYPE_NORMAL) return DNS_ERR_RESERVED_LABEL;
-        end += dns_label_size (label);
-        if (label[0] == 0) break;
-    }
-    return end == name->len ? DNS_OK : DNS_ERR_TRUNCATED;
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, name->ptr, name->len, 0);
+    while (dns_label_iter_next (&it))
+        if (dns_label_type (it.label) == DNS_LABEL_TYPE_POINTER) return DNS_ERR_COMPRESSED;
+    if (it.err != DNS_OK) return it.err;
+    return it.pos == name->len ? DNS_OK : DNS_ERR_TRUNCATED;
 }
 
 dns_error_t
@@ -237,12 +197,20 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
     if (err != DNS_OK) return err;
     if (cursor_is_overflow (&p->cur)) return DNS_ERR_NO_SPACE;
 
-    size_t i      = 0;
-    size_t target = 0;
-    bool   found  = false;
-    for (; d[i] != 0; i += dns_label_size (d + i))
-        if ((found = find_suffix (p, start, d + i, name->len - i, &target))) break;
-    if (!found) i = name->len;
+    // i: octets written as labels; the rest (if found) becomes a pointer to target.
+    size_t           i      = name->len;
+    size_t           target = 0;
+    bool             found  = false;
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, d, name->len, 0);
+    while (dns_label_iter_next (&it) && it.label[0] != 0)
+    {
+        if ((found = find_suffix (p, start, it.label, name->len - it.off, &target)))
+        {
+            i = it.off;
+            break;
+        }
+    }
 
     size_t n = found ? i + DNS_LABEL_POINTER_SIZE : i;
     if (!cursor_fits_bytes (&p->cur, n)) return DNS_ERR_NO_SPACE;
@@ -251,8 +219,9 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
     memcpy (ptr, d, i);
     if (found) dns_label_pointer_write (ptr + i, target);
 
-    for (size_t j = 0; j < i; j += dns_label_size (d + j))
-        dns_cursor_mark_label (p, start + j);
+    dns_label_iter_init (&it, d, name->len, 0);
+    while (dns_label_iter_next (&it) && it.off < i)
+        dns_cursor_mark_label (p, start + it.off);
     cursor_add_bytes (&p->cur, n);
     return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
@@ -260,8 +229,6 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
 dns_error_t
 dns_name_to_string (const dns_name_t *name, char *buf, size_t len)
 {
-    const uint8_t *d = name->ptr;
-
     if (len > 0) buf[0] = '\0';
 
     dns_error_t err = check_labels (name);
@@ -269,15 +236,18 @@ dns_name_to_string (const dns_name_t *name, char *buf, size_t len)
 
     if (len == 0) return DNS_ERR_NO_SPACE;
 
-    size_t out = 0;
-    size_t i   = 0;
-    do
+    // Each label followed by a dot; the root label only shows when it is the whole name (".").
+    size_t           out = 0;
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, name->ptr, name->len, 0);
+    while (dns_label_iter_next (&it))
     {
-        if (dns_label_to_string (d + i, buf, len, &out) != DNS_OK || len - out < 2) goto no_space;
+        if (it.label[0] == 0 && it.off != 0) break;
+        if (dns_label_to_string (it.label, buf, len, &out) != DNS_OK || len - out < 2)
+            goto no_space;
         buf[out++] = '.';
         buf[out]   = '\0';
-        i += dns_label_size (d + i);
-    } while (i + 1 < name->len);
+    }
     return DNS_OK;
 
 no_space:
@@ -288,24 +258,26 @@ no_space:
 const char *
 dns_name_debug_r (const dns_name_t *name, char *buf, size_t len)
 {
-    const uint8_t *d = name->ptr;
-
     if (len == 0) return buf;
     buf[0] = '\0';
 
-    size_t i = 0;
-    while (i < name->len && d[i] != 0 && dns_label_type (d + i) == DNS_LABEL_TYPE_NORMAL)
-        i += dns_label_size (d + i);
-    if (i + 1 >= name->len || dns_label_type (d + i) != DNS_LABEL_TYPE_POINTER)
+    // Find the pointer ending the name; without one, it is shown like dns_name_to_string.
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, name->ptr, name->len, 0);
+    while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
+        ;
+    if (it.err != DNS_OK || dns_label_type (it.label) != DNS_LABEL_TYPE_POINTER)
     {
         dns_name_to_string (name, buf, len);
         return buf;
     }
 
-    size_t out = 0;
-    for (size_t j = 0; j < i; j += dns_label_size (d + j))
+    const uint8_t *pointer = it.label;
+    size_t         out     = 0;
+    dns_label_iter_init (&it, name->ptr, name->len, 0);
+    while (dns_label_iter_next (&it) && it.label != pointer)
     {
-        if (dns_label_to_string (d + j, buf, len, &out) != DNS_OK || len - out < 2)
+        if (dns_label_to_string (it.label, buf, len, &out) != DNS_OK || len - out < 2)
         {
             buf[0] = '\0';
             return buf;
@@ -313,6 +285,7 @@ dns_name_debug_r (const dns_name_t *name, char *buf, size_t len)
         buf[out++] = '.';
         buf[out]   = '\0';
     }
-    snprintf (buf + out, len - out, "[pointer 0x%04X]", (unsigned)dns_label_pointer_target (d + i));
+    snprintf (
+        buf + out, len - out, "[pointer 0x%04X]", (unsigned)dns_label_pointer_target (pointer));
     return buf;
 }

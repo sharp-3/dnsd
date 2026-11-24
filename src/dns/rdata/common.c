@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
-#include "packet/emit.h"
+#include "packet/cursor.h"
 
 dns_error_t
 rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start)

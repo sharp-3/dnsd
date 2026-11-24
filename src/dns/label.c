@@ -1,8 +1,7 @@
 #include <string.h>
 
 #include "dns/label.h"
-#include "packet/emit.h"
-#include "packet/read.h"
+#include "packet/cursor.h"
 
 // A cursor over the first octets of label, for reading only (hence the cast).
 static cursor_t

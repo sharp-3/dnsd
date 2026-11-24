@@ -1,6 +1,5 @@
 #include "common.h"
-#include "packet/emit.h"
-#include "packet/take.h"
+#include "packet/cursor.h"
 
 dns_error_t
 dns_rdata_txt_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out)

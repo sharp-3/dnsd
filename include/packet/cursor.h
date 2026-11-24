@@ -107,4 +107,46 @@ cursor_add_bytes (cursor_t *c, size_t nbytes)
     c->nbytes += nbytes;
 }
 
+// read / write: access the packet at the position without moving it.
+
+// Reads nbits (at most 64) bits at the cursor without moving it; 0 if they are not all
+// within buf or the cursor has overflowed.
+uint64_t
+read_bits (const cursor_t *c, size_t nbits);
+
+// The cursor must be on an octet boundary. out is zeroed if the octets are not all within
+// buf or the cursor has overflowed.
+void
+read_bytes (const cursor_t *c, uint8_t *out, size_t nbytes);
+
+// Writes the low nbits (at most 64) bits of value at the cursor without moving it; does
+// nothing if they are not all within buf or the cursor has overflowed.
+void
+write_bits (const cursor_t *c, size_t nbits, uint64_t value);
+
+// The cursor must be on an octet boundary. Does nothing if the octets are not all within
+// buf or the cursor has overflowed.
+void
+write_bytes (const cursor_t *c, const uint8_t *data, size_t nbytes);
+
+// take / emit: read / write, then move the position past what was accessed.
+
+// read_bits, then advances the cursor by nbits. Past the end of buf it returns 0 and sets
+// overflow instead (see cursor_t).
+uint64_t
+take_bits (cursor_t *c, size_t nbits);
+
+// read_bytes, then advances the cursor by nbytes; sets overflow like take_bits.
+void
+take_bytes (cursor_t *c, uint8_t *out, size_t nbytes);
+
+// write_bits, then advances the cursor by nbits. Past the end of buf it writes nothing and
+// sets overflow instead (see cursor_t).
+void
+emit_bits (cursor_t *c, size_t nbits, uint64_t value);
+
+// write_bytes, then advances the cursor by nbytes; sets overflow like emit_bits.
+void
+emit_bytes (cursor_t *c, const uint8_t *data, size_t nbytes);
+
 #endif

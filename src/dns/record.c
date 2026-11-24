@@ -2,8 +2,7 @@
 
 #include "dns/rdata.h"
 #include "dns/record.h"
-#include "packet/emit.h"
-#include "packet/take.h"
+#include "packet/cursor.h"
 
 #define RR_TTL_SIZE 4
 #define RR_RDLENGTH_SIZE 2

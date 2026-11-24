@@ -1,8 +1,7 @@
 #include <stdio.h>
 
 #include "dns/question.h"
-#include "packet/emit.h"
-#include "packet/take.h"
+#include "packet/cursor.h"
 
 dns_error_t
 dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out)

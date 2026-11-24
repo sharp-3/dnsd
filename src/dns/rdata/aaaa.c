@@ -4,8 +4,7 @@
 #include <stdio.h>
 
 #include "common.h"
-#include "packet/emit.h"
-#include "packet/take.h"
+#include "packet/cursor.h"
 
 dns_error_t
 dns_rdata_aaaa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_aaaa_t *out)

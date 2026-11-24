@@ -4,8 +4,7 @@
 
 #include "dns/cursor.h"
 #include "dns/header.h"
-#include "packet/emit.h"
-#include "packet/take.h"
+#include "packet/cursor.h"
 
 dns_error_t
 dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out)

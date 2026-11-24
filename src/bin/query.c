@@ -28,6 +28,9 @@
 
 static char record_line[1 << 19];
 static bool expand;
+// Room for each name of one record once expanded (at most the message size; see
+// dns_name_expand).
+static uint8_t expanded[1 + RDATA_NAMES_MAX][MSG_MAX];
 
 static void
 usage (void)
@@ -243,13 +246,14 @@ print_records (const char *title, unsigned count, dns_parser_t *p)
         dns_record_t *rr = &record;
 
         dns_name_t *names[1 + RDATA_NAMES_MAX] = {&rr->name};
-        dns_name_t *full[1 + RDATA_NAMES_MAX]  = {};
         size_t      n = 1 + rdata_names (rr->type, rr->class, &rr->rdata, names + 1);
         for (size_t j = 0; expand && j < n; j++)
-            if (dns_is_ok (dns_name_expand (p, names[j], &full[j]))) *names[j] = *full[j];
+        {
+            dns_name_t full;
+            if (dns_is_ok (dns_name_expand (p, names[j], expanded[j], sizeof expanded[j], &full)))
+                *names[j] = full;
+        }
         puts (dns_record_display_r (rr, record_line, sizeof record_line));
-        for (size_t j = 0; j < n; j++)
-            free (full[j]);
     }
     return true;
 }
@@ -283,13 +287,15 @@ print_reply (uint8_t *msg, size_t len)
             ok = false;
             break;
         }
-        dns_question_t *q    = &question;
-        dns_name_t     *full = NULL;
-        if (expand && (err = dns_name_expand (&parser, &q->qname, &full)) != DNS_OK)
-            printf (";; error in QUESTION section: %s\n", dns_error_str (err));
-        if (full) q->qname = *full;
+        dns_question_t *q = &question;
+        if (expand)
+        {
+            dns_name_t full;
+            err = dns_name_expand (&parser, &q->qname, expanded[0], sizeof expanded[0], &full);
+            if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
+            if (dns_is_ok (err)) q->qname = full;
+        }
         printf (";%s\n", dns_question_display (q));
-        free (full);
     }
 
     ok = ok && print_records ("ANSWER", hdr->ancount, &parser) &&

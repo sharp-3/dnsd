@@ -173,24 +173,22 @@ expand (const dns_parser_t *p,
 }
 
 dns_error_t
-dns_name_expand (const dns_parser_t *p, const dns_name_t *name, dns_name_t **out)
+dns_name_expand_length (const dns_parser_t *p, const dns_name_t *name, size_t *len)
 {
-    *out = NULL;
+    return expand (p, name->ptr, name->len, p->cur.len, NULL, 0, len);
+}
 
-    // Measure first, then expand into a buffer of exactly that size.
-    size_t      len;
-    dns_error_t err = expand (p, name->ptr, name->len, p->cur.len, NULL, 0, &len);
+dns_error_t
+dns_name_expand (
+    const dns_parser_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out)
+{
+    size_t      n;
+    dns_error_t err = expand (p, name->ptr, name->len, p->cur.len, buf, len, &n);
     if (!dns_is_ok (err)) return err;
+    if (n > len) return DNS_ERR_NO_SPACE;
 
-    dns_name_t *full = malloc (sizeof *full + len);
-    if (!full) return DNS_ERR_NOMEM;
-
-    uint8_t *data = (uint8_t *)(full + 1);
-    expand (p, name->ptr, name->len, p->cur.len, data, len, &len);
-
-    full->ptr = data;
-    full->len = len;
-    *out      = full;
+    out->ptr = buf;
+    out->len = n;
     return err;
 }
 

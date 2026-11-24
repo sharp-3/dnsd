@@ -103,9 +103,8 @@ dns_message_body_query_validation (const dns_parser_t *p, const dns_message_t *m
 {
     for (unsigned i = 0; i < msg->header.qdcount; i++)
     {
-        dns_name_t *full;
-        dns_error_t err = dns_name_expand (p, &msg->question[i].qname, &full);
-        free (full);
+        size_t      len;
+        dns_error_t err = dns_name_expand_length (p, &msg->question[i].qname, &len);
         if (err != DNS_OK) return err;
     }
     return DNS_OK;

@@ -3,8 +3,8 @@
 #include "common.h"
 #include "packet/cursor.h"
 
-dns_error_t
-dns_rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out)
+static dns_error_t
+rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out)
 {
     cursor_t    start;
     dns_error_t err = rdata_begin (p, len, &start);
@@ -14,13 +14,21 @@ dns_rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out)
     rd.priority = take_bits (&p->cur, 16);
     rd.weight   = take_bits (&p->cur, 16);
     rd.port     = take_bits (&p->cur, 16);
-    err         = rdata_end (p, &start, dns_name_from_bytes (p, &rd.target));
+    err         = rdata_end (p, &start, dns_name_from_bytes (p, &rd.target) ? DNS_OK : p->err);
     if (dns_is_ok (err)) *out = rd;
     return err;
 }
 
-dns_error_t
-dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
+bool
+dns_rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out)
+{
+    if (p->err != DNS_OK) return false;
+    dns_error_t warn = p->warn;
+    return dns_cursor_finish (p, warn, rdata_srv_from_bytes (p, len, out));
+}
+
+static dns_error_t
+rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
 {
     cursor_t start = p->cur;
     emit_bits (&p->cur, 16, rd->priority);
@@ -28,6 +36,14 @@ dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
     emit_bits (&p->cur, 16, rd->port);
     emit_bytes (&p->cur, rd->target.ptr, rd->target.len);
     return rdata_put_end (p, &start);
+}
+
+bool
+dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
+{
+    if (p->err != DNS_OK) return false;
+    dns_error_t warn = p->warn;
+    return dns_cursor_finish (p, warn, rdata_srv_to_bytes (p, rd));
 }
 
 size_t

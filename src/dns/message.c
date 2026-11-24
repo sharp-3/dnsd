@@ -2,15 +2,22 @@
 
 #include "dns/message.h"
 
-dns_error_t
-dns_message_header_from_bytes (dns_cursor_t *p, dns_message_t *out)
+static dns_error_t
+message_header_from_bytes (dns_cursor_t *p, dns_message_t *out)
 {
     dns_header_t hdr;
-    dns_error_t  err = dns_header_from_bytes (p, &hdr);
-    if (err != DNS_OK) return err;
+    if (!dns_header_from_bytes (p, &hdr)) return p->err;
 
     *out = (dns_message_t){.header = hdr};
     return DNS_OK;
+}
+
+bool
+dns_message_header_from_bytes (dns_cursor_t *p, dns_message_t *out)
+{
+    if (p->err != DNS_OK) return false;
+    dns_error_t warn = p->warn;
+    return dns_cursor_finish (p, warn, message_header_from_bytes (p, out));
 }
 
 dns_error_t
@@ -28,20 +35,18 @@ dns_message_header_query_validation (const dns_message_t *msg)
 // Reads count questions into a new array stored in *out (NULL when count is 0). Errors
 // leave *out unchanged.
 static dns_error_t
-read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out, dns_error_t *soft)
+read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out)
 {
     dns_question_t *qs = NULL;
     if (count > 0 && !(qs = calloc (count, sizeof *qs))) return DNS_ERR_NOMEM;
 
     for (unsigned i = 0; i < count; i++)
     {
-        dns_error_t err = dns_question_from_bytes (p, &qs[i]);
-        if (!dns_is_ok (err))
+        if (!dns_question_from_bytes (p, &qs[i]))
         {
             free (qs);
-            return err;
+            return p->err;
         }
-        *soft = dns_merge_soft (*soft, err);
     }
     *out = qs;
     return DNS_OK;
@@ -49,38 +54,35 @@ read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out, dns_error
 
 // Like read_questions, for resource records.
 static dns_error_t
-read_records (dns_cursor_t *p, unsigned count, dns_record_t **out, dns_error_t *soft)
+read_records (dns_cursor_t *p, unsigned count, dns_record_t **out)
 {
     dns_record_t *rrs = NULL;
     if (count > 0 && !(rrs = calloc (count, sizeof *rrs))) return DNS_ERR_NOMEM;
 
     for (unsigned i = 0; i < count; i++)
     {
-        dns_error_t err = dns_record_from_bytes (p, &rrs[i]);
-        if (!dns_is_ok (err))
+        if (!dns_record_from_bytes (p, &rrs[i]))
         {
             free (rrs);
-            return err;
+            return p->err;
         }
-        *soft = dns_merge_soft (*soft, err);
     }
     *out = rrs;
     return DNS_OK;
 }
 
-dns_error_t
-dns_message_body_from_bytes (dns_cursor_t *p, dns_message_t *msg)
+static dns_error_t
+message_body_from_bytes (dns_cursor_t *p, dns_message_t *msg)
 {
     const dns_header_t *h     = &msg->header;
     cursor_t            start = p->cur;
-    dns_error_t         soft  = DNS_OK;
     dns_question_t     *qd    = NULL;
     dns_record_t       *an = NULL, *ns = NULL, *ar = NULL;
 
-    dns_error_t err = read_questions (p, h->qdcount, &qd, &soft);
-    if (err == DNS_OK) err = read_records (p, h->ancount, &an, &soft);
-    if (err == DNS_OK) err = read_records (p, h->nscount, &ns, &soft);
-    if (err == DNS_OK) err = read_records (p, h->arcount, &ar, &soft);
+    dns_error_t err = read_questions (p, h->qdcount, &qd);
+    if (err == DNS_OK) err = read_records (p, h->ancount, &an);
+    if (err == DNS_OK) err = read_records (p, h->nscount, &ns);
+    if (err == DNS_OK) err = read_records (p, h->arcount, &ar);
     if (err != DNS_OK)
     {
         free (qd);
@@ -95,7 +97,15 @@ dns_message_body_from_bytes (dns_cursor_t *p, dns_message_t *msg)
     msg->answer     = an;
     msg->authority  = ns;
     msg->additional = ar;
-    return soft;
+    return DNS_OK;
+}
+
+bool
+dns_message_body_from_bytes (dns_cursor_t *p, dns_message_t *msg)
+{
+    if (p->err != DNS_OK) return false;
+    dns_error_t warn = p->warn;
+    return dns_cursor_finish (p, warn, message_body_from_bytes (p, msg));
 }
 
 dns_error_t

@@ -33,10 +33,11 @@ typedef struct
     uint16_t     arcount; // records in the additional section
 } dns_header_t;
 
-// Reads / writes the header at p->cur and advances it; errors leave p->cur and *out unchanged.
-dns_error_t
+// Reads / writes the header at p->cur and advances it (see dns/cursor.h for the result).
+// p->err: DNS_ERR_TRUNCATED when reading, DNS_ERR_NO_SPACE when writing.
+bool
 dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out);
-dns_error_t
+bool
 dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr);
 const char *
 dns_header_display_r (const dns_header_t *hdr, char *buf, size_t len);

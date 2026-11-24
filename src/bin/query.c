@@ -239,7 +239,8 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
     for (unsigned i = 0; i < count; i++)
     {
         dns_record_t record;
-        dns_error_t  err = dns_record_from_bytes (p, &record);
+        p->warn         = DNS_OK; // so that it holds this record's warning only
+        dns_error_t err = dns_record_from_bytes (p, &record) ? p->warn : p->err;
         if (err != DNS_OK)
             printf (";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (err));
         if (!dns_is_ok (err)) return false;
@@ -265,7 +266,7 @@ print_reply (uint8_t *msg, size_t len)
     dns_cursor_init (&parser, msg, len);
 
     dns_header_t header;
-    dns_error_t  err = dns_header_from_bytes (&parser, &header);
+    dns_error_t  err = dns_header_from_bytes (&parser, &header) ? parser.warn : parser.err;
     if (err != DNS_OK)
     {
         printf (";; error in header: %s\n", dns_error_str (err));
@@ -280,8 +281,9 @@ print_reply (uint8_t *msg, size_t len)
     for (unsigned i = 0; ok && i < hdr->qdcount; i++)
     {
         dns_question_t question;
-        if ((err = dns_question_from_bytes (&parser, &question)) != DNS_OK)
-            printf (";; error in QUESTION section: %s\n", dns_error_str (err));
+        parser.warn = DNS_OK; // so that it holds this question's warning only
+        err         = dns_question_from_bytes (&parser, &question) ? parser.warn : parser.err;
+        if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
         if (!dns_is_ok (err))
         {
             ok = false;
@@ -347,8 +349,8 @@ main (int argc, char **argv)
     uint8_t             query[UDP_MAX];
     static dns_cursor_t writer;
     dns_cursor_init (&writer, query, sizeof query);
-    err = dns_header_to_bytes (&writer, &hdr);
-    if (err == DNS_OK) err = dns_question_to_bytes (&writer, &q);
+    bool built  = dns_header_to_bytes (&writer, &hdr) && dns_question_to_bytes (&writer, &q);
+    err         = built ? writer.warn : writer.err;
     size_t qlen = cursor_bytes (&writer.cur);
     if (!dns_is_ok (err))
     {

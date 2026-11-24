@@ -39,7 +39,7 @@ rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_t *out)
     if (err != DNS_OK) return err;
 
     dns_name_t name;
-    err = rdata_end (p, &start, dns_name_from_bytes (p, &name));
+    err = rdata_end (p, &start, dns_name_from_bytes (p, &name) ? DNS_OK : p->err);
     if (dns_is_ok (err)) *out = name;
     return err;
 }

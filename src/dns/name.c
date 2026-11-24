@@ -15,8 +15,8 @@ check_pointer (const dns_cursor_t *p, const uint8_t *label, size_t bound, size_t
     return DNS_OK;
 }
 
-dns_error_t
-dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out)
+static dns_error_t
+name_from_bytes (dns_cursor_t *p, dns_name_t *out)
 {
     size_t      len;
     dns_error_t err = dns_name_length (p, &len);
@@ -34,6 +34,14 @@ dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out)
     out->ptr = ptr;
     out->len = len;
     return err;
+}
+
+bool
+dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out)
+{
+    if (p->err != DNS_OK) return false;
+    dns_error_t warn = p->warn;
+    return dns_cursor_finish (p, warn, name_from_bytes (p, out));
 }
 
 dns_error_t
@@ -183,8 +191,8 @@ check_labels (const dns_name_t *name)
     return it.pos == name->len ? DNS_OK : DNS_ERR_TRUNCATED;
 }
 
-dns_error_t
-dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
+static dns_error_t
+name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
 {
     assert (cursor_is_aligned (&p->cur));
 
@@ -224,6 +232,14 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
         dns_cursor_mark_label (p, start + it.off);
     cursor_add_bytes (&p->cur, n);
     return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+}
+
+bool
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
+{
+    if (p->err != DNS_OK) return false;
+    dns_error_t warn = p->warn;
+    return dns_cursor_finish (p, warn, name_to_bytes (p, name));
 }
 
 dns_error_t

@@ -56,16 +56,6 @@ dns_is_ok (dns_error_t err)
     return false;
 }
 
-// Combines the results of two steps run in order: a hard error in either wins (a first),
-// otherwise the first warning (DNS_OK_*), otherwise DNS_OK.
-static inline dns_error_t
-dns_merge_soft (dns_error_t a, dns_error_t b)
-{
-    if (!dns_is_ok (a)) return a;
-    if (!dns_is_ok (b)) return b;
-    return a != DNS_OK ? a : b;
-}
-
 const char *
 dns_error_str (dns_error_t err);
 

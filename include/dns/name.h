@@ -22,9 +22,14 @@ typedef struct
 // DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still fills *out and advances p->cur.
 dns_error_t
 dns_name_from_bytes (dns_parser_t *p, dns_name_t *out);
-// DNS_OK_NAME_TOO_LONG still sets *out (caller frees).
+// Parses the presentation form str (absolute; "." is the root) and writes the name in wire format
+// to buf (len octets); *out then points into buf, so keep buf alive while *out is used.
+// strlen (str) + 2 octets always suffice; DNS_NAME_MAX octets hold any name that is not too long.
+// DNS_OK_NAME_TOO_LONG (over DNS_NAME_MAX octets) still sets *out.
+// DNS_ERR_NO_SPACE: the name does not fit in len octets.
+// On error *out is unchanged and the contents of buf are unspecified.
 dns_error_t
-dns_name_from_string (const char *str, dns_name_t **out);
+dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out);
 // Checks the name at p->cur like dns_name_from_bytes and stores its wire length in *size,
 // without changing p (no cursor move, no label marking).
 dns_error_t

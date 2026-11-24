@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "dns/label.h"
@@ -80,43 +79,25 @@ done:
 }
 
 dns_error_t
-dns_name_from_string (const char *str, dns_name_t **out)
+dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out)
 {
-    *out = NULL;
-
     const char *s = strcmp (str, ".") == 0 ? str + 1 : str;
-
-    // each text octet yields at most one wire octet; +2 for the first length octet and the root
-    size_t      size = strlen (s) + 2;
-    dns_name_t *name = malloc (sizeof *name + size);
-    if (!name) return DNS_ERR_NOMEM;
-
-    uint8_t    *data = (uint8_t *)(name + 1);
-    dns_error_t err  = DNS_OK;
-    size_t      len  = 0;
+    size_t      n = 0;
 
     while (*s != '\0')
     {
-        err = dns_label_from_string (&s, data + len, size - len);
-        if (err != DNS_OK) goto error;
-        if (data[len] == 0)
-        {
-            err = DNS_ERR_BAD_TEXT;
-            goto error;
-        }
-        len += dns_label_size (data + len);
+        dns_error_t err = dns_label_from_string (&s, buf + n, len - n);
+        if (err != DNS_OK) return err;
+        if (buf[n] == 0) return DNS_ERR_BAD_TEXT;
+        n += dns_label_size (buf + n);
         if (*s == '.') s++;
     }
-    data[len++] = 0;
+    if (n >= len) return DNS_ERR_NO_SPACE;
+    buf[n++] = 0;
 
-    name->ptr = data;
-    name->len = len;
-    *out      = name;
-    return len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
-
-error:
-    free (name);
-    return err;
+    out->ptr = buf;
+    out->len = n;
+    return n > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 // Expands the name at src into out (room for cap octets) and stores its full length in

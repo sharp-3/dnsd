@@ -336,19 +336,20 @@ main (int argc, char **argv)
     if (!qname) usage ();
     if (!server) server = default_server ();
 
-    dns_name_t *name;
-    dns_error_t err = dns_name_from_string (qname, &name);
+    // A name too long for this buffer would not fit in the query either.
+    uint8_t     name_buf[UDP_MAX];
+    dns_name_t  name;
+    dns_error_t err = dns_name_from_string (qname, name_buf, sizeof name_buf, &name);
     if (err != DNS_OK) fprintf (stderr, "query: bad name '%s': %s\n", qname, dns_error_str (err));
-    if (!name) return 1;
+    if (!dns_is_ok (err)) return 1;
 
-    dns_question_t      q = {.qname = *name, .qtype = qtype, .qclass = qclass};
+    dns_question_t      q = {.qname = name, .qtype = qtype, .qclass = qclass};
     uint8_t             query[UDP_MAX];
     static dns_parser_t writer;
     dns_parser_init (&writer, query, sizeof query);
     err = dns_header_to_bytes (&writer, &hdr);
     if (err == DNS_OK) err = dns_question_to_bytes (&writer, &q);
     size_t qlen = cursor_bytes (&writer.cur);
-    free (name);
     if (!dns_is_ok (err))
     {
         fprintf (stderr, "query: cannot build query: %s\n", dns_error_str (err));

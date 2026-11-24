@@ -19,7 +19,7 @@ rdata_dname_length (const dns_rdata_dname_t *rd)
 }
 
 void
-rdata_dname_display (const dns_rdata_dname_t *rd, char *buf, size_t len, size_t *out)
+rdata_dname_display (const dns_rdata_dname_t *rd, char *buf, size_t len)
 {
-    rdata_name_display (&rd->target, buf, len, out);
+    rdata_name_display (&rd->target, buf, len);
 }

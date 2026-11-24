@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "common.h"
 #include "packet/emit.h"
 #include "packet/take.h"
@@ -32,8 +34,7 @@ rdata_mx_length (const dns_rdata_mx_t *rd)
 }
 
 void
-rdata_mx_display (const dns_rdata_mx_t *rd, char *buf, size_t len, size_t *out)
+rdata_mx_display (const dns_rdata_mx_t *rd, char *buf, size_t len)
 {
-    rdata_appendf (
-        buf, len, out, "%u %s", (unsigned)rd->preference, dns_name_debug (&rd->exchange));
+    snprintf (buf, len, "%u %s", (unsigned)rd->preference, dns_name_debug (&rd->exchange));
 }

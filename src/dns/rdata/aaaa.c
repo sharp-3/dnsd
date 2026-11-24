@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <arpa/inet.h>
+#include <stdio.h>
 
 #include "common.h"
 #include "packet/emit.h"
@@ -35,14 +36,14 @@ rdata_aaaa_length (const dns_rdata_aaaa_t *rd)
 }
 
 void
-rdata_aaaa_display (const dns_rdata_aaaa_t *rd, char *buf, size_t len, size_t *out)
+rdata_aaaa_display (const dns_rdata_aaaa_t *rd, char *buf, size_t len)
 {
     char addr[INET6_ADDRSTRLEN];
     if (!inet_ntop (AF_INET6, rd->addr, addr, sizeof addr))
     {
         rdata_unknown_display (
-            &(dns_rdata_unknown_t){.data = rd->addr, .len = sizeof rd->addr}, buf, len, out);
+            &(dns_rdata_unknown_t){.data = rd->addr, .len = sizeof rd->addr}, buf, len);
         return;
     }
-    rdata_appendf (buf, len, out, "%s", addr);
+    snprintf (buf, len, "%s", addr);
 }

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "common.h"
 #include "packet/emit.h"
 #include "packet/take.h"
@@ -36,14 +38,13 @@ rdata_srv_length (const dns_rdata_srv_t *rd)
 }
 
 void
-rdata_srv_display (const dns_rdata_srv_t *rd, char *buf, size_t len, size_t *out)
+rdata_srv_display (const dns_rdata_srv_t *rd, char *buf, size_t len)
 {
-    rdata_appendf (buf,
-                   len,
-                   out,
-                   "%u %u %u %s",
-                   (unsigned)rd->priority,
-                   (unsigned)rd->weight,
-                   (unsigned)rd->port,
-                   dns_name_debug (&rd->target));
+    snprintf (buf,
+              len,
+              "%u %u %u %s",
+              (unsigned)rd->priority,
+              (unsigned)rd->weight,
+              (unsigned)rd->port,
+              dns_name_debug (&rd->target));
 }

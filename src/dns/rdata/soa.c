@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "common.h"
 #include "packet/emit.h"
 #include "packet/take.h"
@@ -43,17 +45,16 @@ rdata_soa_length (const dns_rdata_soa_t *rd)
 }
 
 void
-rdata_soa_display (const dns_rdata_soa_t *rd, char *buf, size_t len, size_t *out)
+rdata_soa_display (const dns_rdata_soa_t *rd, char *buf, size_t len)
 {
-    rdata_appendf (buf,
-                   len,
-                   out,
-                   "%s %s %lu %lu %lu %lu %lu",
-                   dns_name_debug (&rd->mname),
-                   dns_name_debug (&rd->rname),
-                   (unsigned long)rd->serial,
-                   (unsigned long)rd->refresh,
-                   (unsigned long)rd->retry,
-                   (unsigned long)rd->expire,
-                   (unsigned long)rd->minimum);
+    snprintf (buf,
+              len,
+              "%s %s %lu %lu %lu %lu %lu",
+              dns_name_debug (&rd->mname),
+              dns_name_debug (&rd->rname),
+              (unsigned long)rd->serial,
+              (unsigned long)rd->refresh,
+              (unsigned long)rd->retry,
+              (unsigned long)rd->expire,
+              (unsigned long)rd->minimum);
 }

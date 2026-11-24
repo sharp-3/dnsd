@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "common.h"
 #include "packet/emit.h"
 #include "packet/take.h"
@@ -31,8 +33,8 @@ rdata_a_length (const dns_rdata_a_t *rd)
 }
 
 void
-rdata_a_display (const dns_rdata_a_t *rd, char *buf, size_t len, size_t *out)
+rdata_a_display (const dns_rdata_a_t *rd, char *buf, size_t len)
 {
     const uint8_t *a = rd->addr;
-    rdata_appendf (buf, len, out, "%u.%u.%u.%u", a[0], a[1], a[2], a[3]);
+    snprintf (buf, len, "%u.%u.%u.%u", a[0], a[1], a[2], a[3]);
 }

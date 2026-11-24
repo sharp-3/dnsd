@@ -121,42 +121,42 @@ dns_rdata_to_bytes (dns_parser_t *p, dns_type_t type, dns_class_t class, const d
 }
 
 static void
-known_display (dns_type_t type, const dns_rdata_t *rd, char *buf, size_t len, size_t *out)
+known_display (dns_type_t type, const dns_rdata_t *rd, char *buf, size_t len)
 {
     switch (type)
     {
     case DNS_TYPE_A:
-        rdata_a_display (&rd->a, buf, len, out);
+        rdata_a_display (&rd->a, buf, len);
         break;
     case DNS_TYPE_AAAA:
-        rdata_aaaa_display (&rd->aaaa, buf, len, out);
+        rdata_aaaa_display (&rd->aaaa, buf, len);
         break;
     case DNS_TYPE_NS:
-        rdata_ns_display (&rd->ns, buf, len, out);
+        rdata_ns_display (&rd->ns, buf, len);
         break;
     case DNS_TYPE_CNAME:
-        rdata_cname_display (&rd->cname, buf, len, out);
+        rdata_cname_display (&rd->cname, buf, len);
         break;
     case DNS_TYPE_PTR:
-        rdata_ptr_display (&rd->ptr, buf, len, out);
+        rdata_ptr_display (&rd->ptr, buf, len);
         break;
     case DNS_TYPE_DNAME:
-        rdata_dname_display (&rd->dname, buf, len, out);
+        rdata_dname_display (&rd->dname, buf, len);
         break;
     case DNS_TYPE_MX:
-        rdata_mx_display (&rd->mx, buf, len, out);
+        rdata_mx_display (&rd->mx, buf, len);
         break;
     case DNS_TYPE_SRV:
-        rdata_srv_display (&rd->srv, buf, len, out);
+        rdata_srv_display (&rd->srv, buf, len);
         break;
     case DNS_TYPE_SOA:
-        rdata_soa_display (&rd->soa, buf, len, out);
+        rdata_soa_display (&rd->soa, buf, len);
         break;
     case DNS_TYPE_TXT:
-        rdata_txt_display (&rd->txt, buf, len, out);
+        rdata_txt_display (&rd->txt, buf, len);
         break;
     default:
-        rdata_unknown_display (&rd->unknown, buf, len, out);
+        rdata_unknown_display (&rd->unknown, buf, len);
         break;
     }
 }
@@ -165,12 +165,9 @@ const char *
 dns_rdata_display_r (
     dns_type_t type, dns_class_t class, const dns_rdata_t *rdata, char *buf, size_t len)
 {
-    size_t out = 0;
-
     if (len == 0) return buf;
-    buf[0] = '\0';
 
-    if (dns_rdata_known (type, class)) known_display (type, rdata, buf, len, &out);
-    else rdata_unknown_display (&rdata->unknown, buf, len, &out);
+    if (dns_rdata_known (type, class)) known_display (type, rdata, buf, len);
+    else rdata_unknown_display (&rdata->unknown, buf, len);
     return buf;
 }

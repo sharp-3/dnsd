@@ -36,13 +36,42 @@ rdata_txt_length (const dns_rdata_txt_t *rd)
     return rd->len;
 }
 
+// Appends c to buf (len octets) if it still fits with the NUL; *n counts the octets in buf.
+static void
+put (char *buf, size_t len, size_t *n, char c)
+{
+    if (*n + 1 < len) buf[(*n)++] = c;
+}
+
+// Each <character-string> quoted, separated by spaces; '"' and '\\' are escaped as \X and
+// other non-printable octets as \DDD.
 void
-rdata_txt_display (const dns_rdata_txt_t *rd, char *buf, size_t len, size_t *out)
+rdata_txt_display (const dns_rdata_txt_t *rd, char *buf, size_t len)
 {
     const uint8_t *d = rd->data;
+    size_t         n = 0;
     for (size_t pos = 0; pos < rd->len; pos += 1 + d[pos])
     {
-        if (pos) rdata_appendf (buf, len, out, " ");
-        rdata_append_string (buf, len, out, d + pos + 1, d[pos]);
+        if (pos) put (buf, len, &n, ' ');
+        put (buf, len, &n, '"');
+        for (size_t i = pos + 1; i <= pos + d[pos]; i++)
+        {
+            uint8_t c = d[i];
+            if (c == '"' || c == '\\')
+            {
+                put (buf, len, &n, '\\');
+                put (buf, len, &n, (char)c);
+            }
+            else if (c < 0x20 || c > 0x7e)
+            {
+                put (buf, len, &n, '\\');
+                put (buf, len, &n, (char)('0' + c / 100));
+                put (buf, len, &n, (char)('0' + c / 10 % 10));
+                put (buf, len, &n, (char)('0' + c % 10));
+            }
+            else put (buf, len, &n, (char)c);
+        }
+        put (buf, len, &n, '"');
     }
+    buf[n] = '\0';
 }

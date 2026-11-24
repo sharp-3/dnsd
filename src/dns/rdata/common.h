@@ -33,17 +33,10 @@ rdata_name_from_bytes (dns_parser_t *p, size_t len, dns_name_t *out);
 dns_error_t
 rdata_name_to_bytes (dns_parser_t *p, const dns_name_t *name);
 void
-rdata_name_display (const dns_name_t *name, char *buf, size_t len, size_t *out);
+rdata_name_display (const dns_name_t *name, char *buf, size_t len);
 
-// Appends to buf (len octets in all) at *out, keeping it NUL-terminated; on overflow *out
-// becomes len and later appends do nothing.
-[[gnu::format (printf, 4, 5)]] void
-rdata_appendf (char *buf, size_t len, size_t *out, const char *fmt, ...);
-// Appends s (n octets) as a quoted <character-string>.
-void
-rdata_append_string (char *buf, size_t len, size_t *out, const uint8_t *s, size_t n);
-
-// Per-type length (octets in wire format) and presentation form (appended to buf at *out).
+// Per-type length (octets in wire format) and presentation form. The display functions write
+// the text to buf (len > 0 octets), truncated if needed and always NUL-terminated.
 size_t
 rdata_a_length (const dns_rdata_a_t *rd);
 size_t
@@ -68,27 +61,27 @@ size_t
 rdata_unknown_length (const dns_rdata_unknown_t *rd);
 
 void
-rdata_a_display (const dns_rdata_a_t *rd, char *buf, size_t len, size_t *out);
+rdata_a_display (const dns_rdata_a_t *rd, char *buf, size_t len);
 void
-rdata_aaaa_display (const dns_rdata_aaaa_t *rd, char *buf, size_t len, size_t *out);
+rdata_aaaa_display (const dns_rdata_aaaa_t *rd, char *buf, size_t len);
 void
-rdata_ns_display (const dns_rdata_ns_t *rd, char *buf, size_t len, size_t *out);
+rdata_ns_display (const dns_rdata_ns_t *rd, char *buf, size_t len);
 void
-rdata_cname_display (const dns_rdata_cname_t *rd, char *buf, size_t len, size_t *out);
+rdata_cname_display (const dns_rdata_cname_t *rd, char *buf, size_t len);
 void
-rdata_ptr_display (const dns_rdata_ptr_t *rd, char *buf, size_t len, size_t *out);
+rdata_ptr_display (const dns_rdata_ptr_t *rd, char *buf, size_t len);
 void
-rdata_dname_display (const dns_rdata_dname_t *rd, char *buf, size_t len, size_t *out);
+rdata_dname_display (const dns_rdata_dname_t *rd, char *buf, size_t len);
 void
-rdata_mx_display (const dns_rdata_mx_t *rd, char *buf, size_t len, size_t *out);
+rdata_mx_display (const dns_rdata_mx_t *rd, char *buf, size_t len);
 void
-rdata_srv_display (const dns_rdata_srv_t *rd, char *buf, size_t len, size_t *out);
+rdata_srv_display (const dns_rdata_srv_t *rd, char *buf, size_t len);
 void
-rdata_soa_display (const dns_rdata_soa_t *rd, char *buf, size_t len, size_t *out);
+rdata_soa_display (const dns_rdata_soa_t *rd, char *buf, size_t len);
 void
-rdata_txt_display (const dns_rdata_txt_t *rd, char *buf, size_t len, size_t *out);
+rdata_txt_display (const dns_rdata_txt_t *rd, char *buf, size_t len);
 // RFC 3597 generic form.
 void
-rdata_unknown_display (const dns_rdata_unknown_t *rd, char *buf, size_t len, size_t *out);
+rdata_unknown_display (const dns_rdata_unknown_t *rd, char *buf, size_t len);
 
 #endif

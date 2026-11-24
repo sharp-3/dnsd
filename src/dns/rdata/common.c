@@ -1,4 +1,3 @@
-#include <stdarg.h>
 #include <stdio.h>
 
 #include "common.h"
@@ -54,34 +53,7 @@ rdata_name_to_bytes (dns_parser_t *p, const dns_name_t *name)
 }
 
 void
-rdata_name_display (const dns_name_t *name, char *buf, size_t len, size_t *out)
+rdata_name_display (const dns_name_t *name, char *buf, size_t len)
 {
-    rdata_appendf (buf, len, out, "%s", dns_name_debug (name));
-}
-
-void
-rdata_appendf (char *buf, size_t len, size_t *out, const char *fmt, ...)
-{
-    if (*out >= len) return;
-
-    va_list ap;
-    va_start (ap, fmt);
-    int n = vsnprintf (buf + *out, len - *out, fmt, ap);
-    va_end (ap);
-
-    if (n < 0 || (size_t)n >= len - *out) *out = len;
-    else *out += n;
-}
-
-void
-rdata_append_string (char *buf, size_t len, size_t *out, const uint8_t *s, size_t n)
-{
-    rdata_appendf (buf, len, out, "\"");
-    for (size_t i = 0; i < n; i++)
-    {
-        if (s[i] == '"' || s[i] == '\\') rdata_appendf (buf, len, out, "\\%c", s[i]);
-        else if (s[i] < 0x20 || s[i] > 0x7e) rdata_appendf (buf, len, out, "\\%03u", s[i]);
-        else rdata_appendf (buf, len, out, "%c", s[i]);
-    }
-    rdata_appendf (buf, len, out, "\"");
+    snprintf (buf, len, "%s", dns_name_debug (name));
 }

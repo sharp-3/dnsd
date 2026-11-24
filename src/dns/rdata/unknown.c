@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "common.h"
 #include "packet/emit.h"
 
@@ -32,10 +34,17 @@ rdata_unknown_length (const dns_rdata_unknown_t *rd)
 }
 
 void
-rdata_unknown_display (const dns_rdata_unknown_t *rd, char *buf, size_t len, size_t *out)
+rdata_unknown_display (const dns_rdata_unknown_t *rd, char *buf, size_t len)
 {
-    rdata_appendf (buf, len, out, "\\# %zu", rd->len);
-    if (rd->len) rdata_appendf (buf, len, out, " ");
-    for (size_t i = 0; i < rd->len; i++)
-        rdata_appendf (buf, len, out, "%02x", rd->data[i]);
+    static const char hex[] = "0123456789abcdef";
+
+    int    k = snprintf (buf, len, "\\# %zu", rd->len);
+    size_t n = k < 0 ? 0 : (size_t)k < len ? (size_t)k : len - 1;
+    for (size_t i = 0; i < rd->len && n + 1 < len; i++)
+    {
+        if (i == 0) buf[n++] = ' ';
+        if (n + 1 < len) buf[n++] = hex[rd->data[i] >> 4];
+        if (n + 1 < len) buf[n++] = hex[rd->data[i] & 0xf];
+    }
+    buf[n] = '\0';
 }

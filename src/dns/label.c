@@ -2,6 +2,7 @@
 
 #include "dns/label.h"
 #include "packet/cursor.h"
+#include "utils/string.h"
 
 // A cursor over the first octets of label, for reading only (hence the cast).
 static cursor_t
@@ -48,20 +49,6 @@ dns_label_pointer_write (uint8_t *ptr, size_t target)
     cursor_init (&c, ptr, DNS_LABEL_POINTER_SIZE);
     emit_bits (&c, 2, DNS_LABEL_TYPE_POINTER);
     emit_bits (&c, 14, target);
-}
-
-// Locale-independent ASCII helpers (<ctype.h> depends on the locale
-// and is undefined for negative char values).
-static inline bool
-ascii_isdigit (uint8_t c)
-{
-    return c >= '0' && c <= '9';
-}
-
-static inline uint8_t
-ascii_tolower (uint8_t c)
-{
-    return c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c;
 }
 
 bool

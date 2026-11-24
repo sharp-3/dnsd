@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "dns/params/type.h"
+#include "utils/string.h"
 
 static const struct
 {
@@ -56,7 +57,7 @@ dns_type_from_string (const char *str, dns_type_t *out)
 {
     for (size_t i = 0; i < sizeof names / sizeof names[0]; i++)
     {
-        if (params_equal (str, names[i].name))
+        if (str_equal_nocase (str, names[i].name))
         {
             *out = names[i].value;
             return DNS_OK;

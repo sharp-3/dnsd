@@ -6,10 +6,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Whether a and b are equal ignoring ASCII case (locale-independent, unlike strcasecmp).
-bool
-params_equal (const char *a, const char *b);
-
 // Parses the generic form <prefix><decimal> (RFC 3597, e.g. "TYPE65535"), prefix matched
 // ignoring ASCII case, into *out. Only digits may follow the prefix, and the value must be at
 // most max. Returns false (leaving *out unchanged) otherwise.

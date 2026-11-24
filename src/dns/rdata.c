@@ -120,9 +120,18 @@ dns_rdata_to_bytes (dns_cursor_t *p, dns_type_t type, dns_class_t class, const d
     }
 }
 
-static void
-known_display (dns_type_t type, const dns_rdata_t *rd, char *buf, size_t len)
+const char *
+dns_rdata_display_r (
+    dns_type_t type, dns_class_t class, const dns_rdata_t *rd, char *buf, size_t len)
 {
+    if (len == 0) return buf;
+
+    if (!dns_rdata_known (type, class))
+    {
+        rdata_unknown_display (&rd->unknown, buf, len);
+        return buf;
+    }
+
     switch (type)
     {
     case DNS_TYPE_A:
@@ -159,15 +168,5 @@ known_display (dns_type_t type, const dns_rdata_t *rd, char *buf, size_t len)
         rdata_unknown_display (&rd->unknown, buf, len);
         break;
     }
-}
-
-const char *
-dns_rdata_display_r (
-    dns_type_t type, dns_class_t class, const dns_rdata_t *rdata, char *buf, size_t len)
-{
-    if (len == 0) return buf;
-
-    if (dns_rdata_known (type, class)) known_display (type, rdata, buf, len);
-    else rdata_unknown_display (&rdata->unknown, buf, len);
     return buf;
 }

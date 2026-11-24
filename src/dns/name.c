@@ -9,16 +9,16 @@
 // go back before offset bound to a recorded label start. Stores its target in *target.
 static dns_error_t
 check_pointer (
-    const dns_parser_t *p, const uint8_t *label, size_t avail, size_t bound, size_t *target)
+    const dns_cursor_t *p, const uint8_t *label, size_t avail, size_t bound, size_t *target)
 {
     if (avail < DNS_LABEL_POINTER_SIZE) return DNS_ERR_TRUNCATED;
     *target = dns_label_pointer_target (label);
-    if (*target >= bound || !dns_parser_test_label (p, *target)) return DNS_ERR_BAD_POINTER;
+    if (*target >= bound || !dns_cursor_test_label (p, *target)) return DNS_ERR_BAD_POINTER;
     return DNS_OK;
 }
 
 dns_error_t
-dns_name_from_bytes (dns_parser_t *p, dns_name_t *out)
+dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out)
 {
     size_t      len;
     dns_error_t err = dns_name_length (p, &len);
@@ -26,9 +26,9 @@ dns_name_from_bytes (dns_parser_t *p, dns_name_t *out)
 
     const uint8_t *ptr   = cursor_ptr (&p->cur);
     size_t         start = cursor_bytes (&p->cur);
-    dns_parser_clear_labels (p, start);
+    dns_cursor_clear_labels (p, start);
     for (size_t i = 0; i < len; i += dns_label_size (ptr + i))
-        dns_parser_mark_label (p, start + i);
+        dns_cursor_mark_label (p, start + i);
     cursor_add_bytes (&p->cur, len);
 
     out->ptr = ptr;
@@ -37,7 +37,7 @@ dns_name_from_bytes (dns_parser_t *p, dns_name_t *out)
 }
 
 dns_error_t
-dns_name_length (const dns_parser_t *p, size_t *size)
+dns_name_length (const dns_cursor_t *p, size_t *size)
 {
     assert (cursor_is_aligned (&p->cur));
 
@@ -105,7 +105,7 @@ dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out
 // of earlier names, so each name is followed at most once and the length is bounded by the
 // message size.
 static dns_error_t
-expand (const dns_parser_t *p,
+expand (const dns_cursor_t *p,
         const uint8_t      *src,
         size_t              end,
         size_t              limit,
@@ -154,14 +154,14 @@ expand (const dns_parser_t *p,
 }
 
 dns_error_t
-dns_name_expand_length (const dns_parser_t *p, const dns_name_t *name, size_t *len)
+dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *len)
 {
     return expand (p, name->ptr, name->len, p->cur.len, NULL, 0, len);
 }
 
 dns_error_t
 dns_name_expand (
-    const dns_parser_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out)
+    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out)
 {
     size_t      n;
     dns_error_t err = expand (p, name->ptr, name->len, p->cur.len, buf, len, &n);
@@ -187,7 +187,7 @@ labels_equal (const uint8_t *a, const uint8_t *b)
 
 static bool
 find_suffix (
-    const dns_parser_t *p, size_t nbytes_off, const uint8_t *suffix, size_t len, size_t *target)
+    const dns_cursor_t *p, size_t nbytes_off, const uint8_t *suffix, size_t len, size_t *target)
 {
     size_t limit = nbytes_off < DNS_LABEL_POINTER_MAX + 1 ? nbytes_off : DNS_LABEL_POINTER_MAX + 1;
     for (size_t t = 0; t < limit; t++)
@@ -195,7 +195,7 @@ find_suffix (
         uint8_t name[DNS_NAME_MAX];
         size_t  n;
         // Only names that fit in name[] can match; longer ones are not compressed.
-        if (dns_parser_test_label (p, t) &&
+        if (dns_cursor_test_label (p, t) &&
             dns_is_ok (
                 expand (p, p->cur.buf + t, nbytes_off - t, nbytes_off, name, sizeof name, &n)) &&
             n == len && n <= sizeof name && labels_equal (name, suffix))
@@ -224,14 +224,14 @@ check_labels (const dns_name_t *name)
 }
 
 dns_error_t
-dns_name_to_bytes (dns_parser_t *p, const dns_name_t *name)
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
 {
     assert (cursor_is_aligned (&p->cur));
 
     const uint8_t *d     = name->ptr;
     size_t         start = cursor_bytes (&p->cur);
 
-    dns_parser_clear_labels (p, start);
+    dns_cursor_clear_labels (p, start);
 
     dns_error_t err = check_labels (name);
     if (err != DNS_OK) return err;
@@ -252,7 +252,7 @@ dns_name_to_bytes (dns_parser_t *p, const dns_name_t *name)
     if (found) dns_label_pointer_write (ptr + i, target);
 
     for (size_t j = 0; j < i; j += dns_label_size (d + j))
-        dns_parser_mark_label (p, start + j);
+        dns_cursor_mark_label (p, start + j);
     cursor_add_bytes (&p->cur, n);
     return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }

@@ -231,7 +231,7 @@ rdata_names (dns_type_t type, dns_class_t class, dns_rdata_t *rd, dns_name_t **o
 }
 
 static bool
-print_records (const char *title, unsigned count, dns_parser_t *p)
+print_records (const char *title, unsigned count, dns_cursor_t *p)
 {
     if (count == 0) return true;
 
@@ -261,8 +261,8 @@ print_records (const char *title, unsigned count, dns_parser_t *p)
 static bool
 print_reply (uint8_t *msg, size_t len)
 {
-    static dns_parser_t parser;
-    dns_parser_init (&parser, msg, len);
+    static dns_cursor_t parser;
+    dns_cursor_init (&parser, msg, len);
 
     dns_header_t header;
     dns_error_t  err = dns_header_from_bytes (&parser, &header);
@@ -345,8 +345,8 @@ main (int argc, char **argv)
 
     dns_question_t      q = {.qname = name, .qtype = qtype, .qclass = qclass};
     uint8_t             query[UDP_MAX];
-    static dns_parser_t writer;
-    dns_parser_init (&writer, query, sizeof query);
+    static dns_cursor_t writer;
+    dns_cursor_init (&writer, query, sizeof query);
     err = dns_header_to_bytes (&writer, &hdr);
     if (err == DNS_OK) err = dns_question_to_bytes (&writer, &q);
     size_t qlen = cursor_bytes (&writer.cur);

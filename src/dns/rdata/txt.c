@@ -3,7 +3,7 @@
 #include "packet/take.h"
 
 dns_error_t
-dns_rdata_txt_from_bytes (dns_parser_t *p, size_t len, dns_rdata_txt_t *out)
+dns_rdata_txt_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out)
 {
     cursor_t    start;
     dns_error_t err = rdata_begin (p, len, &start);
@@ -23,7 +23,7 @@ dns_rdata_txt_from_bytes (dns_parser_t *p, size_t len, dns_rdata_txt_t *out)
 }
 
 dns_error_t
-dns_rdata_txt_to_bytes (dns_parser_t *p, const dns_rdata_txt_t *rd)
+dns_rdata_txt_to_bytes (dns_cursor_t *p, const dns_rdata_txt_t *rd)
 {
     cursor_t start = p->cur;
     emit_bytes (&p->cur, rd->data, rd->len);

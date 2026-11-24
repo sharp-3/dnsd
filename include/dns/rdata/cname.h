@@ -4,9 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/name.h"
-#include "dns/parser.h"
 
 // cname points into the message it was read from.
 typedef struct
@@ -15,8 +15,8 @@ typedef struct
 } dns_rdata_cname_t;
 
 dns_error_t
-dns_rdata_cname_from_bytes (dns_parser_t *p, size_t len, dns_rdata_cname_t *out);
+dns_rdata_cname_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_cname_t *out);
 dns_error_t
-dns_rdata_cname_to_bytes (dns_parser_t *p, const dns_rdata_cname_t *rdata);
+dns_rdata_cname_to_bytes (dns_cursor_t *p, const dns_rdata_cname_t *rdata);
 
 #endif

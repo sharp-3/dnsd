@@ -4,11 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/name.h"
 #include "dns/params/class.h"
 #include "dns/params/type.h"
-#include "dns/parser.h"
 #include "dns/rdata.h"
 
 #define DNS_RECORD_DISPLAY_SIZE 4096
@@ -27,11 +27,11 @@ typedef struct
 // DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still fills *out and advances p->cur;
 // other errors leave *out unchanged.
 dns_error_t
-dns_record_from_bytes (dns_parser_t *p, dns_record_t *out);
+dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out);
 // Writes the record at p->cur and advances it; other errors leave p->cur unchanged.
 // DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still writes and advances p->cur.
 dns_error_t
-dns_record_to_bytes (dns_parser_t *p, const dns_record_t *rr);
+dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr);
 
 const char *
 dns_record_display_r (const dns_record_t *rr, char *buf, size_t len);

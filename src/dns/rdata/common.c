@@ -4,7 +4,7 @@
 #include "packet/emit.h"
 
 dns_error_t
-rdata_begin (dns_parser_t *p, size_t len, cursor_t *start)
+rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start)
 {
     if (!cursor_fits_bytes (&p->cur, len)) return DNS_ERR_TRUNCATED;
     *start     = p->cur;
@@ -13,7 +13,7 @@ rdata_begin (dns_parser_t *p, size_t len, cursor_t *start)
 }
 
 dns_error_t
-rdata_end (dns_parser_t *p, const cursor_t *start, dns_error_t err)
+rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
 {
     bool whole = !cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) == p->cur.len;
     if (err == DNS_ERR_TRUNCATED || (dns_is_ok (err) && !whole)) err = DNS_ERR_BAD_RDATA;
@@ -24,7 +24,7 @@ rdata_end (dns_parser_t *p, const cursor_t *start, dns_error_t err)
 }
 
 dns_error_t
-rdata_put_end (dns_parser_t *p, const cursor_t *start)
+rdata_put_end (dns_cursor_t *p, const cursor_t *start)
 {
     if (!cursor_is_overflow (&p->cur)) return DNS_OK;
     p->cur = *start;
@@ -32,7 +32,7 @@ rdata_put_end (dns_parser_t *p, const cursor_t *start)
 }
 
 dns_error_t
-rdata_name_from_bytes (dns_parser_t *p, size_t len, dns_name_t *out)
+rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_t *out)
 {
     cursor_t    start;
     dns_error_t err = rdata_begin (p, len, &start);
@@ -45,7 +45,7 @@ rdata_name_from_bytes (dns_parser_t *p, size_t len, dns_name_t *out)
 }
 
 dns_error_t
-rdata_name_to_bytes (dns_parser_t *p, const dns_name_t *name)
+rdata_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
 {
     cursor_t start = p->cur;
     emit_bytes (&p->cur, name->ptr, name->len);

@@ -4,9 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/label.h"
-#include "dns/parser.h"
 
 #define DNS_NAME_MAX 255
 #define DNS_NAME_STRING_SIZE (DNS_NAME_MAX * DNS_LABEL_ESCAPE_SIZE + 1)
@@ -21,7 +21,7 @@ typedef struct
 // Reads the name at p->cur and advances it; other errors leave p->cur unchanged.
 // DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still fills *out and advances p->cur.
 dns_error_t
-dns_name_from_bytes (dns_parser_t *p, dns_name_t *out);
+dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out);
 // Parses the presentation form str (absolute; "." is the root) and writes the name in wire format
 // to buf (len octets); *out then points into buf, so keep buf alive while *out is used.
 // strlen (str) + 2 octets always suffice; DNS_NAME_MAX octets hold any name that is not too long.
@@ -33,11 +33,11 @@ dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out
 // Checks the name at p->cur like dns_name_from_bytes and stores its wire length in *size,
 // without changing p (no cursor move, no label marking).
 dns_error_t
-dns_name_length (const dns_parser_t *p, size_t *size);
+dns_name_length (const dns_cursor_t *p, size_t *size);
 // Checks name like dns_name_expand and stores its length once expanded in *len.
 // DNS_OK_NAME_TOO_LONG (over DNS_NAME_MAX octets once expanded) still sets *len.
 dns_error_t
-dns_name_expand_length (const dns_parser_t *p, const dns_name_t *name, size_t *len);
+dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *len);
 // Follows the compression pointers in name and writes the uncompressed name to buf (len
 // octets); *out then points into buf, so keep buf alive while *out is used. DNS_NAME_MAX octets
 // hold any name that is not too long; a longer one needs up to the message size.
@@ -46,11 +46,11 @@ dns_name_expand_length (const dns_parser_t *p, const dns_name_t *name, size_t *l
 // On error *out is unchanged and the contents of buf are unspecified.
 dns_error_t
 dns_name_expand (
-    const dns_parser_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
+    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
 // Writes the name at p->cur and advances it; other errors leave p->cur unchanged.
 // DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still writes and advances p->cur.
 dns_error_t
-dns_name_to_bytes (dns_parser_t *p, const dns_name_t *name);
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);
 dns_error_t
 dns_name_to_string (const dns_name_t *name, char *buf, size_t len);
 const char *

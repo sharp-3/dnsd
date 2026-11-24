@@ -3,7 +3,7 @@
 #include "dns/message.h"
 
 dns_error_t
-dns_message_header_from_bytes (dns_parser_t *p, dns_message_t *out)
+dns_message_header_from_bytes (dns_cursor_t *p, dns_message_t *out)
 {
     dns_header_t hdr;
     dns_error_t  err = dns_header_from_bytes (p, &hdr);
@@ -28,7 +28,7 @@ dns_message_header_query_validation (const dns_message_t *msg)
 // Reads count questions into a new array stored in *out (NULL when count is 0). Errors
 // leave *out unchanged.
 static dns_error_t
-read_questions (dns_parser_t *p, unsigned count, dns_question_t **out, dns_error_t *soft)
+read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out, dns_error_t *soft)
 {
     dns_question_t *qs = NULL;
     if (count > 0 && !(qs = calloc (count, sizeof *qs))) return DNS_ERR_NOMEM;
@@ -49,7 +49,7 @@ read_questions (dns_parser_t *p, unsigned count, dns_question_t **out, dns_error
 
 // Like read_questions, for resource records.
 static dns_error_t
-read_records (dns_parser_t *p, unsigned count, dns_record_t **out, dns_error_t *soft)
+read_records (dns_cursor_t *p, unsigned count, dns_record_t **out, dns_error_t *soft)
 {
     dns_record_t *rrs = NULL;
     if (count > 0 && !(rrs = calloc (count, sizeof *rrs))) return DNS_ERR_NOMEM;
@@ -69,7 +69,7 @@ read_records (dns_parser_t *p, unsigned count, dns_record_t **out, dns_error_t *
 }
 
 dns_error_t
-dns_message_body_from_bytes (dns_parser_t *p, dns_message_t *msg)
+dns_message_body_from_bytes (dns_cursor_t *p, dns_message_t *msg)
 {
     const dns_header_t *h     = &msg->header;
     cursor_t            start = p->cur;
@@ -99,7 +99,7 @@ dns_message_body_from_bytes (dns_parser_t *p, dns_message_t *msg)
 }
 
 dns_error_t
-dns_message_body_query_validation (const dns_parser_t *p, const dns_message_t *msg)
+dns_message_body_query_validation (const dns_cursor_t *p, const dns_message_t *msg)
 {
     for (unsigned i = 0; i < msg->header.qdcount; i++)
     {
@@ -111,7 +111,7 @@ dns_message_body_query_validation (const dns_parser_t *p, const dns_message_t *m
 }
 
 dns_error_t
-dns_message_query_validation (const dns_parser_t *p, const dns_message_t *msg)
+dns_message_query_validation (const dns_cursor_t *p, const dns_message_t *msg)
 {
     dns_error_t err = dns_message_header_query_validation (msg);
     if (err != DNS_OK) return err;

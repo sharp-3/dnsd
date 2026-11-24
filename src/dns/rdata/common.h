@@ -6,32 +6,32 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/name.h"
-#include "dns/parser.h"
 #include "dns/rdata.h"
 #include "packet/cursor.h"
 
 // Limits p->cur to the len octets of RDATA at it, so that reading past them overflows (or
 // truncates a name). Saves the cursor in *start for rdata_end.
 dns_error_t
-rdata_begin (dns_parser_t *p, size_t len, cursor_t *start);
+rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start);
 // Ends what rdata_begin started, given the result err of reading the RDATA. Not reading it
 // exactly (too much or too little) is DNS_ERR_BAD_RDATA. On success p->cur stays after the
 // RDATA; on error it goes back to *start.
 dns_error_t
-rdata_end (dns_parser_t *p, const cursor_t *start, dns_error_t err);
+rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err);
 
 // Ends a write of RDATA that started at *start: if it did not fit (or p->cur had already
 // overflowed), p->cur goes back to *start and the result is DNS_ERR_NO_SPACE.
 dns_error_t
-rdata_put_end (dns_parser_t *p, const cursor_t *start);
+rdata_put_end (dns_cursor_t *p, const cursor_t *start);
 
 // A single domain name filling the whole RDATA (NS, CNAME, PTR, DNAME).
 dns_error_t
-rdata_name_from_bytes (dns_parser_t *p, size_t len, dns_name_t *out);
+rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_t *out);
 dns_error_t
-rdata_name_to_bytes (dns_parser_t *p, const dns_name_t *name);
+rdata_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);
 void
 rdata_name_display (const dns_name_t *name, char *buf, size_t len);
 

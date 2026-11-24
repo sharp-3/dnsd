@@ -4,10 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/params/class.h"
 #include "dns/params/type.h"
-#include "dns/parser.h"
 #include "dns/rdata/a.h"
 #include "dns/rdata/aaaa.h"
 #include "dns/rdata/cname.h"
@@ -61,7 +61,7 @@ dns_rdata_known (dns_type_t type, dns_class_t class);
 // !dns_rdata_known), as dns_rdata_<type>_from_bytes does.
 dns_error_t
 dns_rdata_from_bytes (
-    dns_parser_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out);
+    dns_cursor_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out);
 
 // Octets the RDATA takes in wire format.
 size_t
@@ -70,7 +70,7 @@ dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
 // Writes the dns_rdata_t member that (type, class) chooses (.unknown when !dns_rdata_known),
 // as dns_rdata_<type>_to_bytes does.
 dns_error_t
-dns_rdata_to_bytes (dns_parser_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
+dns_rdata_to_bytes (dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
 
 // Writes the presentation form of the RDATA to buf; unknown types use the RFC 3597 form
 // "\# <len> <hex>". Names are shown as they are (see dns_name_debug_r).

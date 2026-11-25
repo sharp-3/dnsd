@@ -47,7 +47,22 @@ dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *l
 dns_error_t
 dns_name_expand (
     const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
-// Writes the name at p->cur and advances it; other errors leave p->cur unchanged.
+// Compresses the uncompressed name against the names already written at p: writes to buf the
+// labels before the longest suffix that occurs earlier in the message, then a pointer to it
+// (or the whole name unchanged when there is none); *out then points into buf, so keep buf
+// alive while *out is used. The result is never longer than name, so DNS_NAME_MAX octets hold
+// any name that is not too long. p is only read; write the result with dns_name_to_bytes.
+// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still sets *out.
+// DNS_ERR_COMPRESSED: name already contains a pointer.
+// DNS_ERR_NO_SPACE: the result does not fit in len octets.
+// On error *out is unchanged and the contents of buf are unspecified.
+dns_error_t
+dns_name_compress (
+    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
+// Writes the name at p->cur exactly as it is (no compression; see dns_name_compress) and
+// advances p->cur; other errors leave p->cur unchanged. A name ending in a pointer is written
+// too, if the pointer goes back to a label start already written (else DNS_ERR_BAD_POINTER).
+// Its label starts are recorded as targets for later names.
 // DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still writes and advances p->cur.
 dns_error_t
 dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);

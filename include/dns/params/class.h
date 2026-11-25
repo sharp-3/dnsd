@@ -18,6 +18,19 @@ typedef enum : uint16_t
     DNS_CLASS_ANY  = 255, // any class (QCLASS only)
 } dns_class_t;
 
+// CLASS categories (RFC 6895 3.2). Every value is in exactly one of them:
+// reserved:      0, 0xFFFF
+// qonly_or_meta: 0x0080-0x00FF (QCLASSes NONE / ANY and Meta-CLASSes) and 0xE000-0xFEFF
+// data:          all other values, i.e. data CLASSes (0x0001-0x007F, 0x0100-0xDFFF and private
+//                use 0xFF00-0xFFFE; 0x0100-0x7FFF has no subcategory in RFC 6895 and counts as
+//                data here)
+bool
+dns_class_is_data (dns_class_t class);
+bool
+dns_class_is_qonly_or_meta (dns_class_t class);
+bool
+dns_class_is_reserved (dns_class_t class);
+
 // Parses the mnemonic (e.g. "IN", ignoring ASCII case) or the generic form "CLASS<n>"
 // (RFC 3597; n decimal, 0..65535) into *out.
 // DNS_ERR_BAD_TEXT: neither form; *out is unchanged.

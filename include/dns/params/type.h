@@ -44,10 +44,10 @@ typedef enum : uint16_t
 // reserved:      0, 0xF000-0xFEFF (reserved for future use), 0xFFFF
 // qonly_or_meta: 0x0080-0x00FF (QTYPEs such as AXFR / ANY and Meta-TYPEs such as TSIG),
 //                plus OPT (41), a Meta-TYPE allocated before that range
-// normal:        all other values, i.e. data TYPEs that can be stored in a zone
+// data:          all other values, i.e. data TYPEs that can be stored in a zone
 //                (0x0001-0x007F, 0x0100-0xEFFF and private use 0xFF00-0xFFFE)
 bool
-dns_type_is_normal (dns_type_t type);
+dns_type_is_data (dns_type_t type);
 bool
 dns_type_is_qonly_or_meta (dns_type_t type);
 bool

@@ -33,7 +33,7 @@ dns_type_is_qonly_or_meta (dns_type_t type)
 }
 
 bool
-dns_type_is_normal (dns_type_t type)
+dns_type_is_data (dns_type_t type)
 {
     return !dns_type_is_reserved (type) && !dns_type_is_qonly_or_meta (type);
 }

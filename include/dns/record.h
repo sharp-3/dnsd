@@ -12,6 +12,7 @@
 #include "dns/rdata.h"
 
 #define DNS_RECORD_DISPLAY_SIZE 4096
+#define DNS_RECORD_NAMES_MAX (1 + DNS_RDATA_NAMES_MAX) // owner name and RDATA names
 
 // name and rdata point into the message they were read from; keep it alive while rr is used.
 typedef struct
@@ -31,11 +32,15 @@ dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr);
 
 // compressed <--> expanded
 dns_error_t
-dns_record_expand (
-    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out);
+dns_record_expand (const dns_cursor_t *p,
+                   const dns_record_t *rr,
+                   dns_name_t          names[DNS_RECORD_NAMES_MAX],
+                   dns_record_t       *out);
 dns_error_t
-dns_record_compress (
-    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out);
+dns_record_compress (const dns_cursor_t *p,
+                     const dns_record_t *rr,
+                     dns_name_t          names[DNS_RECORD_NAMES_MAX],
+                     dns_record_t       *out);
 
 // display
 const char *

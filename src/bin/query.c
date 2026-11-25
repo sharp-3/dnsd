@@ -20,7 +20,6 @@
 #define TRIES 3
 #define UDP_MAX 512
 #define MSG_MAX 65535
-#define RECORD_NAMES_MAX 3 // most domain names in one record (owner, SOA MNAME and RNAME)
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -28,9 +27,10 @@
 
 static char record_line[1 << 19];
 static bool expand;
-// Room for each name of one record once expanded (at most the message size; see
-// dns_name_expand).
-static uint8_t expanded[RECORD_NAMES_MAX * MSG_MAX];
+// Room for the names of one record once expanded, each up to a whole message (names over
+// DNS_NAME_MAX octets are shown expanded too).
+static uint8_t    expanded_buf[DNS_RECORD_NAMES_MAX][MSG_MAX];
+static dns_name_t expanded[DNS_RECORD_NAMES_MAX];
 
 static void
 usage (void)
@@ -207,7 +207,7 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
         if (err != DNS_OK)
             printf (";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (err));
         if (!dns_is_ok (err)) return false;
-        if (expand) dns_record_expand (p, &record, expanded, sizeof expanded, &record);
+        if (expand) dns_record_expand (p, &record, expanded, &record);
         puts (dns_record_display_r (&record, record_line, sizeof record_line));
     }
     return true;
@@ -245,10 +245,9 @@ print_reply (uint8_t *msg, size_t len)
         dns_question_t *q = &question;
         if (expand)
         {
-            dns_name_ref_t full;
-            err = dns_name_expand (&parser, &q->qname, expanded, sizeof expanded, &full);
+            err = dns_name_expand (&parser, &q->qname, &expanded[0]);
             if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
-            if (dns_is_ok (err)) q->qname = full;
+            if (dns_is_ok (err)) q->qname = dns_name_to_ref (&expanded[0]);
         }
         printf (";%s\n", dns_question_display (q));
     }
@@ -265,6 +264,9 @@ print_reply (uint8_t *msg, size_t len)
 int
 main (int argc, char **argv)
 {
+    for (size_t i = 0; i < DNS_RECORD_NAMES_MAX; i++)
+        expanded[i] = (dns_name_t){.ptr = expanded_buf[i], .cap = sizeof expanded_buf[i]};
+
     const char  *server    = NULL;
     const char  *port      = "53";
     const char  *qname     = NULL;
@@ -292,13 +294,13 @@ main (int argc, char **argv)
     if (!server) server = default_server ();
 
     // A name too long for this buffer would not fit in the query either.
-    uint8_t        name_buf[UDP_MAX];
-    dns_name_ref_t name;
-    dns_error_t    err = dns_name_from_string (qname, name_buf, sizeof name_buf, &name);
+    uint8_t     name_buf[UDP_MAX];
+    dns_name_t  name = {.ptr = name_buf, .cap = sizeof name_buf};
+    dns_error_t err  = dns_name_from_string (qname, &name);
     if (err != DNS_OK) fprintf (stderr, "query: bad name '%s': %s\n", qname, dns_error_str (err));
     if (!dns_is_ok (err)) return 1;
 
-    dns_question_t      q = {.qname = name, .qtype = qtype, .qclass = qclass};
+    dns_question_t      q = {.qname = dns_name_to_ref (&name), .qtype = qtype, .qclass = qclass};
     uint8_t             query[UDP_MAX];
     static dns_cursor_t writer;
     dns_cursor_init (&writer, query, sizeof query);

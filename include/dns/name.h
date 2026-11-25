@@ -18,6 +18,21 @@ typedef struct
     size_t         len; // octets at ptr (wire format, not limited to DNS_NAME_MAX)
 } dns_name_ref_t;
 
+// A name written into storage the caller provides (ptr, cap); a dns_name_ref_t to it comes from
+// dns_name_to_ref.
+typedef struct
+{
+    uint8_t *ptr; // wire format
+    size_t   len; // octets used at ptr
+    size_t   cap; // octets available at ptr
+} dns_name_t;
+
+// dns_name_t <--> dns_name_ref_t
+dns_name_ref_t
+dns_name_to_ref (const dns_name_t *name);
+dns_error_t
+dns_name_to_owned (const dns_name_ref_t *ref, dns_name_t *out);
+
 // dns_name_ref_t <--> uint8_t * (wire format)
 dns_error_t
 dns_name_from_bytes (dns_cursor_t *p, dns_name_ref_t *out);
@@ -26,23 +41,15 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name);
 
 // dns_name_ref_t <--> char * (string)
 dns_error_t
-dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_ref_t *out);
+dns_name_from_string (const char *str, dns_name_t *out);
 dns_error_t
 dns_name_to_string (const dns_name_ref_t *name, char *buf, size_t len);
 
 // compressed <--> expanded
 dns_error_t
-dns_name_expand (const dns_cursor_t   *p,
-                 const dns_name_ref_t *name,
-                 uint8_t              *buf,
-                 size_t                len,
-                 dns_name_ref_t       *out);
+dns_name_expand (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *out);
 dns_error_t
-dns_name_compress (const dns_cursor_t   *p,
-                   const dns_name_ref_t *name,
-                   uint8_t              *buf,
-                   size_t                len,
-                   dns_name_ref_t       *out);
+dns_name_compress (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *out);
 
 // length
 dns_error_t

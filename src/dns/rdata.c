@@ -28,37 +28,36 @@ dns_rdata_expand (const dns_cursor_t *p,
                   dns_type_t          type,
                   dns_class_t         class,
                   const dns_rdata_t  *rdata,
-                  uint8_t            *buf,
-                  size_t              len,
+                  dns_name_t          names[DNS_RDATA_NAMES_MAX],
                   dns_rdata_t        *out)
 {
     if (!dns_rdata_known (type, class))
-        return dns_rdata_unknown_expand (p, &rdata->unknown, buf, len, &out->unknown);
+        return dns_rdata_unknown_expand (p, &rdata->unknown, &out->unknown);
 
     switch (type)
     {
     case DNS_TYPE_A:
-        return dns_rdata_a_expand (p, &rdata->a, buf, len, &out->a);
+        return dns_rdata_a_expand (p, &rdata->a, &out->a);
     case DNS_TYPE_AAAA:
-        return dns_rdata_aaaa_expand (p, &rdata->aaaa, buf, len, &out->aaaa);
+        return dns_rdata_aaaa_expand (p, &rdata->aaaa, &out->aaaa);
     case DNS_TYPE_NS:
-        return dns_rdata_ns_expand (p, &rdata->ns, buf, len, &out->ns);
+        return dns_rdata_ns_expand (p, &rdata->ns, &names[0], &out->ns);
     case DNS_TYPE_CNAME:
-        return dns_rdata_cname_expand (p, &rdata->cname, buf, len, &out->cname);
+        return dns_rdata_cname_expand (p, &rdata->cname, &names[0], &out->cname);
     case DNS_TYPE_PTR:
-        return dns_rdata_ptr_expand (p, &rdata->ptr, buf, len, &out->ptr);
+        return dns_rdata_ptr_expand (p, &rdata->ptr, &names[0], &out->ptr);
     case DNS_TYPE_DNAME:
-        return dns_rdata_dname_expand (p, &rdata->dname, buf, len, &out->dname);
+        return dns_rdata_dname_expand (p, &rdata->dname, &names[0], &out->dname);
     case DNS_TYPE_MX:
-        return dns_rdata_mx_expand (p, &rdata->mx, buf, len, &out->mx);
+        return dns_rdata_mx_expand (p, &rdata->mx, &names[0], &out->mx);
     case DNS_TYPE_SRV:
-        return dns_rdata_srv_expand (p, &rdata->srv, buf, len, &out->srv);
+        return dns_rdata_srv_expand (p, &rdata->srv, &names[0], &out->srv);
     case DNS_TYPE_SOA:
-        return dns_rdata_soa_expand (p, &rdata->soa, buf, len, &out->soa);
+        return dns_rdata_soa_expand (p, &rdata->soa, names, &out->soa);
     case DNS_TYPE_TXT:
-        return dns_rdata_txt_expand (p, &rdata->txt, buf, len, &out->txt);
+        return dns_rdata_txt_expand (p, &rdata->txt, &out->txt);
     default:
-        return dns_rdata_unknown_expand (p, &rdata->unknown, buf, len, &out->unknown);
+        return dns_rdata_unknown_expand (p, &rdata->unknown, &out->unknown);
     }
 }
 
@@ -67,37 +66,36 @@ dns_rdata_compress (const dns_cursor_t *p,
                     dns_type_t          type,
                     dns_class_t         class,
                     const dns_rdata_t  *rdata,
-                    uint8_t            *buf,
-                    size_t              len,
+                    dns_name_t          names[DNS_RDATA_NAMES_MAX],
                     dns_rdata_t        *out)
 {
     if (!dns_rdata_known (type, class))
-        return dns_rdata_unknown_compress (p, &rdata->unknown, buf, len, &out->unknown);
+        return dns_rdata_unknown_compress (p, &rdata->unknown, &out->unknown);
 
     switch (type)
     {
     case DNS_TYPE_A:
-        return dns_rdata_a_compress (p, &rdata->a, buf, len, &out->a);
+        return dns_rdata_a_compress (p, &rdata->a, &out->a);
     case DNS_TYPE_AAAA:
-        return dns_rdata_aaaa_compress (p, &rdata->aaaa, buf, len, &out->aaaa);
+        return dns_rdata_aaaa_compress (p, &rdata->aaaa, &out->aaaa);
     case DNS_TYPE_NS:
-        return dns_rdata_ns_compress (p, &rdata->ns, buf, len, &out->ns);
+        return dns_rdata_ns_compress (p, &rdata->ns, &names[0], &out->ns);
     case DNS_TYPE_CNAME:
-        return dns_rdata_cname_compress (p, &rdata->cname, buf, len, &out->cname);
+        return dns_rdata_cname_compress (p, &rdata->cname, &names[0], &out->cname);
     case DNS_TYPE_PTR:
-        return dns_rdata_ptr_compress (p, &rdata->ptr, buf, len, &out->ptr);
+        return dns_rdata_ptr_compress (p, &rdata->ptr, &names[0], &out->ptr);
     case DNS_TYPE_DNAME:
-        return dns_rdata_dname_compress (p, &rdata->dname, buf, len, &out->dname);
+        return dns_rdata_dname_compress (p, &rdata->dname, &names[0], &out->dname);
     case DNS_TYPE_MX:
-        return dns_rdata_mx_compress (p, &rdata->mx, buf, len, &out->mx);
+        return dns_rdata_mx_compress (p, &rdata->mx, &names[0], &out->mx);
     case DNS_TYPE_SRV:
-        return dns_rdata_srv_compress (p, &rdata->srv, buf, len, &out->srv);
+        return dns_rdata_srv_compress (p, &rdata->srv, &names[0], &out->srv);
     case DNS_TYPE_SOA:
-        return dns_rdata_soa_compress (p, &rdata->soa, buf, len, &out->soa);
+        return dns_rdata_soa_compress (p, &rdata->soa, names, &out->soa);
     case DNS_TYPE_TXT:
-        return dns_rdata_txt_compress (p, &rdata->txt, buf, len, &out->txt);
+        return dns_rdata_txt_compress (p, &rdata->txt, &out->txt);
     default:
-        return dns_rdata_unknown_compress (p, &rdata->unknown, buf, len, &out->unknown);
+        return dns_rdata_unknown_compress (p, &rdata->unknown, &out->unknown);
     }
 }
 

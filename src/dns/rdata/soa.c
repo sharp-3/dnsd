@@ -37,39 +37,39 @@ dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
     return rdata_put_end (p, &start, err);
 }
 
-// mname, then rname, one after the other in buf.
+// MNAME into names[0], RNAME into names[1].
 dns_error_t
 dns_rdata_soa_expand (const dns_cursor_t    *p,
                       const dns_rdata_soa_t *rdata,
-                      uint8_t               *buf,
-                      size_t                 len,
+                      dns_name_t             names[2],
                       dns_rdata_soa_t       *out)
 {
-    dns_rdata_soa_t rd  = *rdata;
-    dns_error_t     err = dns_name_expand (p, &rdata->mname, buf, len, &rd.mname);
+    dns_error_t err = dns_name_expand (p, &rdata->mname, &names[0]);
     if (!dns_is_ok (err)) return err;
-    dns_error_t rerr =
-        dns_name_expand (p, &rdata->rname, buf + rd.mname.len, len - rd.mname.len, &rd.rname);
+    dns_error_t rerr = dns_name_expand (p, &rdata->rname, &names[1]);
     if (!dns_is_ok (rerr)) return rerr;
-    *out = rd;
+
+    *out       = *rdata;
+    out->mname = dns_name_to_ref (&names[0]);
+    out->rname = dns_name_to_ref (&names[1]);
     return dns_merge_soft (err, rerr);
 }
 
-// mname, then rname, one after the other in buf.
+// MNAME into names[0], RNAME into names[1].
 dns_error_t
 dns_rdata_soa_compress (const dns_cursor_t    *p,
                         const dns_rdata_soa_t *rdata,
-                        uint8_t               *buf,
-                        size_t                 len,
+                        dns_name_t             names[2],
                         dns_rdata_soa_t       *out)
 {
-    dns_rdata_soa_t rd  = *rdata;
-    dns_error_t     err = dns_name_compress (p, &rdata->mname, buf, len, &rd.mname);
+    dns_error_t err = dns_name_compress (p, &rdata->mname, &names[0]);
     if (!dns_is_ok (err)) return err;
-    dns_error_t rerr =
-        dns_name_compress (p, &rdata->rname, buf + rd.mname.len, len - rd.mname.len, &rd.rname);
+    dns_error_t rerr = dns_name_compress (p, &rdata->rname, &names[1]);
     if (!dns_is_ok (rerr)) return rerr;
-    *out = rd;
+
+    *out       = *rdata;
+    out->mname = dns_name_to_ref (&names[0]);
+    out->rname = dns_name_to_ref (&names[1]);
     return dns_merge_soft (err, rerr);
 }
 

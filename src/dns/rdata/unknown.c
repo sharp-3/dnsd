@@ -31,13 +31,9 @@ dns_rdata_unknown_to_bytes (dns_cursor_t *p, const dns_rdata_unknown_t *rd)
 dns_error_t
 dns_rdata_unknown_expand (const dns_cursor_t        *p,
                           const dns_rdata_unknown_t *rdata,
-                          uint8_t                   *buf,
-                          size_t                     len,
                           dns_rdata_unknown_t       *out)
 {
     (void)p;
-    (void)buf;
-    (void)len;
     *out = *rdata;
     return DNS_OK;
 }
@@ -46,13 +42,9 @@ dns_rdata_unknown_expand (const dns_cursor_t        *p,
 dns_error_t
 dns_rdata_unknown_compress (const dns_cursor_t        *p,
                             const dns_rdata_unknown_t *rdata,
-                            uint8_t                   *buf,
-                            size_t                     len,
                             dns_rdata_unknown_t       *out)
 {
     (void)p;
-    (void)buf;
-    (void)len;
     *out = *rdata;
     return DNS_OK;
 }

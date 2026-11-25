@@ -26,14 +26,12 @@ dns_rdata_ns_length (const dns_rdata_ns_t *rdata);
 dns_error_t
 dns_rdata_ns_expand (const dns_cursor_t   *p,
                      const dns_rdata_ns_t *rdata,
-                     uint8_t              *buf,
-                     size_t                len,
+                     dns_name_t           *name,
                      dns_rdata_ns_t       *out);
 dns_error_t
 dns_rdata_ns_compress (const dns_cursor_t   *p,
                        const dns_rdata_ns_t *rdata,
-                       uint8_t              *buf,
-                       size_t                len,
+                       dns_name_t           *name,
                        dns_rdata_ns_t       *out);
 
 #endif

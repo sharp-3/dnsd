@@ -32,13 +32,14 @@ dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
 dns_error_t
 dns_rdata_srv_expand (const dns_cursor_t    *p,
                       const dns_rdata_srv_t *rdata,
-                      uint8_t               *buf,
-                      size_t                 len,
+                      dns_name_t            *name,
                       dns_rdata_srv_t       *out)
 {
-    dns_rdata_srv_t rd  = *rdata;
-    dns_error_t     err = dns_name_expand (p, &rdata->target, buf, len, &rd.target);
-    if (dns_is_ok (err)) *out = rd;
+    dns_error_t err = dns_name_expand (p, &rdata->target, name);
+    if (!dns_is_ok (err)) return err;
+
+    *out        = *rdata;
+    out->target = dns_name_to_ref (name);
     return err;
 }
 
@@ -46,13 +47,11 @@ dns_rdata_srv_expand (const dns_cursor_t    *p,
 dns_error_t
 dns_rdata_srv_compress (const dns_cursor_t    *p,
                         const dns_rdata_srv_t *rdata,
-                        uint8_t               *buf,
-                        size_t                 len,
+                        dns_name_t            *name,
                         dns_rdata_srv_t       *out)
 {
     (void)p;
-    (void)buf;
-    (void)len;
+    (void)name;
     *out = *rdata;
     return DNS_OK;
 }

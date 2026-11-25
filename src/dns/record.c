@@ -66,52 +66,51 @@ fail:
 
 typedef dns_error_t (*name_convert_t) (const dns_cursor_t   *p,
                                        const dns_name_ref_t *name,
-                                       uint8_t              *buf,
-                                       size_t                len,
-                                       dns_name_ref_t       *out);
+                                       dns_name_t           *out);
 typedef dns_error_t (*rdata_convert_t) (const dns_cursor_t *p,
                                         dns_type_t          type,
                                         dns_class_t         class,
                                         const dns_rdata_t  *rdata,
-                                        uint8_t            *buf,
-                                        size_t              len,
+                                        dns_name_t          names[DNS_RDATA_NAMES_MAX],
                                         dns_rdata_t        *out);
 
-// Converts the owner name, then the names in the RDATA, writing the results one after another
-// in buf.
+// Converts the owner name into names[0], then the names in the RDATA into the rest.
 static dns_error_t
 record_convert (const dns_cursor_t *p,
                 const dns_record_t *rr,
-                uint8_t            *buf,
-                size_t              len,
+                dns_name_t          names[DNS_RECORD_NAMES_MAX],
                 name_convert_t      name_convert,
                 rdata_convert_t     rdata_convert,
                 dns_record_t       *out)
 {
-    dns_record_t r   = *rr;
-    dns_error_t  err = name_convert (p, &rr->name, buf, len, &r.name);
+    dns_error_t err = name_convert (p, &rr->name, &names[0]);
     if (!dns_is_ok (err)) return err;
-
-    dns_error_t rerr = rdata_convert (
-        p, rr->type, rr->class, &rr->rdata, buf + r.name.len, len - r.name.len, &r.rdata);
+    dns_rdata_t rdata;
+    dns_error_t rerr = rdata_convert (p, rr->type, rr->class, &rr->rdata, names + 1, &rdata);
     if (!dns_is_ok (rerr)) return rerr;
 
-    *out = r;
+    *out       = *rr;
+    out->name  = dns_name_to_ref (&names[0]);
+    out->rdata = rdata;
     return dns_merge_soft (err, rerr);
 }
 
 dns_error_t
-dns_record_expand (
-    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out)
+dns_record_expand (const dns_cursor_t *p,
+                   const dns_record_t *rr,
+                   dns_name_t          names[DNS_RECORD_NAMES_MAX],
+                   dns_record_t       *out)
 {
-    return record_convert (p, rr, buf, len, dns_name_expand, dns_rdata_expand, out);
+    return record_convert (p, rr, names, dns_name_expand, dns_rdata_expand, out);
 }
 
 dns_error_t
-dns_record_compress (
-    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out)
+dns_record_compress (const dns_cursor_t *p,
+                     const dns_record_t *rr,
+                     dns_name_t          names[DNS_RECORD_NAMES_MAX],
+                     dns_record_t       *out)
 {
-    return record_convert (p, rr, buf, len, dns_name_compress, dns_rdata_compress, out);
+    return record_convert (p, rr, names, dns_name_compress, dns_rdata_compress, out);
 }
 
 const char *

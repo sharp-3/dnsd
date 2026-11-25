@@ -15,26 +15,28 @@ dns_rdata_ptr_to_bytes (dns_cursor_t *p, const dns_rdata_ptr_t *rd)
 dns_error_t
 dns_rdata_ptr_expand (const dns_cursor_t    *p,
                       const dns_rdata_ptr_t *rdata,
-                      uint8_t               *buf,
-                      size_t                 len,
+                      dns_name_t            *name,
                       dns_rdata_ptr_t       *out)
 {
-    dns_rdata_ptr_t rd  = *rdata;
-    dns_error_t     err = dns_name_expand (p, &rdata->ptrdname, buf, len, &rd.ptrdname);
-    if (dns_is_ok (err)) *out = rd;
+    dns_error_t err = dns_name_expand (p, &rdata->ptrdname, name);
+    if (!dns_is_ok (err)) return err;
+
+    *out          = *rdata;
+    out->ptrdname = dns_name_to_ref (name);
     return err;
 }
 
 dns_error_t
 dns_rdata_ptr_compress (const dns_cursor_t    *p,
                         const dns_rdata_ptr_t *rdata,
-                        uint8_t               *buf,
-                        size_t                 len,
+                        dns_name_t            *name,
                         dns_rdata_ptr_t       *out)
 {
-    dns_rdata_ptr_t rd  = *rdata;
-    dns_error_t     err = dns_name_compress (p, &rdata->ptrdname, buf, len, &rd.ptrdname);
-    if (dns_is_ok (err)) *out = rd;
+    dns_error_t err = dns_name_compress (p, &rdata->ptrdname, name);
+    if (!dns_is_ok (err)) return err;
+
+    *out          = *rdata;
+    out->ptrdname = dns_name_to_ref (name);
     return err;
 }
 

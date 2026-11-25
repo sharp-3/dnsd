@@ -28,26 +28,28 @@ dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rd)
 dns_error_t
 dns_rdata_mx_expand (const dns_cursor_t   *p,
                      const dns_rdata_mx_t *rdata,
-                     uint8_t              *buf,
-                     size_t                len,
+                     dns_name_t           *name,
                      dns_rdata_mx_t       *out)
 {
-    dns_rdata_mx_t rd  = *rdata;
-    dns_error_t    err = dns_name_expand (p, &rdata->exchange, buf, len, &rd.exchange);
-    if (dns_is_ok (err)) *out = rd;
+    dns_error_t err = dns_name_expand (p, &rdata->exchange, name);
+    if (!dns_is_ok (err)) return err;
+
+    *out          = *rdata;
+    out->exchange = dns_name_to_ref (name);
     return err;
 }
 
 dns_error_t
 dns_rdata_mx_compress (const dns_cursor_t   *p,
                        const dns_rdata_mx_t *rdata,
-                       uint8_t              *buf,
-                       size_t                len,
+                       dns_name_t           *name,
                        dns_rdata_mx_t       *out)
 {
-    dns_rdata_mx_t rd  = *rdata;
-    dns_error_t    err = dns_name_compress (p, &rdata->exchange, buf, len, &rd.exchange);
-    if (dns_is_ok (err)) *out = rd;
+    dns_error_t err = dns_name_compress (p, &rdata->exchange, name);
+    if (!dns_is_ok (err)) return err;
+
+    *out          = *rdata;
+    out->exchange = dns_name_to_ref (name);
     return err;
 }
 

@@ -44,22 +44,30 @@ dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q)
 }
 
 dns_error_t
-dns_question_expand (
-    const dns_cursor_t *p, const dns_question_t *q, uint8_t *buf, size_t len, dns_question_t *out)
+dns_question_expand (const dns_cursor_t   *p,
+                     const dns_question_t *q,
+                     dns_name_t           *qname,
+                     dns_question_t       *out)
 {
-    dns_question_t r   = *q;
-    dns_error_t    err = dns_name_expand (p, &q->qname, buf, len, &r.qname);
-    if (dns_is_ok (err)) *out = r;
+    dns_error_t err = dns_name_expand (p, &q->qname, qname);
+    if (!dns_is_ok (err)) return err;
+
+    *out       = *q;
+    out->qname = dns_name_to_ref (qname);
     return err;
 }
 
 dns_error_t
-dns_question_compress (
-    const dns_cursor_t *p, const dns_question_t *q, uint8_t *buf, size_t len, dns_question_t *out)
+dns_question_compress (const dns_cursor_t   *p,
+                       const dns_question_t *q,
+                       dns_name_t           *qname,
+                       dns_question_t       *out)
 {
-    dns_question_t r   = *q;
-    dns_error_t    err = dns_name_compress (p, &q->qname, buf, len, &r.qname);
-    if (dns_is_ok (err)) *out = r;
+    dns_error_t err = dns_name_compress (p, &q->qname, qname);
+    if (!dns_is_ok (err)) return err;
+
+    *out       = *q;
+    out->qname = dns_name_to_ref (qname);
     return err;
 }
 

@@ -8,6 +8,8 @@
 #include "dns/error.h"
 #include "dns/params/class.h"
 #include "dns/params/type.h"
+
+#define DNS_RDATA_NAMES_MAX 2 // most domain names in one RDATA (SOA)
 #include "dns/rdata/a.h"
 #include "dns/rdata/aaaa.h"
 #include "dns/rdata/cname.h"
@@ -55,16 +57,14 @@ dns_rdata_expand (const dns_cursor_t *p,
                   dns_type_t          type,
                   dns_class_t         class,
                   const dns_rdata_t  *rdata,
-                  uint8_t            *buf,
-                  size_t              len,
+                  dns_name_t          names[DNS_RDATA_NAMES_MAX],
                   dns_rdata_t        *out);
 dns_error_t
 dns_rdata_compress (const dns_cursor_t *p,
                     dns_type_t          type,
                     dns_class_t         class,
                     const dns_rdata_t  *rdata,
-                    uint8_t            *buf,
-                    size_t              len,
+                    dns_name_t          names[DNS_RDATA_NAMES_MAX],
                     dns_rdata_t        *out);
 
 // display

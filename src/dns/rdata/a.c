@@ -27,24 +27,18 @@ dns_rdata_a_to_bytes (dns_cursor_t *p, const dns_rdata_a_t *rd)
 
 // No domain names: nothing to expand.
 dns_error_t
-dns_rdata_a_expand (
-    const dns_cursor_t *p, const dns_rdata_a_t *rdata, uint8_t *buf, size_t len, dns_rdata_a_t *out)
+dns_rdata_a_expand (const dns_cursor_t *p, const dns_rdata_a_t *rdata, dns_rdata_a_t *out)
 {
     (void)p;
-    (void)buf;
-    (void)len;
     *out = *rdata;
     return DNS_OK;
 }
 
 // No domain names: nothing to compress.
 dns_error_t
-dns_rdata_a_compress (
-    const dns_cursor_t *p, const dns_rdata_a_t *rdata, uint8_t *buf, size_t len, dns_rdata_a_t *out)
+dns_rdata_a_compress (const dns_cursor_t *p, const dns_rdata_a_t *rdata, dns_rdata_a_t *out)
 {
     (void)p;
-    (void)buf;
-    (void)len;
     *out = *rdata;
     return DNS_OK;
 }

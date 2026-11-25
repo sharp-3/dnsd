@@ -24,7 +24,7 @@ dns_rdata_unknown_to_bytes (dns_cursor_t *p, const dns_rdata_unknown_t *rd)
 {
     cursor_t start = p->cur;
     emit_bytes (&p->cur, rd->data, rd->len);
-    return rdata_put_end (p, &start);
+    return rdata_put_end (p, &start, DNS_OK);
 }
 
 size_t

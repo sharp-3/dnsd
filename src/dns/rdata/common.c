@@ -24,11 +24,13 @@ rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
 }
 
 dns_error_t
-rdata_put_end (dns_cursor_t *p, const cursor_t *start)
+rdata_put_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
 {
-    if (!cursor_is_overflow (&p->cur)) return DNS_OK;
+    if (cursor_is_overflow (&p->cur)) err = DNS_ERR_NO_SPACE;
+    if (dns_is_ok (err)) return err;
     p->cur = *start;
-    return DNS_ERR_NO_SPACE;
+    dns_cursor_clear_labels (p, cursor_bytes (start));
+    return err;
 }
 
 dns_error_t
@@ -48,8 +50,7 @@ dns_error_t
 rdata_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
 {
     cursor_t start = p->cur;
-    emit_bytes (&p->cur, name->ptr, name->len);
-    return rdata_put_end (p, &start);
+    return rdata_put_end (p, &start, dns_name_to_bytes (p, name));
 }
 
 void

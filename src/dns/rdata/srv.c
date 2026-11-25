@@ -26,8 +26,7 @@ dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
     emit_bits (&p->cur, 16, rd->priority);
     emit_bits (&p->cur, 16, rd->weight);
     emit_bits (&p->cur, 16, rd->port);
-    emit_bytes (&p->cur, rd->target.ptr, rd->target.len);
-    return rdata_put_end (p, &start);
+    return rdata_put_end (p, &start, dns_name_to_bytes (p, &rd->target));
 }
 
 size_t

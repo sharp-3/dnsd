@@ -22,8 +22,7 @@ dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rd)
 {
     cursor_t start = p->cur;
     emit_bits (&p->cur, 16, rd->preference);
-    emit_bytes (&p->cur, rd->exchange.ptr, rd->exchange.len);
-    return rdata_put_end (p, &start);
+    return rdata_put_end (p, &start, dns_name_to_bytes (p, &rd->exchange));
 }
 
 size_t

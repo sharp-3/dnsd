@@ -37,6 +37,7 @@ dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q)
     if (cursor_is_overflow (&p->cur))
     {
         p->cur = start;
+        dns_cursor_clear_labels (p, cursor_bytes (&start));
         return DNS_ERR_NO_SPACE;
     }
     return err;

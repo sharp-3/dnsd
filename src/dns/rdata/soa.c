@@ -26,15 +26,15 @@ dns_rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
 dns_error_t
 dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
 {
-    cursor_t start = p->cur;
-    emit_bytes (&p->cur, rd->mname.ptr, rd->mname.len);
-    emit_bytes (&p->cur, rd->rname.ptr, rd->rname.len);
+    cursor_t    start = p->cur;
+    dns_error_t err   = dns_name_to_bytes (p, &rd->mname);
+    if (dns_is_ok (err)) err = dns_merge_soft (err, dns_name_to_bytes (p, &rd->rname));
     emit_bits (&p->cur, 32, rd->serial);
     emit_bits (&p->cur, 32, rd->refresh);
     emit_bits (&p->cur, 32, rd->retry);
     emit_bits (&p->cur, 32, rd->expire);
     emit_bits (&p->cur, 32, rd->minimum);
-    return rdata_put_end (p, &start);
+    return rdata_put_end (p, &start, err);
 }
 
 size_t

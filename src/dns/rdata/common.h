@@ -22,10 +22,12 @@ rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start);
 dns_error_t
 rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err);
 
-// Ends a write of RDATA that started at *start: if it did not fit (or p->cur had already
-// overflowed), p->cur goes back to *start and the result is DNS_ERR_NO_SPACE.
+// Ends a write of RDATA that started at *start, given the result err of writing its names
+// (DNS_OK if it has none). If it did not fit (or p->cur had already overflowed) the result is
+// DNS_ERR_NO_SPACE, otherwise err. On error p->cur goes back to *start and the label starts
+// recorded from there on are forgotten.
 dns_error_t
-rdata_put_end (dns_cursor_t *p, const cursor_t *start);
+rdata_put_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err);
 
 // A single domain name filling the whole RDATA (NS, CNAME, PTR, DNAME).
 dns_error_t

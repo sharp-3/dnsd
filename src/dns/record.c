@@ -54,11 +54,13 @@ dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
     emit_bits (&p->cur, DNS_CLASS_SIZE * 8, rr->class);
     emit_bits (&p->cur, RR_TTL_SIZE * 8, rr->ttl);
     emit_bits (&p->cur, RR_RDLENGTH_SIZE * 8, rdlength);
-    if ((err = dns_rdata_to_bytes (p, rr->type, rr->class, &rr->rdata)) != DNS_OK) goto fail;
-    return soft;
+    err = dns_rdata_to_bytes (p, rr->type, rr->class, &rr->rdata);
+    if (!dns_is_ok (err)) goto fail;
+    return dns_merge_soft (soft, err);
 
 fail:
     p->cur = start;
+    dns_cursor_clear_labels (p, cursor_bytes (&start));
     return err;
 }
 

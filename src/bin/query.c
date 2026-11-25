@@ -20,7 +20,7 @@
 #define TRIES 3
 #define UDP_MAX 512
 #define MSG_MAX 65535
-#define RDATA_NAMES_MAX 2 // most domain names in one RDATA (SOA)
+#define RECORD_NAMES_MAX 3 // most domain names in one record (owner, SOA MNAME and RNAME)
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -30,7 +30,7 @@ static char record_line[1 << 19];
 static bool expand;
 // Room for each name of one record once expanded (at most the message size; see
 // dns_name_expand).
-static uint8_t expanded[1 + RDATA_NAMES_MAX][MSG_MAX];
+static uint8_t expanded[RECORD_NAMES_MAX * MSG_MAX];
 
 static void
 usage (void)
@@ -194,42 +194,6 @@ exchange_tcp (const struct addrinfo *ai, const uint8_t *q, size_t qlen, uint8_t 
     return n;
 }
 
-// Stores pointers to the domain names in the RDATA in out, which has room for
-// RDATA_NAMES_MAX entries. Returns how many were stored.
-static size_t
-rdata_names (dns_type_t type, dns_class_t class, dns_rdata_t *rd, dns_name_t **out)
-{
-    if (!dns_rdata_known (type, class)) return 0;
-
-    switch (type)
-    {
-    case DNS_TYPE_NS:
-        out[0] = &rd->ns.nsdname;
-        return 1;
-    case DNS_TYPE_CNAME:
-        out[0] = &rd->cname.cname;
-        return 1;
-    case DNS_TYPE_PTR:
-        out[0] = &rd->ptr.ptrdname;
-        return 1;
-    case DNS_TYPE_DNAME:
-        out[0] = &rd->dname.target;
-        return 1;
-    case DNS_TYPE_MX:
-        out[0] = &rd->mx.exchange;
-        return 1;
-    case DNS_TYPE_SRV:
-        out[0] = &rd->srv.target;
-        return 1;
-    case DNS_TYPE_SOA:
-        out[0] = &rd->soa.mname;
-        out[1] = &rd->soa.rname;
-        return 2;
-    default:
-        return 0;
-    }
-}
-
 static bool
 print_records (const char *title, unsigned count, dns_cursor_t *p)
 {
@@ -243,17 +207,8 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
         if (err != DNS_OK)
             printf (";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (err));
         if (!dns_is_ok (err)) return false;
-        dns_record_t *rr = &record;
-
-        dns_name_t *names[1 + RDATA_NAMES_MAX] = {&rr->name};
-        size_t      n = 1 + rdata_names (rr->type, rr->class, &rr->rdata, names + 1);
-        for (size_t j = 0; expand && j < n; j++)
-        {
-            dns_name_t full;
-            if (dns_is_ok (dns_name_expand (p, names[j], expanded[j], sizeof expanded[j], &full)))
-                *names[j] = full;
-        }
-        puts (dns_record_display_r (rr, record_line, sizeof record_line));
+        if (expand) dns_record_expand (p, &record, expanded, sizeof expanded, &record);
+        puts (dns_record_display_r (&record, record_line, sizeof record_line));
     }
     return true;
 }
@@ -291,7 +246,7 @@ print_reply (uint8_t *msg, size_t len)
         if (expand)
         {
             dns_name_t full;
-            err = dns_name_expand (&parser, &q->qname, expanded[0], sizeof expanded[0], &full);
+            err = dns_name_expand (&parser, &q->qname, expanded, sizeof expanded, &full);
             if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
             if (dns_is_ok (err)) q->qname = full;
         }

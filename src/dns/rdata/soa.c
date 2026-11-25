@@ -8,7 +8,7 @@ dns_rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
 {
     cursor_t start = p->cur;
 
-    (void)len;
+    (void)len; // checked against RDLENGTH by the record
     dns_rdata_soa_t rd;
     dns_error_t     err = dns_name_from_bytes (p, &rd.mname);
     if (dns_is_ok (err)) err = dns_merge_soft (err, dns_name_from_bytes (p, &rd.rname));

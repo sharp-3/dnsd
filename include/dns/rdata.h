@@ -43,6 +43,8 @@ bool
 dns_rdata_known (dns_type_t type, dns_class_t class);
 
 // dns_rdata_t <--> uint8_t * (wire format)
+// len is RDLENGTH. Only TXT and unknown read by it; that the RDATA takes exactly len octets is
+// checked by dns_record_from_bytes.
 dns_error_t
 dns_rdata_from_bytes (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out);

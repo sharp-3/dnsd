@@ -12,7 +12,7 @@ dns_rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out)
     rd.priority = take_bits (&p->cur, 16);
     rd.weight   = take_bits (&p->cur, 16);
     rd.port     = take_bits (&p->cur, 16);
-    (void)len;
+    (void)len; // checked against RDLENGTH by the record
     dns_error_t err = rdata_end (p, &start, dns_name_from_bytes (p, &rd.target), DNS_ERR_TRUNCATED);
     if (dns_is_ok (err)) *out = rd;
     return err;

@@ -10,7 +10,7 @@ dns_rdata_mx_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_mx_t *out)
 
     dns_rdata_mx_t rd;
     rd.preference = take_bits (&p->cur, 16);
-    (void)len;
+    (void)len; // checked against RDLENGTH by the record
     dns_error_t err =
         rdata_end (p, &start, dns_name_from_bytes (p, &rd.exchange), DNS_ERR_TRUNCATED);
     if (dns_is_ok (err)) *out = rd;

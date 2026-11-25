@@ -40,9 +40,12 @@ dns_name_from_bytes (dns_cursor_t *p, dns_name_ref_t *out)
     const uint8_t *ptr   = cursor_ptr (&p->cur);
     size_t         start = cursor_bytes (&p->cur);
     dns_cursor_clear_labels (p, start);
+
+    // Record where the labels start (not the pointer) as targets for later names, as
+    // dns_name_to_bytes does.
     dns_label_iter_t it;
     dns_label_iter_init (&it, ptr, len, 0);
-    while (dns_label_iter_next (&it))
+    while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
         dns_cursor_mark_label (p, start + it.off);
     cursor_add_bytes (&p->cur, len);
 

@@ -37,6 +37,42 @@ dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
     return rdata_put_end (p, &start, err);
 }
 
+// mname, then rname, one after the other in buf.
+dns_error_t
+dns_rdata_soa_expand (const dns_cursor_t    *p,
+                      const dns_rdata_soa_t *rdata,
+                      uint8_t               *buf,
+                      size_t                 len,
+                      dns_rdata_soa_t       *out)
+{
+    dns_rdata_soa_t rd  = *rdata;
+    dns_error_t     err = dns_name_expand (p, &rdata->mname, buf, len, &rd.mname);
+    if (!dns_is_ok (err)) return err;
+    dns_error_t rerr =
+        dns_name_expand (p, &rdata->rname, buf + rd.mname.len, len - rd.mname.len, &rd.rname);
+    if (!dns_is_ok (rerr)) return rerr;
+    *out = rd;
+    return dns_merge_soft (err, rerr);
+}
+
+// mname, then rname, one after the other in buf.
+dns_error_t
+dns_rdata_soa_compress (const dns_cursor_t    *p,
+                        const dns_rdata_soa_t *rdata,
+                        uint8_t               *buf,
+                        size_t                 len,
+                        dns_rdata_soa_t       *out)
+{
+    dns_rdata_soa_t rd  = *rdata;
+    dns_error_t     err = dns_name_compress (p, &rdata->mname, buf, len, &rd.mname);
+    if (!dns_is_ok (err)) return err;
+    dns_error_t rerr =
+        dns_name_compress (p, &rdata->rname, buf + rd.mname.len, len - rd.mname.len, &rd.rname);
+    if (!dns_is_ok (rerr)) return rerr;
+    *out = rd;
+    return dns_merge_soft (err, rerr);
+}
+
 size_t
 dns_rdata_soa_length (const dns_rdata_soa_t *rd)
 {

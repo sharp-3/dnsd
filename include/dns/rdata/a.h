@@ -20,4 +20,18 @@ dns_rdata_a_to_bytes (dns_cursor_t *p, const dns_rdata_a_t *rdata);
 size_t
 dns_rdata_a_length (const dns_rdata_a_t *rdata);
 
+// compressed <--> expanded
+dns_error_t
+dns_rdata_a_expand (const dns_cursor_t  *p,
+                    const dns_rdata_a_t *rdata,
+                    uint8_t             *buf,
+                    size_t               len,
+                    dns_rdata_a_t       *out);
+dns_error_t
+dns_rdata_a_compress (const dns_cursor_t  *p,
+                      const dns_rdata_a_t *rdata,
+                      uint8_t             *buf,
+                      size_t               len,
+                      dns_rdata_a_t       *out);
+
 #endif

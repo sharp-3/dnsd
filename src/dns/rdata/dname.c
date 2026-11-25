@@ -12,6 +12,34 @@ dns_rdata_dname_to_bytes (dns_cursor_t *p, const dns_rdata_dname_t *rd)
     return rdata_name_to_bytes (p, &rd->target);
 }
 
+dns_error_t
+dns_rdata_dname_expand (const dns_cursor_t      *p,
+                        const dns_rdata_dname_t *rdata,
+                        uint8_t                 *buf,
+                        size_t                   len,
+                        dns_rdata_dname_t       *out)
+{
+    dns_rdata_dname_t rd  = *rdata;
+    dns_error_t       err = dns_name_expand (p, &rdata->target, buf, len, &rd.target);
+    if (dns_is_ok (err)) *out = rd;
+    return err;
+}
+
+// Names in DNAME RDATA must not be compressed (RFC 6672): kept as given.
+dns_error_t
+dns_rdata_dname_compress (const dns_cursor_t      *p,
+                          const dns_rdata_dname_t *rdata,
+                          uint8_t                 *buf,
+                          size_t                   len,
+                          dns_rdata_dname_t       *out)
+{
+    (void)p;
+    (void)buf;
+    (void)len;
+    *out = *rdata;
+    return DNS_OK;
+}
+
 size_t
 dns_rdata_dname_length (const dns_rdata_dname_t *rd)
 {

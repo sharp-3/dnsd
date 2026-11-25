@@ -25,6 +25,32 @@ dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rd)
     return rdata_put_end (p, &start, dns_name_to_bytes (p, &rd->exchange));
 }
 
+dns_error_t
+dns_rdata_mx_expand (const dns_cursor_t   *p,
+                     const dns_rdata_mx_t *rdata,
+                     uint8_t              *buf,
+                     size_t                len,
+                     dns_rdata_mx_t       *out)
+{
+    dns_rdata_mx_t rd  = *rdata;
+    dns_error_t    err = dns_name_expand (p, &rdata->exchange, buf, len, &rd.exchange);
+    if (dns_is_ok (err)) *out = rd;
+    return err;
+}
+
+dns_error_t
+dns_rdata_mx_compress (const dns_cursor_t   *p,
+                       const dns_rdata_mx_t *rdata,
+                       uint8_t              *buf,
+                       size_t                len,
+                       dns_rdata_mx_t       *out)
+{
+    dns_rdata_mx_t rd  = *rdata;
+    dns_error_t    err = dns_name_compress (p, &rdata->exchange, buf, len, &rd.exchange);
+    if (dns_is_ok (err)) *out = rd;
+    return err;
+}
+
 size_t
 dns_rdata_mx_length (const dns_rdata_mx_t *rd)
 {

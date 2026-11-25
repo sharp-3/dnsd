@@ -19,12 +19,11 @@ typedef enum : uint8_t
     DNS_OPCODE_DSO    = 6, // DNS stateful operations (RFC 8490)
 } dns_opcode_t;
 
-// Parses the mnemonic (e.g. "QUERY", ignoring ASCII case) or the generic form "OPCODE<n>"
-// (n decimal, 0..DNS_OPCODE_MAX; the form dns_opcode_display uses for unknown values) into *out.
-// DNS_ERR_BAD_TEXT: neither form; *out is unchanged.
+// dns_opcode_t <-- char * (string)
 dns_error_t
 dns_opcode_from_string (const char *str, dns_opcode_t *out);
 
+// display
 const char *
 dns_opcode_display_r (dns_opcode_t value, char *buf, size_t len);
 

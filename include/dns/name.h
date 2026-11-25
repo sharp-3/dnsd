@@ -18,64 +18,37 @@ typedef struct
     size_t         len; // octets at ptr (wire format, not limited to DNS_NAME_MAX)
 } dns_name_t;
 
-// Reads the name at p->cur and advances it; other errors leave p->cur unchanged.
-// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still fills *out and advances p->cur.
+// dns_name_t <--> uint8_t * (wire format)
 dns_error_t
 dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out);
-// Parses the presentation form str (absolute; "." is the root) and writes the name in wire format
-// to buf (len octets); *out then points into buf, so keep buf alive while *out is used.
-// strlen (str) + 2 octets always suffice; DNS_NAME_MAX octets hold any name that is not too long.
-// DNS_OK_NAME_TOO_LONG (over DNS_NAME_MAX octets) still sets *out.
-// DNS_ERR_NO_SPACE: the name does not fit in len octets.
-// On error *out is unchanged and the contents of buf are unspecified.
+dns_error_t
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);
+
+// dns_name_t <--> char * (string)
 dns_error_t
 dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out);
-// Checks the name at p->cur like dns_name_from_bytes and stores its wire length in *size,
-// without changing p (no cursor move, no label marking).
 dns_error_t
-dns_name_length (const dns_cursor_t *p, size_t *size);
-// Checks that name is a whole uncompressed name: its labels fit in name->len octets, none has a
-// reserved type, none is a pointer, and it ends with the root label at its last octet.
-// DNS_OK_NAME_TOO_LONG: it is, but over DNS_NAME_MAX octets.
-// DNS_ERR_COMPRESSED: it contains a pointer.
-// DNS_ERR_RESERVED_LABEL: a label has type 0b01 / 0b10.
-// DNS_ERR_TRUNCATED: a label runs past name->len, or octets follow the root label.
-dns_error_t
-dns_name_check_uncompressed (const dns_name_t *name);
-// Checks name like dns_name_expand and stores its length once expanded in *len.
-// DNS_OK_NAME_TOO_LONG (over DNS_NAME_MAX octets once expanded) still sets *len.
-dns_error_t
-dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *len);
-// Follows the compression pointers in name and writes the uncompressed name to buf (len
-// octets); *out then points into buf, so keep buf alive while *out is used. DNS_NAME_MAX octets
-// hold any name that is not too long; a longer one needs up to the message size.
-// DNS_OK_NAME_TOO_LONG (over DNS_NAME_MAX octets once expanded) still sets *out.
-// DNS_ERR_NO_SPACE: the expanded name does not fit in len octets.
-// On error *out is unchanged and the contents of buf are unspecified.
+dns_name_to_string (const dns_name_t *name, char *buf, size_t len);
+
+// compressed <--> expanded
 dns_error_t
 dns_name_expand (
     const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
-// Compresses the uncompressed name against the names already written at p: writes to buf the
-// labels before the longest suffix that occurs earlier in the message, then a pointer to it
-// (or the whole name unchanged when there is none); *out then points into buf, so keep buf
-// alive while *out is used. The result is never longer than name, so DNS_NAME_MAX octets hold
-// any name that is not too long. p is only read; write the result with dns_name_to_bytes.
-// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still sets *out.
-// DNS_ERR_COMPRESSED: name already contains a pointer.
-// DNS_ERR_NO_SPACE: the result does not fit in len octets.
-// On error *out is unchanged and the contents of buf are unspecified.
 dns_error_t
 dns_name_compress (
     const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
-// Writes the name at p->cur exactly as it is (no compression; see dns_name_compress) and
-// advances p->cur; other errors leave p->cur unchanged. A name ending in a pointer is written
-// too, if the pointer goes back to a label start already written (else DNS_ERR_BAD_POINTER).
-// Its label starts are recorded as targets for later names.
-// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still writes and advances p->cur.
+
+// length
 dns_error_t
-dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);
+dns_name_length (const dns_cursor_t *p, size_t *size);
 dns_error_t
-dns_name_to_string (const dns_name_t *name, char *buf, size_t len);
+dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *len);
+
+// check
+dns_error_t
+dns_name_check_uncompressed (const dns_name_t *name);
+
+// debug
 const char *
 dns_name_debug_r (const dns_name_t *name, char *buf, size_t len);
 #define dns_name_debug(name)                                                                       \

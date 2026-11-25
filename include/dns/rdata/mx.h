@@ -15,6 +15,7 @@ typedef struct
     dns_name_t exchange;
 } dns_rdata_mx_t;
 
+// dns_rdata_mx_t <--> uint8_t * (wire format)
 dns_error_t
 dns_rdata_mx_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_mx_t *out);
 dns_error_t

@@ -25,12 +25,11 @@ typedef enum : uint8_t
     DNS_RCODE_DSOTYPENI = 11, // DSO-TYPE not implemented (RFC 8490)
 } dns_rcode_t;
 
-// Parses the mnemonic (e.g. "NXDOMAIN", ignoring ASCII case) or the generic form "RCODE<n>"
-// (n decimal, 0..DNS_RCODE_MAX; the form dns_rcode_display uses for unknown values) into *out.
-// DNS_ERR_BAD_TEXT: neither form; *out is unchanged.
+// dns_rcode_t <-- char * (string)
 dns_error_t
 dns_rcode_from_string (const char *str, dns_rcode_t *out);
 
+// display
 const char *
 dns_rcode_display_r (dns_rcode_t value, char *buf, size_t len);
 

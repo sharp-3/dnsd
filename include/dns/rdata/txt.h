@@ -14,6 +14,7 @@ typedef struct
     size_t         len;
 } dns_rdata_txt_t;
 
+// dns_rdata_txt_t <--> uint8_t * (wire format)
 dns_error_t
 dns_rdata_txt_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out);
 dns_error_t

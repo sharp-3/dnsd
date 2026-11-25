@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// uint8_t * --> stdout (hex dump)
 void
 hexdump (const uint8_t *pkt, size_t nbytes_len);
 

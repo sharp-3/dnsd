@@ -14,9 +14,11 @@ typedef struct
         label_bitmap[(DNS_LABEL_POINTER_MAX + 1) / 8]; // offsets where a label or pointer starts
 } dns_cursor_t;
 
-// Starts at offset 0 of pkt.
+// init
 void
 dns_cursor_init (dns_cursor_t *p, uint8_t *pkt, size_t len);
+
+// label starts
 void
 dns_cursor_mark_label (dns_cursor_t *p, size_t nbytes_off);
 void

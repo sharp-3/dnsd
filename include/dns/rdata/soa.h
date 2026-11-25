@@ -20,6 +20,7 @@ typedef struct
     uint32_t   minimum;
 } dns_rdata_soa_t;
 
+// dns_rdata_soa_t <--> uint8_t * (wire format)
 dns_error_t
 dns_rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out);
 dns_error_t

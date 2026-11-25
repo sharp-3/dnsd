@@ -27,14 +27,12 @@ typedef struct
      .prefix = (prefix_),                                                                          \
      .max    = (max_)}
 
-// The mnemonic of value, or the generic form written to buf when it has none.
-const char *
-params_display_r (const params_table_t *t, uint32_t value, char *buf, size_t len);
-
-// Parses a mnemonic (ignoring ASCII case) or the generic form (prefix ignoring ASCII case, then
-// one or more decimal digits with a value of at most t->max) into *out. Returns false (leaving
-// *out unchanged) when str is neither.
+// params_table_t lookup (value <-- char * (string))
 bool
 params_from_string (const params_table_t *t, const char *str, uint32_t *out);
+
+// display
+const char *
+params_display_r (const params_table_t *t, uint32_t value, char *buf, size_t len);
 
 #endif

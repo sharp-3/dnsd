@@ -14,6 +14,7 @@ typedef struct
     dns_name_t ptrdname;
 } dns_rdata_ptr_t;
 
+// dns_rdata_ptr_t <--> uint8_t * (wire format)
 dns_error_t
 dns_rdata_ptr_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_ptr_t *out);
 dns_error_t

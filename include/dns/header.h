@@ -33,11 +33,13 @@ typedef struct
     uint16_t     arcount; // records in the additional section
 } dns_header_t;
 
-// Reads / writes the header at p->cur and advances it; errors leave p->cur and *out unchanged.
+// dns_header_t <--> uint8_t * (wire format)
 dns_error_t
 dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out);
 dns_error_t
 dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr);
+
+// display
 const char *
 dns_header_display_r (const dns_header_t *hdr, char *buf, size_t len);
 #define dns_header_display(hdr)                                                                    \

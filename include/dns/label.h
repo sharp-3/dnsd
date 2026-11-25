@@ -19,6 +19,7 @@ typedef enum : uint8_t
     DNS_LABEL_TYPE_POINTER  = 0b11, // compression pointer to an earlier label
 } dns_label_type_t;
 
+// label (wire format)
 dns_label_type_t
 dns_label_type (const uint8_t *label);
 size_t
@@ -29,10 +30,12 @@ void
 dns_label_pointer_write (uint8_t *ptr, size_t target);
 bool
 dns_label_equal (const uint8_t *a, const uint8_t *b);
-dns_error_t
-dns_label_to_string (const uint8_t *label, char *buf, size_t len, size_t *out);
+
+// label <--> char * (string)
 dns_error_t
 dns_label_from_string (const char **str, uint8_t *label, size_t len);
+dns_error_t
+dns_label_to_string (const uint8_t *label, char *buf, size_t len, size_t *out);
 
 // Walks the labels of a name in buf (len octets), starting at offset pos, without following
 // compression pointers:
@@ -59,9 +62,9 @@ typedef struct
                           // DNS_ERR_RESERVED_LABEL (label type 0b01 / 0b10)
 } dns_label_iter_t;
 
+// label iteration
 void
 dns_label_iter_init (dns_label_iter_t *it, const uint8_t *buf, size_t len, size_t pos);
-// Moves to the next label; false when the name has ended or on error (see it->err).
 bool
 dns_label_iter_next (dns_label_iter_t *it);
 

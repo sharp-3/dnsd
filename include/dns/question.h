@@ -21,16 +21,13 @@ typedef struct
     dns_class_t qclass; // class being queried
 } dns_question_t;
 
-// Reads the question at p->cur and advances it; other errors leave p->cur unchanged.
-// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still fills *out and advances p->cur;
-// other errors leave *out unchanged.
+// dns_question_t <--> uint8_t * (wire format)
 dns_error_t
 dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out);
-// Writes the question at p->cur and advances it; other errors leave p->cur unchanged.
-// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still writes and advances p->cur.
 dns_error_t
 dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q);
 
+// display
 const char *
 dns_question_display_r (const dns_question_t *q, char *buf, size_t len);
 

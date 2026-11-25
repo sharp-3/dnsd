@@ -12,6 +12,7 @@ typedef struct
     uint8_t addr[4];
 } dns_rdata_a_t; // A (class IN)
 
+// dns_rdata_a_t <--> uint8_t * (wire format)
 dns_error_t
 dns_rdata_a_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_a_t *out);
 dns_error_t

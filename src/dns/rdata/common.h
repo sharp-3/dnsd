@@ -12,33 +12,23 @@
 #include "dns/rdata.h"
 #include "packet/cursor.h"
 
-// Limits p->cur to the len octets of RDATA at it, so that reading past them overflows (or
-// truncates a name). Saves the cursor in *start for rdata_end.
+// reading RDATA
 dns_error_t
 rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start);
-// Ends what rdata_begin started, given the result err of reading the RDATA. Not reading it
-// exactly (too much or too little) is DNS_ERR_BAD_RDATA. On success p->cur stays after the
-// RDATA; on error it goes back to *start.
 dns_error_t
 rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err);
 
-// Ends a write of RDATA that started at *start, given the result err of writing its names
-// (DNS_OK if it has none). If it did not fit (or p->cur had already overflowed) the result is
-// DNS_ERR_NO_SPACE, otherwise err. On error p->cur goes back to *start and the label starts
-// recorded from there on are forgotten.
+// writing RDATA
 dns_error_t
 rdata_put_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err);
 
-// A single domain name filling the whole RDATA (NS, CNAME, PTR, DNAME).
+// RDATA made of a single name (NS, CNAME, PTR, DNAME)
 dns_error_t
 rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_t *out);
 dns_error_t
 rdata_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);
-void
-rdata_name_display (const dns_name_t *name, char *buf, size_t len);
 
-// Per-type length (octets in wire format) and presentation form. The display functions write
-// the text to buf (len > 0 octets), truncated if needed and always NUL-terminated.
+// per-type length
 size_t
 rdata_a_length (const dns_rdata_a_t *rd);
 size_t
@@ -62,6 +52,9 @@ rdata_txt_length (const dns_rdata_txt_t *rd);
 size_t
 rdata_unknown_length (const dns_rdata_unknown_t *rd);
 
+// display
+void
+rdata_name_display (const dns_name_t *name, char *buf, size_t len);
 void
 rdata_a_display (const dns_rdata_a_t *rd, char *buf, size_t len);
 void
@@ -82,7 +75,6 @@ void
 rdata_soa_display (const dns_rdata_soa_t *rd, char *buf, size_t len);
 void
 rdata_txt_display (const dns_rdata_txt_t *rd, char *buf, size_t len);
-// RFC 3597 generic form.
 void
 rdata_unknown_display (const dns_rdata_unknown_t *rd, char *buf, size_t len);
 

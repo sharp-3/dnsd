@@ -24,8 +24,7 @@ typedef enum
     DNS_ERR_TRAILING_DATA,   // octets left after the last section
 } dns_error_t;
 
-// Whether err means success: the output is filled and the position advanced. DNS_OK_*
-// codes add a warning to it. No default, so -Wswitch flags a new code left out here.
+// result
 static inline bool
 dns_is_ok (dns_error_t err)
 {
@@ -56,8 +55,6 @@ dns_is_ok (dns_error_t err)
     return false;
 }
 
-// Combines the results of two steps run in order: a hard error in either wins (a first),
-// otherwise the first warning (DNS_OK_*), otherwise DNS_OK.
 static inline dns_error_t
 dns_merge_soft (dns_error_t a, dns_error_t b)
 {
@@ -66,6 +63,7 @@ dns_merge_soft (dns_error_t a, dns_error_t b)
     return a != DNS_OK ? a : b;
 }
 
+// dns_error_t --> char * (string)
 const char *
 dns_error_str (dns_error_t err);
 

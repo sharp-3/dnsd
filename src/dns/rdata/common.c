@@ -15,8 +15,9 @@ rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start)
 dns_error_t
 rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
 {
-    bool whole = !cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) == p->cur.len;
-    if (err == DNS_ERR_TRUNCATED || (dns_is_ok (err) && !whole)) err = DNS_ERR_BAD_RDATA;
+    bool whole     = !cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) == p->cur.len;
+    bool truncated = err == DNS_ERR_TRUNCATED || err == DNS_ERR_NAME_TRUNCATED;
+    if (truncated || (dns_is_ok (err) && !whole)) err = DNS_ERR_BAD_RDATA;
 
     if (dns_is_ok (err)) p->cur.len = start->len;
     else p->cur = *start;

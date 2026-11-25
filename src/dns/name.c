@@ -11,7 +11,7 @@ static dns_error_t
 check_pointer (const dns_cursor_t *p, const uint8_t *label, size_t bound, size_t *target)
 {
     *target = dns_label_pointer_target (label);
-    if (*target >= bound || !dns_cursor_test_label (p, *target)) return DNS_ERR_BAD_POINTER;
+    if (*target >= bound || !dns_cursor_test_label (p, *target)) return DNS_ERR_NAME_BAD_POINTER;
     return DNS_OK;
 }
 
@@ -55,7 +55,7 @@ dns_error_t
 dns_name_length (const dns_cursor_t *p, size_t *size)
 {
     assert (cursor_is_aligned (&p->cur));
-    if (cursor_is_overflow (&p->cur)) return DNS_ERR_TRUNCATED;
+    if (cursor_is_overflow (&p->cur)) return DNS_ERR_NAME_TRUNCATED;
 
     size_t           start = cursor_bytes (&p->cur);
     dns_label_iter_t it;
@@ -86,7 +86,7 @@ name_parse (const char *str, uint8_t *buf, size_t *len)
         // One octet more than a label takes, so that a label too long is told apart.
         uint8_t     label[1 + DNS_LABEL_MAX + 1];
         dns_error_t err = dns_label_from_string (&s, label, sizeof label);
-        if (err == DNS_ERR_NO_SPACE) return DNS_ERR_LABEL_TOO_LONG;
+        if (err == DNS_ERR_NO_SPACE) return DNS_ERR_NAME_LABEL_TOO_LONG;
         if (err != DNS_OK) return err;
         if (label[0] == 0) return DNS_ERR_BAD_TEXT;
         if (buf) memcpy (buf + n, label, dns_label_size (label));
@@ -210,9 +210,9 @@ dns_name_check_uncompressed (const dns_name_ref_t *name)
     dns_label_iter_t it;
     dns_label_iter_init (&it, name->ptr, name->len, 0);
     while (dns_label_iter_next (&it))
-        if (dns_label_type (it.label) == DNS_LABEL_TYPE_POINTER) return DNS_ERR_COMPRESSED;
+        if (dns_label_type (it.label) == DNS_LABEL_TYPE_POINTER) return DNS_ERR_NAME_COMPRESSED;
     if (it.err != DNS_OK) return it.err;
-    if (it.pos != name->len) return DNS_ERR_TRUNCATED;
+    if (it.pos != name->len) return DNS_ERR_NAME_TRAILING_DATA;
     return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
@@ -267,7 +267,7 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
         if (err != DNS_OK) return err;
     }
     if (it.err != DNS_OK) return it.err;
-    if (it.pos != name->len) return DNS_ERR_TRUNCATED;
+    if (it.pos != name->len) return DNS_ERR_NAME_TRAILING_DATA;
 
     if (!cursor_fits_bytes (&p->cur, name->len)) return DNS_ERR_NO_SPACE;
     memcpy (cursor_ptr (&p->cur), name->ptr, name->len);

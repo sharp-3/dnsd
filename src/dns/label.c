@@ -142,7 +142,7 @@ dns_label_from_string (const char **str, uint8_t *label, size_t len)
         if (1 + n >= len) return DNS_ERR_NO_SPACE;
         label[1 + n++] = c;
     }
-    if (n > DNS_LABEL_MAX) return DNS_ERR_LABEL_TOO_LONG;
+    if (n > DNS_LABEL_MAX) return DNS_ERR_NAME_LABEL_TOO_LONG;
 
     label[0] = n;
     *str     = p;
@@ -161,7 +161,7 @@ dns_label_iter_next (dns_label_iter_t *it)
     if (it->end || it->err != DNS_OK) return false;
     if (it->pos >= it->len)
     {
-        it->err = DNS_ERR_TRUNCATED;
+        it->err = DNS_ERR_NAME_TRUNCATED;
         return false;
     }
 
@@ -175,13 +175,13 @@ dns_label_iter_next (dns_label_iter_t *it)
         it->end = true;
         break;
     default:
-        it->err = DNS_ERR_RESERVED_LABEL;
+        it->err = DNS_ERR_NAME_RESERVED_LABEL;
         return false;
     }
     if (it->len - it->pos < dns_label_size (label))
     {
         it->end = false;
-        it->err = DNS_ERR_TRUNCATED;
+        it->err = DNS_ERR_NAME_TRUNCATED;
         return false;
     }
 

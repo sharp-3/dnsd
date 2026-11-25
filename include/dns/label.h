@@ -58,8 +58,8 @@ typedef struct
     size_t         off;   // offset of label in buf
     bool           end;   // the name has ended (root label or pointer yielded)
     dns_error_t    err;   // DNS_OK, or why the walk stopped before the name ended:
-                          // DNS_ERR_TRUNCATED (buf ends within a label) or
-                          // DNS_ERR_RESERVED_LABEL (label type 0b01 / 0b10)
+                          // DNS_ERR_NAME_TRUNCATED (buf ends within a label) or
+                          // DNS_ERR_NAME_RESERVED_LABEL (label type 0b01 / 0b10)
 } dns_label_iter_t;
 
 // label iteration

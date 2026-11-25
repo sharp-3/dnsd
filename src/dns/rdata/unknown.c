@@ -6,15 +6,13 @@
 dns_error_t
 dns_rdata_unknown_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_unknown_t *out)
 {
-    cursor_t    start;
-    dns_error_t err = rdata_begin (p, len, &start);
-    if (err != DNS_OK) return err;
+    cursor_t start = p->cur;
 
     dns_rdata_unknown_t rd;
     rd.data = cursor_ptr (&p->cur);
     rd.len  = len;
     cursor_add_bytes (&p->cur, len);
-    err = rdata_end (p, &start, DNS_OK);
+    dns_error_t err = rdata_end (p, &start, DNS_OK, DNS_ERR_TRUNCATED);
     if (dns_is_ok (err)) *out = rd;
     return err;
 }
@@ -24,7 +22,7 @@ dns_rdata_unknown_to_bytes (dns_cursor_t *p, const dns_rdata_unknown_t *rd)
 {
     cursor_t start = p->cur;
     emit_bytes (&p->cur, rd->data, rd->len);
-    return rdata_put_end (p, &start, DNS_OK);
+    return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
 // No domain names: nothing to expand.

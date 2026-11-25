@@ -6,19 +6,18 @@
 dns_error_t
 dns_rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
 {
-    cursor_t    start;
-    dns_error_t err = rdata_begin (p, len, &start);
-    if (err != DNS_OK) return err;
+    cursor_t start = p->cur;
 
+    (void)len;
     dns_rdata_soa_t rd;
-    err = dns_name_from_bytes (p, &rd.mname);
+    dns_error_t     err = dns_name_from_bytes (p, &rd.mname);
     if (dns_is_ok (err)) err = dns_merge_soft (err, dns_name_from_bytes (p, &rd.rname));
     rd.serial  = take_bits (&p->cur, 32);
     rd.refresh = take_bits (&p->cur, 32);
     rd.retry   = take_bits (&p->cur, 32);
     rd.expire  = take_bits (&p->cur, 32);
     rd.minimum = take_bits (&p->cur, 32);
-    err        = rdata_end (p, &start, err);
+    err        = rdata_end (p, &start, err, DNS_ERR_TRUNCATED);
     if (dns_is_ok (err)) *out = rd;
     return err;
 }
@@ -34,7 +33,7 @@ dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
     emit_bits (&p->cur, 32, rd->retry);
     emit_bits (&p->cur, 32, rd->expire);
     emit_bits (&p->cur, 32, rd->minimum);
-    return rdata_put_end (p, &start, err);
+    return rdata_end (p, &start, err, DNS_ERR_NO_SPACE);
 }
 
 // MNAME into names[0], RNAME into names[1].

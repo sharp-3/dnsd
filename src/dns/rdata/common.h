@@ -12,15 +12,9 @@
 #include "dns/rdata.h"
 #include "packet/cursor.h"
 
-// reading RDATA
+// end of reading / writing RDATA
 dns_error_t
-rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start);
-dns_error_t
-rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err);
-
-// writing RDATA
-dns_error_t
-rdata_put_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err);
+rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err, dns_error_t overflow_err);
 
 // RDATA made of a single name (NS, CNAME, PTR, DNAME)
 dns_error_t

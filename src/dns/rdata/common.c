@@ -4,30 +4,9 @@
 #include "packet/cursor.h"
 
 dns_error_t
-rdata_begin (dns_cursor_t *p, size_t len, cursor_t *start)
+rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err, dns_error_t overflow_err)
 {
-    if (!cursor_fits_bytes (&p->cur, len)) return DNS_ERR_TRUNCATED;
-    *start     = p->cur;
-    p->cur.len = cursor_bytes (&p->cur) + len;
-    return DNS_OK;
-}
-
-dns_error_t
-rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
-{
-    bool whole     = !cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) == p->cur.len;
-    bool truncated = err == DNS_ERR_TRUNCATED || err == DNS_ERR_NAME_TRUNCATED;
-    if (truncated || (dns_is_ok (err) && !whole)) err = DNS_ERR_BAD_RDATA;
-
-    if (dns_is_ok (err)) p->cur.len = start->len;
-    else p->cur = *start;
-    return err;
-}
-
-dns_error_t
-rdata_put_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
-{
-    if (cursor_is_overflow (&p->cur)) err = DNS_ERR_NO_SPACE;
+    if (dns_is_ok (err) && cursor_is_overflow (&p->cur)) err = overflow_err;
     if (dns_is_ok (err)) return err;
     p->cur = *start;
     dns_cursor_clear_labels (p, cursor_bytes (start));
@@ -37,21 +16,15 @@ rdata_put_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
 dns_error_t
 rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_ref_t *out)
 {
-    cursor_t    start;
-    dns_error_t err = rdata_begin (p, len, &start);
-    if (err != DNS_OK) return err;
-
-    dns_name_ref_t name;
-    err = rdata_end (p, &start, dns_name_from_bytes (p, &name));
-    if (dns_is_ok (err)) *out = name;
-    return err;
+    (void)len; // checked against RDLENGTH by the record
+    return dns_name_from_bytes (p, out);
 }
 
 dns_error_t
 rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
 {
     cursor_t start = p->cur;
-    return rdata_put_end (p, &start, dns_name_to_bytes (p, name));
+    return rdata_end (p, &start, dns_name_to_bytes (p, name), DNS_ERR_NO_SPACE);
 }
 
 void

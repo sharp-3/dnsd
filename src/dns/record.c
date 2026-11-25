@@ -22,9 +22,21 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
     uint32_t    ttl      = take_bits (&p->cur, RR_TTL_SIZE * 8);
     uint16_t    rdlength = take_bits (&p->cur, RR_RDLENGTH_SIZE * 8);
 
-    // Fails with DNS_ERR_TRUNCATED if the fields above overflowed.
+    // The fields above and RDLENGTH octets of RDATA must be in the message.
+    if (cursor_is_overflow (&p->cur) || !cursor_fits_bytes (&p->cur, rdlength))
+    {
+        p->cur = start;
+        return DNS_ERR_TRUNCATED;
+    }
+
+    // The RDATA must take exactly RDLENGTH octets. With those octets known to be in the message,
+    // running past its end also means running past RDLENGTH.
+    size_t      rdata_start = cursor_bytes (&p->cur);
     dns_rdata_t rdata;
     err = dns_rdata_from_bytes (p, type, class, rdlength, &rdata);
+    if (err == DNS_ERR_TRUNCATED || err == DNS_ERR_NAME_TRUNCATED) err = DNS_ERR_BAD_RDATA;
+    if (dns_is_ok (err) && cursor_bytes (&p->cur) - rdata_start != rdlength)
+        err = DNS_ERR_BAD_RDATA;
     if (!dns_is_ok (err))
     {
         p->cur = start;

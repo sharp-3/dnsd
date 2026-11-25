@@ -4,19 +4,16 @@
 dns_error_t
 dns_rdata_txt_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out)
 {
-    cursor_t    start;
-    dns_error_t err = rdata_begin (p, len, &start);
-    if (err != DNS_OK) return err;
+    cursor_t start = p->cur;
 
-    dns_rdata_txt_t rd;
-    // One or more <character-string>s (length octet + octets); a length running past the
-    // RDATA overflows.
-    rd.data = cursor_ptr (&p->cur);
-    rd.len  = len;
-    if (len == 0) err = DNS_ERR_BAD_RDATA;
-    while (!cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) < p->cur.len)
+    // One or more <character-string>s (length octet + octets) filling the len octets; a string
+    // running past them shows as a length different from RDLENGTH to the record.
+    dns_rdata_txt_t rd  = {.data = cursor_ptr (&p->cur), .len = len};
+    size_t          end = cursor_bytes (&p->cur) + len;
+    dns_error_t     err = len == 0 ? DNS_ERR_BAD_RDATA : DNS_OK;
+    while (!cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) < end)
         cursor_add_bytes (&p->cur, take_bits (&p->cur, 8));
-    err = rdata_end (p, &start, err);
+    err = rdata_end (p, &start, err, DNS_ERR_TRUNCATED);
     if (dns_is_ok (err)) *out = rd;
     return err;
 }
@@ -26,7 +23,7 @@ dns_rdata_txt_to_bytes (dns_cursor_t *p, const dns_rdata_txt_t *rd)
 {
     cursor_t start = p->cur;
     emit_bytes (&p->cur, rd->data, rd->len);
-    return rdata_put_end (p, &start, DNS_OK);
+    return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
 // No domain names: nothing to expand.

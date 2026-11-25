@@ -13,7 +13,7 @@ dns_rdata_ptr_to_bytes (dns_cursor_t *p, const dns_rdata_ptr_t *rd)
 }
 
 size_t
-rdata_ptr_length (const dns_rdata_ptr_t *rd)
+dns_rdata_ptr_length (const dns_rdata_ptr_t *rd)
 {
     return rd->ptrdname.len;
 }

@@ -26,7 +26,7 @@ dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rd)
 }
 
 size_t
-rdata_mx_length (const dns_rdata_mx_t *rd)
+dns_rdata_mx_length (const dns_rdata_mx_t *rd)
 {
     return 2 + rd->exchange.len;
 }

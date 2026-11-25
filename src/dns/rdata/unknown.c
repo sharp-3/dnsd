@@ -28,7 +28,7 @@ dns_rdata_unknown_to_bytes (dns_cursor_t *p, const dns_rdata_unknown_t *rd)
 }
 
 size_t
-rdata_unknown_length (const dns_rdata_unknown_t *rd)
+dns_rdata_unknown_length (const dns_rdata_unknown_t *rd)
 {
     return rd->len;
 }

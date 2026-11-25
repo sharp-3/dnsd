@@ -30,7 +30,7 @@ dns_rdata_txt_to_bytes (dns_cursor_t *p, const dns_rdata_txt_t *rd)
 }
 
 size_t
-rdata_txt_length (const dns_rdata_txt_t *rd)
+dns_rdata_txt_length (const dns_rdata_txt_t *rd)
 {
     return rd->len;
 }

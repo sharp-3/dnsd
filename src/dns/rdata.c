@@ -59,32 +59,32 @@ dns_rdata_from_bytes (
 size_t
 dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rd)
 {
-    if (!dns_rdata_known (type, class)) return rdata_unknown_length (&rd->unknown);
+    if (!dns_rdata_known (type, class)) return dns_rdata_unknown_length (&rd->unknown);
 
     switch (type)
     {
     case DNS_TYPE_A:
-        return rdata_a_length (&rd->a);
+        return dns_rdata_a_length (&rd->a);
     case DNS_TYPE_AAAA:
-        return rdata_aaaa_length (&rd->aaaa);
+        return dns_rdata_aaaa_length (&rd->aaaa);
     case DNS_TYPE_NS:
-        return rdata_ns_length (&rd->ns);
+        return dns_rdata_ns_length (&rd->ns);
     case DNS_TYPE_CNAME:
-        return rdata_cname_length (&rd->cname);
+        return dns_rdata_cname_length (&rd->cname);
     case DNS_TYPE_PTR:
-        return rdata_ptr_length (&rd->ptr);
+        return dns_rdata_ptr_length (&rd->ptr);
     case DNS_TYPE_DNAME:
-        return rdata_dname_length (&rd->dname);
+        return dns_rdata_dname_length (&rd->dname);
     case DNS_TYPE_MX:
-        return rdata_mx_length (&rd->mx);
+        return dns_rdata_mx_length (&rd->mx);
     case DNS_TYPE_SRV:
-        return rdata_srv_length (&rd->srv);
+        return dns_rdata_srv_length (&rd->srv);
     case DNS_TYPE_SOA:
-        return rdata_soa_length (&rd->soa);
+        return dns_rdata_soa_length (&rd->soa);
     case DNS_TYPE_TXT:
-        return rdata_txt_length (&rd->txt);
+        return dns_rdata_txt_length (&rd->txt);
     default:
-        return rdata_unknown_length (&rd->unknown);
+        return dns_rdata_unknown_length (&rd->unknown);
     }
 }
 

@@ -26,7 +26,7 @@ dns_rdata_a_to_bytes (dns_cursor_t *p, const dns_rdata_a_t *rd)
 }
 
 size_t
-rdata_a_length (const dns_rdata_a_t *rd)
+dns_rdata_a_length (const dns_rdata_a_t *rd)
 {
     return sizeof rd->addr;
 }

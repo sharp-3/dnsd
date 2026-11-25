@@ -38,7 +38,7 @@ dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
 }
 
 size_t
-rdata_soa_length (const dns_rdata_soa_t *rd)
+dns_rdata_soa_length (const dns_rdata_soa_t *rd)
 {
     return rd->mname.len + rd->rname.len + 20;
 }

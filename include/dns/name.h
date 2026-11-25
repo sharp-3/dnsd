@@ -34,6 +34,14 @@ dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out
 // without changing p (no cursor move, no label marking).
 dns_error_t
 dns_name_length (const dns_cursor_t *p, size_t *size);
+// Checks that name is a whole uncompressed name: its labels fit in name->len octets, none has a
+// reserved type, none is a pointer, and it ends with the root label at its last octet.
+// DNS_OK_NAME_TOO_LONG: it is, but over DNS_NAME_MAX octets.
+// DNS_ERR_COMPRESSED: it contains a pointer.
+// DNS_ERR_RESERVED_LABEL: a label has type 0b01 / 0b10.
+// DNS_ERR_TRUNCATED: a label runs past name->len, or octets follow the root label.
+dns_error_t
+dns_name_check_uncompressed (const dns_name_t *name);
 // Checks name like dns_name_expand and stores its length once expanded in *len.
 // DNS_OK_NAME_TOO_LONG (over DNS_NAME_MAX octets once expanded) still sets *len.
 dns_error_t

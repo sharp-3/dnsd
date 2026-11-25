@@ -172,23 +172,24 @@ find_suffix (
     return false;
 }
 
-static dns_error_t
-check_labels (const dns_name_t *name)
+dns_error_t
+dns_name_check_uncompressed (const dns_name_t *name)
 {
     dns_label_iter_t it;
     dns_label_iter_init (&it, name->ptr, name->len, 0);
     while (dns_label_iter_next (&it))
         if (dns_label_type (it.label) == DNS_LABEL_TYPE_POINTER) return DNS_ERR_COMPRESSED;
     if (it.err != DNS_OK) return it.err;
-    return it.pos == name->len ? DNS_OK : DNS_ERR_TRUNCATED;
+    if (it.pos != name->len) return DNS_ERR_TRUNCATED;
+    return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 dns_error_t
 dns_name_compress (
     const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out)
 {
-    dns_error_t err = check_labels (name);
-    if (err != DNS_OK) return err;
+    dns_error_t err = dns_name_check_uncompressed (name);
+    if (!dns_is_ok (err)) return err;
 
     // i: octets kept as labels; the rest (if found) becomes a pointer to target. The leftmost
     // suffix found is the longest one.
@@ -255,8 +256,8 @@ dns_name_to_string (const dns_name_t *name, char *buf, size_t len)
 {
     if (len > 0) buf[0] = '\0';
 
-    dns_error_t err = check_labels (name);
-    if (err != DNS_OK) return err;
+    dns_error_t err = dns_name_check_uncompressed (name);
+    if (!dns_is_ok (err)) return err;
 
     if (len == 0) return DNS_ERR_NO_SPACE;
 

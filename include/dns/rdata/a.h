@@ -12,9 +12,9 @@ typedef struct
     uint8_t addr[4];
 } dns_rdata_a_t; // A (class IN)
 
-bool
+dns_error_t
 dns_rdata_a_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_a_t *out);
-bool
+dns_error_t
 dns_rdata_a_to_bytes (dns_cursor_t *p, const dns_rdata_a_t *rdata);
 
 #endif

@@ -6,8 +6,8 @@
 #include "dns/header.h"
 #include "packet/cursor.h"
 
-static dns_error_t
-header_from_bytes (dns_cursor_t *p, dns_header_t *out)
+dns_error_t
+dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out)
 {
     cursor_t     start = p->cur;
     dns_header_t h;
@@ -36,16 +36,8 @@ header_from_bytes (dns_cursor_t *p, dns_header_t *out)
     return DNS_OK;
 }
 
-bool
-dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out)
-{
-    if (p->err != DNS_OK) return false;
-    dns_error_t warn = p->warn;
-    return dns_cursor_finish (p, warn, header_from_bytes (p, out));
-}
-
-static dns_error_t
-header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
+dns_error_t
+dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
 {
     cursor_t start = p->cur;
     emit_bits (&p->cur, 16, hdr->id);
@@ -69,14 +61,6 @@ header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
         return DNS_ERR_NO_SPACE;
     }
     return DNS_OK;
-}
-
-bool
-dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
-{
-    if (p->err != DNS_OK) return false;
-    dns_error_t warn = p->warn;
-    return dns_cursor_finish (p, warn, header_to_bytes (p, hdr));
 }
 
 const char *

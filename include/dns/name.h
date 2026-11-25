@@ -18,9 +18,9 @@ typedef struct
     size_t         len; // octets at ptr (wire format, not limited to DNS_NAME_MAX)
 } dns_name_t;
 
-// Reads the name at p->cur and advances it (see dns/cursor.h for the result).
-// p->warn: DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets).
-bool
+// Reads the name at p->cur and advances it; other errors leave p->cur unchanged.
+// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still fills *out and advances p->cur.
+dns_error_t
 dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out);
 // Parses the presentation form str (absolute; "." is the root) and writes the name in wire format
 // to buf (len octets); *out then points into buf, so keep buf alive while *out is used.
@@ -47,9 +47,9 @@ dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *l
 dns_error_t
 dns_name_expand (
     const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
-// Writes the name at p->cur, compressing it, and advances it (see dns/cursor.h for the
-// result). p->warn: DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets).
-bool
+// Writes the name at p->cur and advances it; other errors leave p->cur unchanged.
+// DNS_OK_NAME_TOO_LONG (name over DNS_NAME_MAX octets) still writes and advances p->cur.
+dns_error_t
 dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);
 dns_error_t
 dns_name_to_string (const dns_name_t *name, char *buf, size_t len);

@@ -3,15 +3,16 @@
 #include "common.h"
 #include "packet/cursor.h"
 
-static dns_error_t
-rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
+dns_error_t
+dns_rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
 {
     cursor_t    start;
     dns_error_t err = rdata_begin (p, len, &start);
     if (err != DNS_OK) return err;
 
     dns_rdata_soa_t rd;
-    if (!dns_name_from_bytes (p, &rd.mname) || !dns_name_from_bytes (p, &rd.rname)) err = p->err;
+    err = dns_name_from_bytes (p, &rd.mname);
+    if (dns_is_ok (err)) err = dns_merge_soft (err, dns_name_from_bytes (p, &rd.rname));
     rd.serial  = take_bits (&p->cur, 32);
     rd.refresh = take_bits (&p->cur, 32);
     rd.retry   = take_bits (&p->cur, 32);
@@ -22,16 +23,8 @@ rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
     return err;
 }
 
-bool
-dns_rdata_soa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
-{
-    if (p->err != DNS_OK) return false;
-    dns_error_t warn = p->warn;
-    return dns_cursor_finish (p, warn, rdata_soa_from_bytes (p, len, out));
-}
-
-static dns_error_t
-rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
+dns_error_t
+dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
 {
     cursor_t start = p->cur;
     emit_bytes (&p->cur, rd->mname.ptr, rd->mname.len);
@@ -42,14 +35,6 @@ rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
     emit_bits (&p->cur, 32, rd->expire);
     emit_bits (&p->cur, 32, rd->minimum);
     return rdata_put_end (p, &start);
-}
-
-bool
-dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
-{
-    if (p->err != DNS_OK) return false;
-    dns_error_t warn = p->warn;
-    return dns_cursor_finish (p, warn, rdata_soa_to_bytes (p, rd));
 }
 
 size_t

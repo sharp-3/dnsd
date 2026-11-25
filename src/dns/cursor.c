@@ -6,29 +6,7 @@ void
 dns_cursor_init (dns_cursor_t *p, uint8_t *pkt, size_t len)
 {
     cursor_init (&p->cur, pkt, len);
-    p->err  = DNS_OK;
-    p->warn = DNS_OK;
     memset (p->label_bitmap, 0, sizeof p->label_bitmap);
-}
-
-bool
-dns_cursor_set_error (dns_cursor_t *p, dns_error_t err)
-{
-    if (err == DNS_OK) return true;
-    dns_error_t *slot = dns_is_ok (err) ? &p->warn : &p->err;
-    if (*slot == DNS_OK) *slot = err;
-    return dns_is_ok (err);
-}
-
-bool
-dns_cursor_finish (dns_cursor_t *p, dns_error_t warn, dns_error_t err)
-{
-    if (!dns_is_ok (err))
-    {
-        p->err  = DNS_OK;
-        p->warn = warn;
-    }
-    return dns_cursor_set_error (p, err);
 }
 
 void

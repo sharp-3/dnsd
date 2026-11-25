@@ -23,7 +23,7 @@ dns_rdata_known (dns_type_t type, dns_class_t class)
     }
 }
 
-bool
+dns_error_t
 dns_rdata_from_bytes (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out)
 {
@@ -88,7 +88,7 @@ dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rd)
     }
 }
 
-bool
+dns_error_t
 dns_rdata_to_bytes (dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rd)
 {
     if (!dns_rdata_known (type, class)) return dns_rdata_unknown_to_bytes (p, &rd->unknown);

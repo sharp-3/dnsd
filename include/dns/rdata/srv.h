@@ -17,9 +17,9 @@ typedef struct
     dns_name_t target;
 } dns_rdata_srv_t; // RFC 2782
 
-bool
+dns_error_t
 dns_rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out);
-bool
+dns_error_t
 dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rdata);
 
 #endif

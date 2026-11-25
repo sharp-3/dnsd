@@ -15,9 +15,9 @@ typedef struct
     size_t         len;
 } dns_rdata_unknown_t;
 
-bool
+dns_error_t
 dns_rdata_unknown_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_unknown_t *out);
-bool
+dns_error_t
 dns_rdata_unknown_to_bytes (dns_cursor_t *p, const dns_rdata_unknown_t *rdata);
 
 #endif

@@ -7,13 +7,15 @@
 #define RR_TTL_SIZE 4
 #define RR_RDLENGTH_SIZE 2
 
-static dns_error_t
-record_from_bytes (dns_cursor_t *p, dns_record_t *out)
+dns_error_t
+dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
 {
     cursor_t start = p->cur;
 
-    dns_name_t name;
-    if (!dns_name_from_bytes (p, &name)) return p->err;
+    dns_name_t  name;
+    dns_error_t err = dns_name_from_bytes (p, &name);
+    if (!dns_is_ok (err)) return err;
+    dns_error_t soft = err;
 
     dns_type_t  type     = take_bits (&p->cur, DNS_TYPE_SIZE * 8);
     dns_class_t class    = take_bits (&p->cur, DNS_CLASS_SIZE * 8);
@@ -22,30 +24,24 @@ record_from_bytes (dns_cursor_t *p, dns_record_t *out)
 
     // Fails with DNS_ERR_TRUNCATED if the fields above overflowed.
     dns_rdata_t rdata;
-    if (!dns_rdata_from_bytes (p, type, class, rdlength, &rdata))
+    err = dns_rdata_from_bytes (p, type, class, rdlength, &rdata);
+    if (!dns_is_ok (err))
     {
         p->cur = start;
-        return p->err;
+        return err;
     }
 
     *out = (dns_record_t){.name = name, .type = type, .class = class, .ttl = ttl, .rdata = rdata};
-    return DNS_OK;
+    return dns_merge_soft (soft, err);
 }
 
-bool
-dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
-{
-    if (p->err != DNS_OK) return false;
-    dns_error_t warn = p->warn;
-    return dns_cursor_finish (p, warn, record_from_bytes (p, out));
-}
-
-static dns_error_t
-record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
+dns_error_t
+dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
 {
     cursor_t    start = p->cur;
-    dns_error_t err;
-    if (!dns_name_to_bytes (p, &rr->name)) return p->err;
+    dns_error_t err   = dns_name_to_bytes (p, &rr->name);
+    if (!dns_is_ok (err)) return err;
+    dns_error_t soft = err;
 
     size_t rdlength = dns_rdata_length (rr->type, rr->class, &rr->rdata);
     if (rdlength > UINT16_MAX)
@@ -58,24 +54,12 @@ record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
     emit_bits (&p->cur, DNS_CLASS_SIZE * 8, rr->class);
     emit_bits (&p->cur, RR_TTL_SIZE * 8, rr->ttl);
     emit_bits (&p->cur, RR_RDLENGTH_SIZE * 8, rdlength);
-    if (!dns_rdata_to_bytes (p, rr->type, rr->class, &rr->rdata))
-    {
-        err = p->err;
-        goto fail;
-    }
-    return DNS_OK;
+    if ((err = dns_rdata_to_bytes (p, rr->type, rr->class, &rr->rdata)) != DNS_OK) goto fail;
+    return soft;
 
 fail:
     p->cur = start;
     return err;
-}
-
-bool
-dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
-{
-    if (p->err != DNS_OK) return false;
-    dns_error_t warn = p->warn;
-    return dns_cursor_finish (p, warn, record_to_bytes (p, rr));
 }
 
 const char *

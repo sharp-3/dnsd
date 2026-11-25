@@ -29,11 +29,15 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
         goto fail;
     }
 
-    // The RDATA must take exactly RDLENGTH octets. With those octets known to be in the message,
-    // running past its end also means running past RDLENGTH.
+    // The RDATA must take exactly RDLENGTH octets. It is read with the message cut after them,
+    // so that running past them (in a field or a name) fails as truncated instead of reading
+    // the next record's octets.
     size_t      rdata_start = cursor_bytes (&p->cur);
+    size_t      msg_len     = p->cur.len;
     dns_rdata_t rdata;
-    err = dns_rdata_from_bytes (p, type, class, rdlength, &rdata);
+    p->cur.len = rdata_start + rdlength;
+    err        = dns_rdata_from_bytes (p, type, class, rdlength, &rdata);
+    p->cur.len = msg_len;
     if (err == DNS_ERR_TRUNCATED || err == DNS_ERR_NAME_TRUNCATED) err = DNS_ERR_BAD_RDATA;
     if (dns_is_ok (err) && cursor_bytes (&p->cur) - rdata_start != rdlength)
         err = DNS_ERR_BAD_RDATA;

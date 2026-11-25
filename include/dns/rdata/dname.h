@@ -11,7 +11,7 @@
 // target points into the message it was read from.
 typedef struct
 {
-    dns_name_t target;
+    dns_name_ref_t target;
 } dns_rdata_dname_t; // RFC 6672
 
 // dns_rdata_dname_t <--> uint8_t * (wire format)

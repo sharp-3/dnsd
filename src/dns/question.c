@@ -9,8 +9,8 @@ dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out)
     cursor_t start = p->cur;
 
     // QNAME
-    dns_name_t  name;
-    dns_error_t err = dns_name_from_bytes (p, &name);
+    dns_name_ref_t name;
+    dns_error_t    err = dns_name_from_bytes (p, &name);
     if (!dns_is_ok (err)) return err;
 
     dns_type_t  qtype  = take_bits (&p->cur, DNS_TYPE_SIZE * 8);

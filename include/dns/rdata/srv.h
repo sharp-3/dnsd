@@ -11,10 +11,10 @@
 // target points into the message it was read from.
 typedef struct
 {
-    uint16_t   priority;
-    uint16_t   weight;
-    uint16_t   port;
-    dns_name_t target;
+    uint16_t       priority;
+    uint16_t       weight;
+    uint16_t       port;
+    dns_name_ref_t target;
 } dns_rdata_srv_t; // RFC 2782
 
 // dns_rdata_srv_t <--> uint8_t * (wire format)

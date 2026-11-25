@@ -16,11 +16,11 @@
 // name and rdata point into the message they were read from; keep it alive while rr is used.
 typedef struct
 {
-    dns_name_t  name;  // owner name
-    dns_type_t  type;  // RR type
-    dns_class_t class; // RR class
-    uint32_t    ttl;   // seconds the record may be cached
-    dns_rdata_t rdata; // RDATA; member chosen by type and class (see rdata.h)
+    dns_name_ref_t name;  // owner name
+    dns_type_t     type;  // RR type
+    dns_class_t    class; // RR class
+    uint32_t       ttl;   // seconds the record may be cached
+    dns_rdata_t    rdata; // RDATA; member chosen by type and class (see rdata.h)
 } dns_record_t;
 
 // dns_record_t <--> uint8_t * (wire format)

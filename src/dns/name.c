@@ -16,7 +16,7 @@ check_pointer (const dns_cursor_t *p, const uint8_t *label, size_t bound, size_t
 }
 
 dns_error_t
-dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out)
+dns_name_from_bytes (dns_cursor_t *p, dns_name_ref_t *out)
 {
     size_t      len;
     dns_error_t err = dns_name_length (p, &len);
@@ -59,7 +59,7 @@ dns_name_length (const dns_cursor_t *p, size_t *size)
 }
 
 dns_error_t
-dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out)
+dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_ref_t *out)
 {
     const char *s = strcmp (str, ".") == 0 ? str + 1 : str;
     size_t      n = 0;
@@ -119,14 +119,17 @@ expand (const dns_cursor_t *p,
 }
 
 dns_error_t
-dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *len)
+dns_name_expand_length (const dns_cursor_t *p, const dns_name_ref_t *name, size_t *len)
 {
     return expand (p, name->ptr, name->len, p->cur.len, NULL, 0, len);
 }
 
 dns_error_t
-dns_name_expand (
-    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out)
+dns_name_expand (const dns_cursor_t   *p,
+                 const dns_name_ref_t *name,
+                 uint8_t              *buf,
+                 size_t                len,
+                 dns_name_ref_t       *out)
 {
     size_t      n;
     dns_error_t err = expand (p, name->ptr, name->len, p->cur.len, buf, len, &n);
@@ -173,7 +176,7 @@ find_suffix (
 }
 
 dns_error_t
-dns_name_check_uncompressed (const dns_name_t *name)
+dns_name_check_uncompressed (const dns_name_ref_t *name)
 {
     dns_label_iter_t it;
     dns_label_iter_init (&it, name->ptr, name->len, 0);
@@ -185,8 +188,11 @@ dns_name_check_uncompressed (const dns_name_t *name)
 }
 
 dns_error_t
-dns_name_compress (
-    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out)
+dns_name_compress (const dns_cursor_t   *p,
+                   const dns_name_ref_t *name,
+                   uint8_t              *buf,
+                   size_t                len,
+                   dns_name_ref_t       *out)
 {
     dns_error_t err = dns_name_check_uncompressed (name);
     if (!dns_is_ok (err)) return err;
@@ -219,7 +225,7 @@ dns_name_compress (
 }
 
 dns_error_t
-dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
 {
     assert (cursor_is_aligned (&p->cur));
 
@@ -252,7 +258,7 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
 }
 
 dns_error_t
-dns_name_to_string (const dns_name_t *name, char *buf, size_t len)
+dns_name_to_string (const dns_name_ref_t *name, char *buf, size_t len)
 {
     if (len > 0) buf[0] = '\0';
 
@@ -281,7 +287,7 @@ no_space:
 }
 
 const char *
-dns_name_debug_r (const dns_name_t *name, char *buf, size_t len)
+dns_name_debug_r (const dns_name_ref_t *name, char *buf, size_t len)
 {
     if (len == 0) return buf;
     buf[0] = '\0';

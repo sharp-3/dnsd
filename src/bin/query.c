@@ -245,7 +245,7 @@ print_reply (uint8_t *msg, size_t len)
         dns_question_t *q = &question;
         if (expand)
         {
-            dns_name_t full;
+            dns_name_ref_t full;
             err = dns_name_expand (&parser, &q->qname, expanded, sizeof expanded, &full);
             if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
             if (dns_is_ok (err)) q->qname = full;
@@ -292,9 +292,9 @@ main (int argc, char **argv)
     if (!server) server = default_server ();
 
     // A name too long for this buffer would not fit in the query either.
-    uint8_t     name_buf[UDP_MAX];
-    dns_name_t  name;
-    dns_error_t err = dns_name_from_string (qname, name_buf, sizeof name_buf, &name);
+    uint8_t        name_buf[UDP_MAX];
+    dns_name_ref_t name;
+    dns_error_t    err = dns_name_from_string (qname, name_buf, sizeof name_buf, &name);
     if (err != DNS_OK) fprintf (stderr, "query: bad name '%s': %s\n", qname, dns_error_str (err));
     if (!dns_is_ok (err)) return 1;
 

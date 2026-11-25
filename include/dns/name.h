@@ -16,41 +16,47 @@ typedef struct
 {
     const uint8_t *ptr; // wire format; may end with a compression pointer
     size_t         len; // octets at ptr (wire format, not limited to DNS_NAME_MAX)
-} dns_name_t;
+} dns_name_ref_t;
 
-// dns_name_t <--> uint8_t * (wire format)
+// dns_name_ref_t <--> uint8_t * (wire format)
 dns_error_t
-dns_name_from_bytes (dns_cursor_t *p, dns_name_t *out);
+dns_name_from_bytes (dns_cursor_t *p, dns_name_ref_t *out);
 dns_error_t
-dns_name_to_bytes (dns_cursor_t *p, const dns_name_t *name);
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name);
 
-// dns_name_t <--> char * (string)
+// dns_name_ref_t <--> char * (string)
 dns_error_t
-dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_t *out);
+dns_name_from_string (const char *str, uint8_t *buf, size_t len, dns_name_ref_t *out);
 dns_error_t
-dns_name_to_string (const dns_name_t *name, char *buf, size_t len);
+dns_name_to_string (const dns_name_ref_t *name, char *buf, size_t len);
 
 // compressed <--> expanded
 dns_error_t
-dns_name_expand (
-    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
+dns_name_expand (const dns_cursor_t   *p,
+                 const dns_name_ref_t *name,
+                 uint8_t              *buf,
+                 size_t                len,
+                 dns_name_ref_t       *out);
 dns_error_t
-dns_name_compress (
-    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
+dns_name_compress (const dns_cursor_t   *p,
+                   const dns_name_ref_t *name,
+                   uint8_t              *buf,
+                   size_t                len,
+                   dns_name_ref_t       *out);
 
 // length
 dns_error_t
 dns_name_length (const dns_cursor_t *p, size_t *size);
 dns_error_t
-dns_name_expand_length (const dns_cursor_t *p, const dns_name_t *name, size_t *len);
+dns_name_expand_length (const dns_cursor_t *p, const dns_name_ref_t *name, size_t *len);
 
 // check
 dns_error_t
-dns_name_check_uncompressed (const dns_name_t *name);
+dns_name_check_uncompressed (const dns_name_ref_t *name);
 
 // debug
 const char *
-dns_name_debug_r (const dns_name_t *name, char *buf, size_t len);
+dns_name_debug_r (const dns_name_ref_t *name, char *buf, size_t len);
 #define dns_name_debug(name)                                                                       \
     dns_name_debug_r ((name), (char[DNS_NAME_DEBUG_SIZE]){}, DNS_NAME_DEBUG_SIZE)
 

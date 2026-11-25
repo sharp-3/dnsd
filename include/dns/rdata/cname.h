@@ -11,7 +11,7 @@
 // cname points into the message it was read from.
 typedef struct
 {
-    dns_name_t cname;
+    dns_name_ref_t cname;
 } dns_rdata_cname_t;
 
 // dns_rdata_cname_t <--> uint8_t * (wire format)

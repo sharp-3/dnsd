@@ -11,13 +11,13 @@
 // mname and rname point into the message they were read from.
 typedef struct
 {
-    dns_name_t mname;
-    dns_name_t rname;
-    uint32_t   serial;
-    uint32_t   refresh;
-    uint32_t   retry;
-    uint32_t   expire;
-    uint32_t   minimum;
+    dns_name_ref_t mname;
+    dns_name_ref_t rname;
+    uint32_t       serial;
+    uint32_t       refresh;
+    uint32_t       retry;
+    uint32_t       expire;
+    uint32_t       minimum;
 } dns_rdata_soa_t;
 
 // dns_rdata_soa_t <--> uint8_t * (wire format)

@@ -11,7 +11,7 @@
 // ptrdname points into the message it was read from.
 typedef struct
 {
-    dns_name_t ptrdname;
+    dns_name_ref_t ptrdname;
 } dns_rdata_ptr_t;
 
 // dns_rdata_ptr_t <--> uint8_t * (wire format)

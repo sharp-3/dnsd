@@ -11,8 +11,8 @@
 // exchange points into the message it was read from.
 typedef struct
 {
-    uint16_t   preference;
-    dns_name_t exchange;
+    uint16_t       preference;
+    dns_name_ref_t exchange;
 } dns_rdata_mx_t;
 
 // dns_rdata_mx_t <--> uint8_t * (wire format)

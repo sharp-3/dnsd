@@ -34,27 +34,27 @@ rdata_put_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err)
 }
 
 dns_error_t
-rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_t *out)
+rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_ref_t *out)
 {
     cursor_t    start;
     dns_error_t err = rdata_begin (p, len, &start);
     if (err != DNS_OK) return err;
 
-    dns_name_t name;
+    dns_name_ref_t name;
     err = rdata_end (p, &start, dns_name_from_bytes (p, &name));
     if (dns_is_ok (err)) *out = name;
     return err;
 }
 
 dns_error_t
-rdata_name_to_bytes (dns_cursor_t *p, const dns_name_t *name)
+rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
 {
     cursor_t start = p->cur;
     return rdata_put_end (p, &start, dns_name_to_bytes (p, name));
 }
 
 void
-rdata_name_display (const dns_name_t *name, char *buf, size_t len)
+rdata_name_display (const dns_name_ref_t *name, char *buf, size_t len)
 {
     snprintf (buf, len, "%s", dns_name_debug (name));
 }

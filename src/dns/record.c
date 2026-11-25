@@ -12,8 +12,8 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
 {
     cursor_t start = p->cur;
 
-    dns_name_t  name;
-    dns_error_t err = dns_name_from_bytes (p, &name);
+    dns_name_ref_t name;
+    dns_error_t    err = dns_name_from_bytes (p, &name);
     if (!dns_is_ok (err)) return err;
     dns_error_t soft = err;
 
@@ -64,8 +64,11 @@ fail:
     return err;
 }
 
-typedef dns_error_t (*name_convert_t) (
-    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
+typedef dns_error_t (*name_convert_t) (const dns_cursor_t   *p,
+                                       const dns_name_ref_t *name,
+                                       uint8_t              *buf,
+                                       size_t                len,
+                                       dns_name_ref_t       *out);
 typedef dns_error_t (*rdata_convert_t) (const dns_cursor_t *p,
                                         dns_type_t          type,
                                         dns_class_t         class,

@@ -16,9 +16,9 @@
 
 typedef struct
 {
-    dns_name_t  qname;  // name being queried
-    dns_type_t  qtype;  // type being queried
-    dns_class_t qclass; // class being queried
+    dns_name_ref_t qname;  // name being queried
+    dns_type_t     qtype;  // type being queried
+    dns_class_t    qclass; // class being queried
 } dns_question_t;
 
 // dns_question_t <--> uint8_t * (wire format)

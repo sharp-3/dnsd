@@ -207,7 +207,15 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
         if (err != DNS_OK)
             printf (";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (err));
         if (!dns_is_ok (err)) return false;
-        if (expand) dns_record_expand (p, &record, expanded, &record);
+        if (expand)
+        {
+            // On failure the record is shown as read (compressed). A warning the read already
+            // gave is not repeated.
+            dns_error_t xerr = dns_record_expand (p, &record, expanded, &record);
+            if (xerr != DNS_OK && xerr != err)
+                printf (
+                    ";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (xerr));
+        }
         puts (dns_record_display_r (&record, record_line, sizeof record_line));
     }
     return true;

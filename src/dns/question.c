@@ -43,6 +43,26 @@ dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q)
     return err;
 }
 
+dns_error_t
+dns_question_expand (
+    const dns_cursor_t *p, const dns_question_t *q, uint8_t *buf, size_t len, dns_question_t *out)
+{
+    dns_question_t r   = *q;
+    dns_error_t    err = dns_name_expand (p, &q->qname, buf, len, &r.qname);
+    if (dns_is_ok (err)) *out = r;
+    return err;
+}
+
+dns_error_t
+dns_question_compress (
+    const dns_cursor_t *p, const dns_question_t *q, uint8_t *buf, size_t len, dns_question_t *out)
+{
+    dns_question_t r   = *q;
+    dns_error_t    err = dns_name_compress (p, &q->qname, buf, len, &r.qname);
+    if (dns_is_ok (err)) *out = r;
+    return err;
+}
+
 const char *
 dns_question_display_r (const dns_question_t *q, char *buf, size_t len)
 {

@@ -29,6 +29,14 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out);
 dns_error_t
 dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr);
 
+// compressed <--> expanded
+dns_error_t
+dns_record_expand (
+    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out);
+dns_error_t
+dns_record_compress (
+    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out);
+
 // display
 const char *
 dns_record_display_r (const dns_record_t *rr, char *buf, size_t len);

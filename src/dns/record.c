@@ -64,6 +64,53 @@ fail:
     return err;
 }
 
+typedef dns_error_t (*name_convert_t) (
+    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
+typedef dns_error_t (*rdata_convert_t) (const dns_cursor_t *p,
+                                        dns_type_t          type,
+                                        dns_class_t         class,
+                                        const dns_rdata_t  *rdata,
+                                        uint8_t            *buf,
+                                        size_t              len,
+                                        dns_rdata_t        *out);
+
+// Converts the owner name, then the names in the RDATA, writing the results one after another
+// in buf.
+static dns_error_t
+record_convert (const dns_cursor_t *p,
+                const dns_record_t *rr,
+                uint8_t            *buf,
+                size_t              len,
+                name_convert_t      name_convert,
+                rdata_convert_t     rdata_convert,
+                dns_record_t       *out)
+{
+    dns_record_t r   = *rr;
+    dns_error_t  err = name_convert (p, &rr->name, buf, len, &r.name);
+    if (!dns_is_ok (err)) return err;
+
+    dns_error_t rerr = rdata_convert (
+        p, rr->type, rr->class, &rr->rdata, buf + r.name.len, len - r.name.len, &r.rdata);
+    if (!dns_is_ok (rerr)) return rerr;
+
+    *out = r;
+    return dns_merge_soft (err, rerr);
+}
+
+dns_error_t
+dns_record_expand (
+    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out)
+{
+    return record_convert (p, rr, buf, len, dns_name_expand, dns_rdata_expand, out);
+}
+
+dns_error_t
+dns_record_compress (
+    const dns_cursor_t *p, const dns_record_t *rr, uint8_t *buf, size_t len, dns_record_t *out)
+{
+    return record_convert (p, rr, buf, len, dns_name_compress, dns_rdata_compress, out);
+}
+
 const char *
 dns_record_display_r (const dns_record_t *rr, char *buf, size_t len)
 {

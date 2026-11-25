@@ -23,6 +23,121 @@ dns_rdata_known (dns_type_t type, dns_class_t class)
     }
 }
 
+// Stores pointers to the domain names in rd, in wire order, in out and returns how many there
+// are (at most 2, for SOA).
+static size_t
+rdata_names (dns_type_t type, dns_class_t class, dns_rdata_t *rd, dns_name_t *out[2])
+{
+    if (!dns_rdata_known (type, class)) return 0;
+
+    switch (type)
+    {
+    case DNS_TYPE_NS:
+        out[0] = &rd->ns.nsdname;
+        return 1;
+    case DNS_TYPE_CNAME:
+        out[0] = &rd->cname.cname;
+        return 1;
+    case DNS_TYPE_PTR:
+        out[0] = &rd->ptr.ptrdname;
+        return 1;
+    case DNS_TYPE_DNAME:
+        out[0] = &rd->dname.target;
+        return 1;
+    case DNS_TYPE_MX:
+        out[0] = &rd->mx.exchange;
+        return 1;
+    case DNS_TYPE_SRV:
+        out[0] = &rd->srv.target;
+        return 1;
+    case DNS_TYPE_SOA:
+        out[0] = &rd->soa.mname;
+        out[1] = &rd->soa.rname;
+        return 2;
+    default:
+        return 0;
+    }
+}
+
+// Whether the names in RDATA of type may be compressed: only for the types of RFC 1035
+// (RFC 3597 4); SRV (RFC 2782) and DNAME (RFC 6672) names must not be.
+static bool
+rdata_compressible (dns_type_t type)
+{
+    switch (type)
+    {
+    case DNS_TYPE_NS:
+    case DNS_TYPE_CNAME:
+    case DNS_TYPE_PTR:
+    case DNS_TYPE_MX:
+    case DNS_TYPE_SOA:
+        return true;
+    default:
+        return false;
+    }
+}
+
+typedef dns_error_t (*name_convert_t) (
+    const dns_cursor_t *p, const dns_name_t *name, uint8_t *buf, size_t len, dns_name_t *out);
+
+// Converts each name in rdata with convert, writing the results one after another in buf.
+static dns_error_t
+rdata_convert_names (const dns_cursor_t *p,
+                     dns_type_t          type,
+                     dns_class_t         class,
+                     const dns_rdata_t  *rdata,
+                     uint8_t            *buf,
+                     size_t              len,
+                     name_convert_t      convert,
+                     dns_rdata_t        *out)
+{
+    dns_rdata_t rd = *rdata;
+    dns_name_t *names[2];
+    size_t      count = rdata_names (type, class, &rd, names);
+    size_t      used  = 0;
+    dns_error_t soft  = DNS_OK;
+    for (size_t i = 0; i < count; i++)
+    {
+        dns_name_t  converted; // not names[i] itself: convert reads its input to the end
+        dns_error_t err = convert (p, names[i], buf + used, len - used, &converted);
+        if (!dns_is_ok (err)) return err;
+        soft      = dns_merge_soft (soft, err);
+        *names[i] = converted;
+        used += converted.len;
+    }
+    *out = rd;
+    return soft;
+}
+
+dns_error_t
+dns_rdata_expand (const dns_cursor_t *p,
+                  dns_type_t          type,
+                  dns_class_t         class,
+                  const dns_rdata_t  *rdata,
+                  uint8_t            *buf,
+                  size_t              len,
+                  dns_rdata_t        *out)
+{
+    return rdata_convert_names (p, type, class, rdata, buf, len, dns_name_expand, out);
+}
+
+dns_error_t
+dns_rdata_compress (const dns_cursor_t *p,
+                    dns_type_t          type,
+                    dns_class_t         class,
+                    const dns_rdata_t  *rdata,
+                    uint8_t            *buf,
+                    size_t              len,
+                    dns_rdata_t        *out)
+{
+    if (!rdata_compressible (type))
+    {
+        *out = *rdata;
+        return DNS_OK;
+    }
+    return rdata_convert_names (p, type, class, rdata, buf, len, dns_name_compress, out);
+}
+
 dns_error_t
 dns_rdata_from_bytes (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out)

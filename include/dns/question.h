@@ -27,6 +27,14 @@ dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out);
 dns_error_t
 dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q);
 
+// compressed <--> expanded
+dns_error_t
+dns_question_expand (
+    const dns_cursor_t *p, const dns_question_t *q, uint8_t *buf, size_t len, dns_question_t *out);
+dns_error_t
+dns_question_compress (
+    const dns_cursor_t *p, const dns_question_t *q, uint8_t *buf, size_t len, dns_question_t *out);
+
 // display
 const char *
 dns_question_display_r (const dns_question_t *q, char *buf, size_t len);

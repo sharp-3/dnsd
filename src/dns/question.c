@@ -18,6 +18,7 @@ dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out)
     if (cursor_is_overflow (&p->cur))
     {
         p->cur = start;
+        dns_cursor_clear_labels (p, cursor_bytes (&start));
         return DNS_ERR_TRUNCATED;
     }
 

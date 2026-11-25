@@ -25,8 +25,8 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
     // The fields above and RDLENGTH octets of RDATA must be in the message.
     if (cursor_is_overflow (&p->cur) || !cursor_fits_bytes (&p->cur, rdlength))
     {
-        p->cur = start;
-        return DNS_ERR_TRUNCATED;
+        err = DNS_ERR_TRUNCATED;
+        goto fail;
     }
 
     // The RDATA must take exactly RDLENGTH octets. With those octets known to be in the message,
@@ -37,14 +37,17 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
     if (err == DNS_ERR_TRUNCATED || err == DNS_ERR_NAME_TRUNCATED) err = DNS_ERR_BAD_RDATA;
     if (dns_is_ok (err) && cursor_bytes (&p->cur) - rdata_start != rdlength)
         err = DNS_ERR_BAD_RDATA;
-    if (!dns_is_ok (err))
-    {
-        p->cur = start;
-        return err;
-    }
+    if (!dns_is_ok (err)) goto fail;
 
     *out = (dns_record_t){.name = name, .type = type, .class = class, .ttl = ttl, .rdata = rdata};
     return dns_merge_soft (soft, err);
+
+fail:
+    // The names read may have marked label starts past the record (an RDATA name can run past
+    // RDLENGTH): unmark them with the position.
+    p->cur = start;
+    dns_cursor_clear_labels (p, cursor_bytes (&start));
+    return err;
 }
 
 dns_error_t

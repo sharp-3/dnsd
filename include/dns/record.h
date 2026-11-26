@@ -29,18 +29,15 @@ dns_error_t
 dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out);
 dns_error_t
 dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr);
+dns_error_t
+dns_record_to_bytes_with_compress (dns_cursor_t *p, const dns_record_t *rr);
 
-// compressed <--> expanded
+// compressed --> expanded
 dns_error_t
 dns_record_expand (const dns_cursor_t *p,
                    const dns_record_t *rr,
                    dns_name_t          names[DNS_RECORD_NAMES_MAX],
                    dns_record_t       *out);
-dns_error_t
-dns_record_compress (const dns_cursor_t *p,
-                     const dns_record_t *rr,
-                     dns_name_t          names[DNS_RECORD_NAMES_MAX],
-                     dns_record_t       *out);
 
 // display
 const char *

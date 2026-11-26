@@ -313,7 +313,7 @@ main (int argc, char **argv)
     static dns_cursor_t writer;
     dns_cursor_init (&writer, query, sizeof query);
     err = dns_header_to_bytes (&writer, &hdr);
-    if (err == DNS_OK) err = dns_question_to_bytes (&writer, &q);
+    if (err == DNS_OK) err = dns_question_to_bytes_with_compress (&writer, &q);
     size_t qlen = cursor_bytes (&writer.cur);
     if (!dns_is_ok (err))
     {

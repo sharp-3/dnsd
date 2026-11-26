@@ -25,22 +25,18 @@ dns_rdata_unknown_to_bytes (dns_cursor_t *p, const dns_rdata_unknown_t *rd)
     return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
+// No domain names: written as by dns_rdata_unknown_to_bytes.
+dns_error_t
+dns_rdata_unknown_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_unknown_t *rd)
+{
+    return dns_rdata_unknown_to_bytes (p, rd);
+}
+
 // No domain names: nothing to expand.
 dns_error_t
 dns_rdata_unknown_expand (const dns_cursor_t        *p,
                           const dns_rdata_unknown_t *rdata,
                           dns_rdata_unknown_t       *out)
-{
-    (void)p;
-    *out = *rdata;
-    return DNS_OK;
-}
-
-// No domain names: nothing to compress.
-dns_error_t
-dns_rdata_unknown_compress (const dns_cursor_t        *p,
-                            const dns_rdata_unknown_t *rdata,
-                            dns_rdata_unknown_t       *out)
 {
     (void)p;
     *out = *rdata;

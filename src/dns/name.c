@@ -219,35 +219,17 @@ dns_name_check_uncompressed (const dns_name_ref_t *name)
     return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
-dns_error_t
-dns_name_compress (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *out)
+// Records where the labels of the name just written at the position (n octets) start (not the
+// pointer) as targets for later names, and moves past it.
+static void
+mark_written (dns_cursor_t *p, size_t n)
 {
-    dns_error_t err = dns_name_check_uncompressed (name);
-    if (!dns_is_ok (err)) return err;
-
-    // i: octets kept as labels; the rest (if found) becomes a pointer to target. The leftmost
-    // suffix found is the longest one.
-    size_t           start  = cursor_bytes (&p->cur);
-    size_t           i      = name->len;
-    size_t           target = 0;
-    bool             found  = false;
+    size_t           start = cursor_bytes (&p->cur);
     dns_label_iter_t it;
-    dns_label_iter_init (&it, name->ptr, name->len, 0);
-    while (dns_label_iter_next (&it) && it.label[0] != 0)
-    {
-        if ((found = find_suffix (p, start, it.label, name->len - it.off, &target)))
-        {
-            i = it.off;
-            break;
-        }
-    }
-
-    size_t n = found ? i + DNS_LABEL_POINTER_SIZE : i;
-    if (n > out->cap) return DNS_ERR_NO_SPACE;
-    memmove (out->ptr, name->ptr, i); // name may point into out
-    if (found) dns_label_pointer_write (out->ptr + i, target);
-    out->len = n;
-    return err;
+    dns_label_iter_init (&it, cursor_ptr (&p->cur), n, 0);
+    while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
+        dns_cursor_mark_label (p, start + it.off);
+    cursor_add_bytes (&p->cur, n);
 }
 
 dns_error_t
@@ -274,13 +256,43 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
 
     if (!cursor_fits_bytes (&p->cur, name->len)) return DNS_ERR_NO_SPACE;
     memcpy (cursor_ptr (&p->cur), name->ptr, name->len);
-
-    // Record where the labels start (not the pointer) as targets for later names.
-    dns_label_iter_init (&it, name->ptr, name->len, 0);
-    while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
-        dns_cursor_mark_label (p, start + it.off);
-    cursor_add_bytes (&p->cur, name->len);
+    mark_written (p, name->len);
     return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+}
+
+dns_error_t
+dns_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name)
+{
+    assert (cursor_is_aligned (&p->cur));
+
+    dns_error_t err = dns_name_check_uncompressed (name);
+    if (!dns_is_ok (err)) return err;
+
+    size_t start = cursor_bytes (&p->cur);
+    dns_cursor_clear_labels (p, start);
+
+    // i: octets kept as labels; the rest (if found earlier in the message) becomes a pointer to
+    // target. The leftmost suffix found is the longest one.
+    size_t           i      = name->len;
+    size_t           target = 0;
+    bool             found  = false;
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, name->ptr, name->len, 0);
+    while (dns_label_iter_next (&it) && it.label[0] != 0)
+    {
+        if ((found = find_suffix (p, start, it.label, name->len - it.off, &target)))
+        {
+            i = it.off;
+            break;
+        }
+    }
+
+    size_t n = found ? i + DNS_LABEL_POINTER_SIZE : i;
+    if (!cursor_fits_bytes (&p->cur, n)) return DNS_ERR_NO_SPACE;
+    memcpy (cursor_ptr (&p->cur), name->ptr, i);
+    if (found) dns_label_pointer_write (cursor_ptr (&p->cur) + i, target);
+    mark_written (p, n);
+    return err;
 }
 
 dns_error_t

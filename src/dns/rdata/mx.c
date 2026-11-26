@@ -26,26 +26,21 @@ dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rd)
 }
 
 dns_error_t
+dns_rdata_mx_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_mx_t *rd)
+{
+    cursor_t start = p->cur;
+    emit_bits (&p->cur, 16, rd->preference);
+    return rdata_end (
+        p, &start, dns_name_to_bytes_with_compress (p, &rd->exchange), DNS_ERR_NO_SPACE);
+}
+
+dns_error_t
 dns_rdata_mx_expand (const dns_cursor_t   *p,
                      const dns_rdata_mx_t *rdata,
                      dns_name_t           *name,
                      dns_rdata_mx_t       *out)
 {
     dns_error_t err = dns_name_expand (p, &rdata->exchange, name);
-    if (!dns_is_ok (err)) return err;
-
-    *out          = *rdata;
-    out->exchange = dns_name_to_ref (name);
-    return err;
-}
-
-dns_error_t
-dns_rdata_mx_compress (const dns_cursor_t   *p,
-                       const dns_rdata_mx_t *rdata,
-                       dns_name_t           *name,
-                       dns_rdata_mx_t       *out)
-{
-    dns_error_t err = dns_name_compress (p, &rdata->exchange, name);
     if (!dns_is_ok (err)) return err;
 
     *out          = *rdata;

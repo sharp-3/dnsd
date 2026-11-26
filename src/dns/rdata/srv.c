@@ -32,6 +32,13 @@ dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
     return rdata_end (p, &start, dns_name_to_bytes (p, &rd->target), DNS_ERR_NO_SPACE);
 }
 
+// The target must not be compressed (RFC 2782): written as by dns_rdata_srv_to_bytes.
+dns_error_t
+dns_rdata_srv_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_srv_t *rd)
+{
+    return dns_rdata_srv_to_bytes (p, rd);
+}
+
 dns_error_t
 dns_rdata_srv_expand (const dns_cursor_t    *p,
                       const dns_rdata_srv_t *rdata,
@@ -44,19 +51,6 @@ dns_rdata_srv_expand (const dns_cursor_t    *p,
     *out        = *rdata;
     out->target = dns_name_to_ref (name);
     return err;
-}
-
-// Names in SRV RDATA must not be compressed (RFC 2782): kept as given.
-dns_error_t
-dns_rdata_srv_compress (const dns_cursor_t    *p,
-                        const dns_rdata_srv_t *rdata,
-                        dns_name_t            *name,
-                        dns_rdata_srv_t       *out)
-{
-    (void)p;
-    (void)name;
-    *out = *rdata;
-    return DNS_OK;
 }
 
 size_t

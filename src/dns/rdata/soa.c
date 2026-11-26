@@ -36,6 +36,22 @@ dns_rdata_soa_to_bytes (dns_cursor_t *p, const dns_rdata_soa_t *rd)
     return rdata_end (p, &start, err, DNS_ERR_NO_SPACE);
 }
 
+// RNAME may be compressed against MNAME too.
+dns_error_t
+dns_rdata_soa_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_soa_t *rd)
+{
+    cursor_t    start = p->cur;
+    dns_error_t err   = dns_name_to_bytes_with_compress (p, &rd->mname);
+    if (dns_is_ok (err))
+        err = dns_merge_soft (err, dns_name_to_bytes_with_compress (p, &rd->rname));
+    emit_bits (&p->cur, 32, rd->serial);
+    emit_bits (&p->cur, 32, rd->refresh);
+    emit_bits (&p->cur, 32, rd->retry);
+    emit_bits (&p->cur, 32, rd->expire);
+    emit_bits (&p->cur, 32, rd->minimum);
+    return rdata_end (p, &start, err, DNS_ERR_NO_SPACE);
+}
+
 // MNAME into names[0], RNAME into names[1].
 dns_error_t
 dns_rdata_soa_expand (const dns_cursor_t    *p,
@@ -46,24 +62,6 @@ dns_rdata_soa_expand (const dns_cursor_t    *p,
     dns_error_t err = dns_name_expand (p, &rdata->mname, &names[0]);
     if (!dns_is_ok (err)) return err;
     dns_error_t rerr = dns_name_expand (p, &rdata->rname, &names[1]);
-    if (!dns_is_ok (rerr)) return rerr;
-
-    *out       = *rdata;
-    out->mname = dns_name_to_ref (&names[0]);
-    out->rname = dns_name_to_ref (&names[1]);
-    return dns_merge_soft (err, rerr);
-}
-
-// MNAME into names[0], RNAME into names[1].
-dns_error_t
-dns_rdata_soa_compress (const dns_cursor_t    *p,
-                        const dns_rdata_soa_t *rdata,
-                        dns_name_t             names[2],
-                        dns_rdata_soa_t       *out)
-{
-    dns_error_t err = dns_name_compress (p, &rdata->mname, &names[0]);
-    if (!dns_is_ok (err)) return err;
-    dns_error_t rerr = dns_name_compress (p, &rdata->rname, &names[1]);
     if (!dns_is_ok (rerr)) return rerr;
 
     *out       = *rdata;

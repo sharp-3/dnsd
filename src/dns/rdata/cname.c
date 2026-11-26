@@ -13,26 +13,18 @@ dns_rdata_cname_to_bytes (dns_cursor_t *p, const dns_rdata_cname_t *rd)
 }
 
 dns_error_t
+dns_rdata_cname_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_cname_t *rd)
+{
+    return rdata_name_to_bytes_with_compress (p, &rd->cname);
+}
+
+dns_error_t
 dns_rdata_cname_expand (const dns_cursor_t      *p,
                         const dns_rdata_cname_t *rdata,
                         dns_name_t              *name,
                         dns_rdata_cname_t       *out)
 {
     dns_error_t err = dns_name_expand (p, &rdata->cname, name);
-    if (!dns_is_ok (err)) return err;
-
-    *out       = *rdata;
-    out->cname = dns_name_to_ref (name);
-    return err;
-}
-
-dns_error_t
-dns_rdata_cname_compress (const dns_cursor_t      *p,
-                          const dns_rdata_cname_t *rdata,
-                          dns_name_t              *name,
-                          dns_rdata_cname_t       *out)
-{
-    dns_error_t err = dns_name_compress (p, &rdata->cname, name);
     if (!dns_is_ok (err)) return err;
 
     *out       = *rdata;

@@ -19,13 +19,13 @@ dns_error_t
 dns_rdata_txt_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out);
 dns_error_t
 dns_rdata_txt_to_bytes (dns_cursor_t *p, const dns_rdata_txt_t *rdata);
+dns_error_t
+dns_rdata_txt_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_txt_t *rdata);
 size_t
 dns_rdata_txt_length (const dns_rdata_txt_t *rdata);
 
-// compressed <--> expanded
+// compressed --> expanded
 dns_error_t
 dns_rdata_txt_expand (const dns_cursor_t *p, const dns_rdata_txt_t *rdata, dns_rdata_txt_t *out);
-dns_error_t
-dns_rdata_txt_compress (const dns_cursor_t *p, const dns_rdata_txt_t *rdata, dns_rdata_txt_t *out);
 
 #endif

@@ -23,7 +23,7 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
     uint16_t    rdlength = take_bits (&p->cur, RR_RDLENGTH_SIZE * 8);
 
     // The fields above and RDLENGTH octets of RDATA must be in the message.
-    if (cursor_is_overflow (&p->cur) || !cursor_fits_bytes (&p->cur, rdlength))
+    if (cursor_is_overflow (&p->cur) || !cursor_fits (&p->cur, rdlength, 0))
     {
         err = DNS_ERR_TRUNCATED;
         goto fail;

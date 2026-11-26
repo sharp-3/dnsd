@@ -11,7 +11,7 @@ dns_rdata_unknown_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_unknown_t *
     dns_rdata_unknown_t rd;
     rd.data = cursor_ptr (&p->cur);
     rd.len  = len;
-    cursor_add_bytes (&p->cur, len);
+    cursor_add (&p->cur, len, 0);
     dns_error_t err = rdata_end (p, &start, DNS_OK, DNS_ERR_TRUNCATED);
     if (dns_is_ok (err)) *out = rd;
     return err;

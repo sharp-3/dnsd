@@ -13,7 +13,7 @@ dns_rdata_txt_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out)
     size_t          end = cursor_bytes (&p->cur) + len;
     dns_error_t     err = len == 0 ? DNS_ERR_BAD_RDATA : DNS_OK;
     while (!cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) < end)
-        cursor_add_bytes (&p->cur, take_bits (&p->cur, 8));
+        cursor_add (&p->cur, take_bits (&p->cur, 8), 0);
     if (dns_is_ok (err) && !cursor_is_overflow (&p->cur) && cursor_bytes (&p->cur) != end)
         err = DNS_ERR_BAD_RDATA;
     err = rdata_end (p, &start, err, DNS_ERR_TRUNCATED);

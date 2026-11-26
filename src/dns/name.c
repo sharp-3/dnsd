@@ -47,7 +47,7 @@ dns_name_from_bytes (dns_cursor_t *p, dns_name_ref_t *out)
     dns_label_iter_init (&it, ptr, len, 0);
     while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
         dns_cursor_mark_label (p, start + it.off);
-    cursor_add_bytes (&p->cur, len);
+    cursor_add (&p->cur, len, 0);
 
     out->ptr = ptr;
     out->len = len;
@@ -229,7 +229,7 @@ mark_written (dns_cursor_t *p, size_t n)
     dns_label_iter_init (&it, cursor_ptr (&p->cur), n, 0);
     while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
         dns_cursor_mark_label (p, start + it.off);
-    cursor_add_bytes (&p->cur, n);
+    cursor_add (&p->cur, n, 0);
 }
 
 dns_error_t
@@ -254,7 +254,7 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
     if (it.err != DNS_OK) return it.err;
     if (it.pos != name->len) return DNS_ERR_NAME_TRAILING_DATA;
 
-    if (!cursor_fits_bytes (&p->cur, name->len)) return DNS_ERR_NO_SPACE;
+    if (!cursor_fits (&p->cur, name->len, 0)) return DNS_ERR_NO_SPACE;
     memcpy (cursor_ptr (&p->cur), name->ptr, name->len);
     mark_written (p, name->len);
     return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
@@ -288,7 +288,7 @@ dns_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name)
     }
 
     size_t n = found ? i + DNS_LABEL_POINTER_SIZE : i;
-    if (!cursor_fits_bytes (&p->cur, n)) return DNS_ERR_NO_SPACE;
+    if (!cursor_fits (&p->cur, n, 0)) return DNS_ERR_NO_SPACE;
     memcpy (cursor_ptr (&p->cur), name->ptr, i);
     if (found) dns_label_pointer_write (cursor_ptr (&p->cur) + i, target);
     mark_written (p, n);

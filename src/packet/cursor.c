@@ -7,7 +7,7 @@ uint64_t
 read_bits (const cursor_t *c, size_t nbits)
 {
     assert (nbits <= 64);
-    if (!cursor_fits_bits (c, nbits)) return 0;
+    if (!cursor_fits (c, 0, nbits)) return 0;
 
     const uint8_t *p   = cursor_ptr (c);
     size_t         end = cursor_bits (c) + nbits;
@@ -25,7 +25,7 @@ void
 read_bytes (const cursor_t *c, uint8_t *out, size_t nbytes)
 {
     assert (cursor_is_aligned (c));
-    if (!cursor_fits_bytes (c, nbytes)) memset (out, 0, nbytes);
+    if (!cursor_fits (c, nbytes, 0)) memset (out, 0, nbytes);
     else memcpy (out, cursor_ptr (c), nbytes);
 }
 
@@ -33,7 +33,7 @@ void
 write_bits (const cursor_t *c, size_t nbits, uint64_t value)
 {
     assert (nbits <= 64);
-    if (nbits == 0 || !cursor_fits_bits (c, nbits)) return;
+    if (nbits == 0 || !cursor_fits (c, 0, nbits)) return;
 
     uint8_t *p    = cursor_ptr (c);
     size_t   head = cursor_bits (c);
@@ -57,7 +57,7 @@ void
 write_bytes (const cursor_t *c, const uint8_t *data, size_t nbytes)
 {
     assert (cursor_is_aligned (c));
-    if (!cursor_fits_bytes (c, nbytes)) return;
+    if (!cursor_fits (c, nbytes, 0)) return;
     memcpy (cursor_ptr (c), data, nbytes);
 }
 
@@ -65,7 +65,7 @@ uint64_t
 take_bits (cursor_t *c, size_t nbits)
 {
     uint64_t value = read_bits (c, nbits);
-    cursor_add_bits (c, nbits);
+    cursor_add (c, 0, nbits);
     return value;
 }
 
@@ -73,19 +73,19 @@ void
 take_bytes (cursor_t *c, uint8_t *out, size_t nbytes)
 {
     read_bytes (c, out, nbytes);
-    cursor_add_bytes (c, nbytes);
+    cursor_add (c, nbytes, 0);
 }
 
 void
 emit_bits (cursor_t *c, size_t nbits, uint64_t value)
 {
     write_bits (c, nbits, value);
-    cursor_add_bits (c, nbits);
+    cursor_add (c, 0, nbits);
 }
 
 void
 emit_bytes (cursor_t *c, const uint8_t *data, size_t nbytes)
 {
     write_bytes (c, data, nbytes);
-    cursor_add_bytes (c, nbytes);
+    cursor_add (c, nbytes, 0);
 }

@@ -59,47 +59,30 @@ cursor_ptr (const cursor_t *c)
     return c->buf + c->nbytes;
 }
 
+// Whether nbytes octets plus nbits bits from the position are within buf.
 static inline bool
-cursor_fits_bits (const cursor_t *c, size_t nbits)
+cursor_fits (const cursor_t *c, size_t nbytes, size_t nbits)
 {
     if (c->overflow || c->nbytes > c->len) return false;
-    // Octets touched from the position's octet on: ceil ((c->nbits + nbits) / 8),
+    // Octets touched from the position's octet on: nbytes + ceil ((c->nbits + nbits) / 8),
     // computed so that it cannot overflow.
-    size_t need = nbits / 8 + (c->nbits + nbits % 8 + 7) / 8;
-    return need <= c->len - c->nbytes;
-}
-
-static inline bool
-cursor_fits_bytes (const cursor_t *c, size_t nbytes)
-{
-    if (c->overflow || c->nbytes > c->len) return false;
     size_t avail = c->len - c->nbytes;
-    return c->nbits == 0 ? nbytes <= avail : avail > 0 && nbytes < avail;
+    size_t extra = nbits / 8 + (c->nbits + nbits % 8 + 7) / 8;
+    return nbytes <= avail && extra <= avail - nbytes;
 }
 
-// move
+// move by nbytes octets plus nbits bits
 static inline void
-cursor_add_bits (cursor_t *c, size_t nbits)
+cursor_add (cursor_t *c, size_t nbytes, size_t nbits)
 {
-    if (!cursor_fits_bits (c, nbits))
+    if (!cursor_fits (c, nbytes, nbits))
     {
         c->overflow = true;
         return;
     }
     size_t total = c->nbits + nbits % 8;
-    c->nbytes += nbits / 8 + (total >> 3);
+    c->nbytes += nbytes + nbits / 8 + (total >> 3);
     c->nbits = total & 0b111;
-}
-
-static inline void
-cursor_add_bytes (cursor_t *c, size_t nbytes)
-{
-    if (!cursor_fits_bytes (c, nbytes))
-    {
-        c->overflow = true;
-        return;
-    }
-    c->nbytes += nbytes;
 }
 
 // read / write (without moving)

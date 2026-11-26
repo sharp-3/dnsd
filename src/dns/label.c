@@ -38,7 +38,7 @@ size_t
 dns_label_pointer_target (const uint8_t *label)
 {
     cursor_t c = label_cursor (label, DNS_LABEL_POINTER_SIZE);
-    cursor_add_bits (&c, 2);
+    cursor_add (&c, 0, 2);
     return read_bits (&c, 14);
 }
 

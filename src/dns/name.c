@@ -22,7 +22,7 @@ dns_name_to_ref (const dns_name_t *name)
 }
 
 dns_error_t
-dns_name_to_owned (const dns_name_ref_t *ref, dns_name_t *out)
+dns_name_from_ref (const dns_name_ref_t *ref, dns_name_t *out)
 {
     if (out->cap < ref->len) return DNS_ERR_NO_SPACE;
     memmove (out->ptr, ref->ptr, ref->len); // ref may point into out

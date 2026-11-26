@@ -31,7 +31,7 @@ typedef struct
 dns_name_ref_t
 dns_name_to_ref (const dns_name_t *name);
 dns_error_t
-dns_name_to_owned (const dns_name_ref_t *ref, dns_name_t *out);
+dns_name_from_ref (const dns_name_ref_t *ref, dns_name_t *out);
 
 // dns_name_ref_t <--> uint8_t * (wire format)
 dns_error_t

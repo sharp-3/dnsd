@@ -17,8 +17,7 @@ dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out)
     dns_class_t qclass = take_bits (&p->cur, DNS_CLASS_SIZE * 8);
     if (cursor_is_overflow (&p->cur))
     {
-        p->cur = start;
-        dns_cursor_clear_labels (p, cursor_bytes (&start));
+        dns_cursor_rewind (p, &start);
         return DNS_ERR_TRUNCATED;
     }
 
@@ -39,8 +38,7 @@ question_write (dns_cursor_t *p, const dns_question_t *q, name_write_t name_writ
     emit_bits (&p->cur, DNS_CLASS_SIZE * 8, q->qclass);
     if (cursor_is_overflow (&p->cur))
     {
-        p->cur = start;
-        dns_cursor_clear_labels (p, cursor_bytes (&start));
+        dns_cursor_rewind (p, &start);
         return DNS_ERR_NO_SPACE;
     }
     return err;

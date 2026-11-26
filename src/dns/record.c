@@ -48,9 +48,8 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out)
 
 fail:
     // The names read may have marked label starts past the record (an RDATA name can run past
-    // RDLENGTH): unmark them with the position.
-    p->cur = start;
-    dns_cursor_clear_labels (p, cursor_bytes (&start));
+    // RDLENGTH): the rewind unmarks them.
+    dns_cursor_rewind (p, &start);
     return err;
 }
 
@@ -78,8 +77,7 @@ dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
     return dns_merge_soft (soft, err);
 
 fail:
-    p->cur = start;
-    dns_cursor_clear_labels (p, cursor_bytes (&start));
+    dns_cursor_rewind (p, &start);
     return err;
 }
 
@@ -117,8 +115,7 @@ dns_record_to_bytes_with_compress (dns_cursor_t *p, const dns_record_t *rr)
     return dns_merge_soft (soft, err);
 
 fail:
-    p->cur = start;
-    dns_cursor_clear_labels (p, cursor_bytes (&start));
+    dns_cursor_rewind (p, &start);
     return err;
 }
 

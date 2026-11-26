@@ -28,7 +28,7 @@ dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out)
     h.arcount = take_bits (&p->cur, 16);
     if (cursor_is_overflow (&p->cur))
     {
-        p->cur = start;
+        dns_cursor_rewind (p, &start);
         return DNS_ERR_TRUNCATED;
     }
 
@@ -57,7 +57,7 @@ dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
     emit_bits (&p->cur, 16, hdr->arcount);
     if (cursor_is_overflow (&p->cur))
     {
-        p->cur = start;
+        dns_cursor_rewind (p, &start);
         return DNS_ERR_NO_SPACE;
     }
     return DNS_OK;

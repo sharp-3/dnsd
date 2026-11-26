@@ -87,7 +87,7 @@ dns_message_body_from_bytes (dns_cursor_t *p, dns_message_t *msg)
         free (an);
         free (ns);
         free (ar);
-        p->cur = start;
+        dns_cursor_rewind (p, &start);
         return err;
     }
 

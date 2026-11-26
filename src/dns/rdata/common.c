@@ -8,8 +8,7 @@ rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err, dns_error_t 
 {
     if (dns_is_ok (err) && cursor_is_overflow (&p->cur)) err = overflow_err;
     if (dns_is_ok (err)) return err;
-    p->cur = *start;
-    dns_cursor_clear_labels (p, cursor_bytes (start));
+    dns_cursor_rewind (p, start);
     return err;
 }
 

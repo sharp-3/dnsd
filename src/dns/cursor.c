@@ -27,6 +27,13 @@ dns_cursor_clear_labels (dns_cursor_t *p, size_t from)
     memset (p->label_bitmap + byte + 1, 0, sizeof p->label_bitmap - byte - 1);
 }
 
+void
+dns_cursor_rewind (dns_cursor_t *p, const cursor_t *pos)
+{
+    p->cur = *pos;
+    dns_cursor_clear_labels (p, cursor_bytes (pos));
+}
+
 bool
 dns_cursor_test_label (const dns_cursor_t *p, size_t nbytes_off)
 {

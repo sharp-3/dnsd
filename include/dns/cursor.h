@@ -22,6 +22,9 @@ void
 dns_cursor_mark_label (dns_cursor_t *p, size_t nbytes_off);
 void
 dns_cursor_clear_labels (dns_cursor_t *p, size_t from);
+// Moves back to pos (an earlier position) and forgets the label starts from there on.
+void
+dns_cursor_rewind (dns_cursor_t *p, const cursor_t *pos);
 bool
 dns_cursor_test_label (const dns_cursor_t *p, size_t nbytes_off);
 

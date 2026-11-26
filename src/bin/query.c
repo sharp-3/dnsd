@@ -26,19 +26,19 @@
 #endif
 
 static char record_line[1 << 19];
-static bool expand;
-// Room for the names of one record once expanded, each up to a whole message (names over
-// DNS_NAME_MAX octets are shown expanded too).
-static uint8_t    expanded_buf[DNS_RECORD_NAMES_MAX][MSG_MAX];
-static dns_name_t expanded[DNS_RECORD_NAMES_MAX];
+static bool uncompressed;
+// Room for the names of one record once uncompressed, each up to a whole message (names over
+// DNS_NAME_MAX octets are shown uncompressed too).
+static uint8_t    uncompressed_buf[DNS_RECORD_NAMES_MAX][MSG_MAX];
+static dns_name_t uncompressed_names[DNS_RECORD_NAMES_MAX];
 
 static void
 usage (void)
 {
-    fprintf (
-        stderr,
-        "usage: query [@server] [-p port] [+tcp] [+expand] [+[no]FLAG ...] name [type] [class]\n"
-        "       FLAG: qr aa tc rd ra z ad cd (default: rd on, others off)\n");
+    fprintf (stderr,
+             "usage: query [@server] [-p port] [+tcp] [+uncompressed] [+[no]FLAG ...] name [type] "
+             "[class]\n"
+             "       FLAG: qr aa tc rd ra z ad cd (default: rd on, others off)\n");
     exit (1);
 }
 
@@ -207,11 +207,11 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
         if (err != DNS_OK)
             printf (";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (err));
         if (!dns_is_ok (err)) return false;
-        if (expand)
+        if (uncompressed)
         {
             // On failure the record is shown as read (compressed). A warning the read already
             // gave is not repeated.
-            dns_error_t xerr = dns_record_to_uncompressed (p, &record, expanded, &record);
+            dns_error_t xerr = dns_record_to_uncompressed (p, &record, uncompressed_names, &record);
             if (xerr != DNS_OK && xerr != err)
                 printf (
                     ";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (xerr));
@@ -251,11 +251,11 @@ print_reply (uint8_t *msg, size_t len)
             break;
         }
         dns_question_t *q = &question;
-        if (expand)
+        if (uncompressed)
         {
-            err = dns_name_to_uncompressed (&parser, &q->qname, &expanded[0]);
+            err = dns_name_to_uncompressed (&parser, &q->qname, &uncompressed_names[0]);
             if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
-            if (dns_is_ok (err)) q->qname = dns_name_to_ref (&expanded[0]);
+            if (dns_is_ok (err)) q->qname = dns_name_to_ref (&uncompressed_names[0]);
         }
         printf (";%s\n", dns_question_display (q));
     }
@@ -273,7 +273,8 @@ int
 main (int argc, char **argv)
 {
     for (size_t i = 0; i < DNS_RECORD_NAMES_MAX; i++)
-        expanded[i] = (dns_name_t){.ptr = expanded_buf[i], .cap = sizeof expanded_buf[i]};
+        uncompressed_names[i] =
+            (dns_name_t){.ptr = uncompressed_buf[i], .cap = sizeof uncompressed_buf[i]};
 
     const char  *server    = NULL;
     const char  *port      = "53";
@@ -290,7 +291,7 @@ main (int argc, char **argv)
         if (a[0] == '@' && a[1]) server = a + 1;
         else if (strcmp (a, "-p") == 0 && i + 1 < argc) port = argv[++i];
         else if (strcmp (a, "+tcp") == 0) tcp = true;
-        else if (strcmp (a, "+expand") == 0) expand = true;
+        else if (strcmp (a, "+uncompressed") == 0) uncompressed = true;
         else if (parse_flag (a, &hdr)) continue;
         else if (a[0] == '+') usage ();
         else if (!qname) qname = a;

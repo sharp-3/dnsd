@@ -59,11 +59,8 @@ dns_rdata_srv_length (const dns_rdata_srv_t *rd)
 void
 rdata_srv_display (const dns_rdata_srv_t *rd, char *buf, size_t len)
 {
-    snprintf (buf,
-              len,
-              "%u %u %u %s",
-              (unsigned)rd->priority,
-              (unsigned)rd->weight,
-              (unsigned)rd->port,
-              dns_name_debug (&rd->target));
+    int n = snprintf (
+        buf, len, "%u %u %u ", (unsigned)rd->priority, (unsigned)rd->weight, (unsigned)rd->port);
+    if (n < 0 || len <= (size_t)n) return;
+    dns_name_debug_r (&rd->target, buf + n, len - n);
 }

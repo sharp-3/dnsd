@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "dns/question.h"
 #include "packet/cursor.h"
@@ -73,11 +74,11 @@ dns_question_to_uncompressed (const dns_cursor_t   *p,
 const char *
 dns_question_display_r (const dns_question_t *q, char *buf, size_t len)
 {
-    snprintf (buf,
-              len,
-              "%s\t%s\t%s",
-              dns_name_debug (&q->qname),
-              dns_class_display (q->qclass),
-              dns_type_display (q->qtype));
+    if (len == 0) return buf;
+
+    // The name goes straight into buf, so that a name of any length shows when buf has room.
+    size_t n = strlen (dns_name_debug_r (&q->qname, buf, len));
+    snprintf (
+        buf + n, len - n, "\t%s\t%s", dns_class_display (q->qclass), dns_type_display (q->qtype));
     return buf;
 }

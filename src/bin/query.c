@@ -25,7 +25,9 @@
 #define NI_MAXHOST 1025
 #endif
 
-static char record_line[1 << 19];
+// Room for a record or question line: each name, and the rest of the RDATA, up to a whole
+// message with every octet escaped (\DDD).
+static char record_line[(DNS_RECORD_NAMES_MAX + 1) * MSG_MAX * DNS_LABEL_ESCAPE_SIZE];
 static bool uncompressed;
 // Room for the names of one record once uncompressed, each up to a whole message (names over
 // DNS_NAME_MAX octets are shown uncompressed too).
@@ -257,7 +259,7 @@ print_reply (uint8_t *msg, size_t len)
             if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
             if (dns_is_ok (err)) q->qname = dns_name_to_ref (&uncompressed_names[0]);
         }
-        printf (";%s\n", dns_question_display (q));
+        printf (";%s\n", dns_question_display_r (q, record_line, sizeof record_line));
     }
 
     ok = ok && print_records ("ANSWER", hdr->ancount, &parser) &&

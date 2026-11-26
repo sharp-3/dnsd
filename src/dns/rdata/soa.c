@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 #include "packet/cursor.h"
@@ -79,11 +80,16 @@ dns_rdata_soa_length (const dns_rdata_soa_t *rd)
 void
 rdata_soa_display (const dns_rdata_soa_t *rd, char *buf, size_t len)
 {
-    snprintf (buf,
-              len,
-              "%s %s %lu %lu %lu %lu %lu",
-              dns_name_debug (&rd->mname),
-              dns_name_debug (&rd->rname),
+    if (len == 0) return;
+
+    // The names go straight into buf, so that a name of any length shows when buf has room.
+    size_t n = strlen (dns_name_debug_r (&rd->mname, buf, len));
+    if (len - n < 2) return;
+    buf[n++] = ' ';
+    n += strlen (dns_name_debug_r (&rd->rname, buf + n, len - n));
+    snprintf (buf + n,
+              len - n,
+              " %lu %lu %lu %lu %lu",
               (unsigned long)rd->serial,
               (unsigned long)rd->refresh,
               (unsigned long)rd->retry,

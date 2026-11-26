@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "dns/rdata.h"
 #include "dns/record.h"
@@ -144,15 +145,17 @@ dns_record_display_r (const dns_record_t *rr, char *buf, size_t len)
 {
     if (len == 0) return buf;
 
-    int n = snprintf (buf,
-                      len,
-                      "%s\t%lu\t%s\t%s\t",
-                      dns_name_debug (&rr->name),
+    // The name goes straight into buf, so that a name of any length shows when buf has room.
+    size_t n = strlen (dns_name_debug_r (&rr->name, buf, len));
+    int    m = snprintf (buf + n,
+                      len - n,
+                      "\t%lu\t%s\t%s\t",
                       (unsigned long)rr->ttl,
                       dns_class_display (rr->class),
                       dns_type_display (rr->type));
-    if (n < 0) buf[0] = '\0';
-    if (n < 0 || len <= (size_t)n) return buf;
+    if (m < 0) buf[n] = '\0';
+    if (m < 0 || len - n <= (size_t)m) return buf;
+    n += m;
 
     dns_rdata_display_r (rr->type, rr->class, &rr->rdata, buf + n, len - n);
     return buf;

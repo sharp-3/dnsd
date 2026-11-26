@@ -36,5 +36,5 @@ rdata_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name)
 void
 rdata_name_display (const dns_name_ref_t *name, char *buf, size_t len)
 {
-    snprintf (buf, len, "%s", dns_name_debug (name));
+    dns_name_debug_r (name, buf, len);
 }

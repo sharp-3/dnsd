@@ -238,27 +238,15 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
 {
     assert (cursor_is_aligned (&p->cur));
 
-    size_t start = cursor_bytes (&p->cur);
-    dns_cursor_clear_labels (p, start);
+    // A pointer in name goes into the message it was read from, not necessarily this one.
+    dns_error_t err = dns_name_check_uncompressed (name);
+    if (!dns_is_ok (err)) return err;
 
-    // The labels must be whole, and a pointer (which ends the name) must go back to a label
-    // start already written.
-    dns_label_iter_t it;
-    dns_label_iter_init (&it, name->ptr, name->len, 0);
-    while (dns_label_iter_next (&it))
-    {
-        if (dns_label_type (it.label) != DNS_LABEL_TYPE_POINTER) continue;
-        size_t      target;
-        dns_error_t err = check_pointer (p, it.label, start, &target);
-        if (err != DNS_OK) return err;
-    }
-    if (it.err != DNS_OK) return it.err;
-    if (it.pos != name->len) return DNS_ERR_NAME_TRAILING_DATA;
-
+    dns_cursor_clear_labels (p, cursor_bytes (&p->cur));
     if (!cursor_fits (&p->cur, name->len, 0)) return DNS_ERR_NO_SPACE;
     memcpy (cursor_ptr (&p->cur), name->ptr, name->len);
     mark_written (p, name->len);
-    return DNS_NAME_MAX < name->len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return err;
 }
 
 dns_error_t

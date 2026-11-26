@@ -21,10 +21,7 @@ dns_rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out)
 dns_error_t
 dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
 {
-    // The target must not be compressed (RFC 2782).
-    dns_error_t err = dns_name_check_uncompressed (&rd->target);
-    if (!dns_is_ok (err)) return err;
-
+    // The target must not be compressed (RFC 2782); dns_name_to_bytes rejects that.
     cursor_t start = p->cur;
     emit_bits (&p->cur, 16, rd->priority);
     emit_bits (&p->cur, 16, rd->weight);

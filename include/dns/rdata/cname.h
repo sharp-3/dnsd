@@ -24,11 +24,11 @@ dns_rdata_cname_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_cname_t
 size_t
 dns_rdata_cname_length (const dns_rdata_cname_t *rdata);
 
-// compressed --> expanded
+// compressed --> uncompressed
 dns_error_t
-dns_rdata_cname_expand (const dns_cursor_t      *p,
-                        const dns_rdata_cname_t *rdata,
-                        dns_name_t              *name,
-                        dns_rdata_cname_t       *out);
+dns_rdata_cname_to_uncompressed (const dns_cursor_t      *p,
+                                 const dns_rdata_cname_t *rdata,
+                                 dns_name_t              *name,
+                                 dns_rdata_cname_t       *out);
 
 #endif

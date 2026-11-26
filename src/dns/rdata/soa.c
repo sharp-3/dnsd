@@ -54,14 +54,14 @@ dns_rdata_soa_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_soa_t *rd
 
 // MNAME into names[0], RNAME into names[1].
 dns_error_t
-dns_rdata_soa_expand (const dns_cursor_t    *p,
-                      const dns_rdata_soa_t *rdata,
-                      dns_name_t             names[2],
-                      dns_rdata_soa_t       *out)
+dns_rdata_soa_to_uncompressed (const dns_cursor_t    *p,
+                               const dns_rdata_soa_t *rdata,
+                               dns_name_t             names[2],
+                               dns_rdata_soa_t       *out)
 {
-    dns_error_t err = dns_name_expand (p, &rdata->mname, &names[0]);
+    dns_error_t err = dns_name_to_uncompressed (p, &rdata->mname, &names[0]);
     if (!dns_is_ok (err)) return err;
-    dns_error_t rerr = dns_name_expand (p, &rdata->rname, &names[1]);
+    dns_error_t rerr = dns_name_to_uncompressed (p, &rdata->rname, &names[1]);
     if (!dns_is_ok (rerr)) return rerr;
 
     *out       = *rdata;

@@ -31,9 +31,9 @@ dns_rdata_a_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_a_t *rd)
     return dns_rdata_a_to_bytes (p, rd);
 }
 
-// No domain names: nothing to expand.
+// No domain names: nothing to uncompress.
 dns_error_t
-dns_rdata_a_expand (const dns_cursor_t *p, const dns_rdata_a_t *rdata, dns_rdata_a_t *out)
+dns_rdata_a_to_uncompressed (const dns_cursor_t *p, const dns_rdata_a_t *rdata, dns_rdata_a_t *out)
 {
     (void)p;
     *out = *rdata;

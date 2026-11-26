@@ -32,12 +32,12 @@ dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr);
 dns_error_t
 dns_record_to_bytes_with_compress (dns_cursor_t *p, const dns_record_t *rr);
 
-// compressed --> expanded
+// compressed --> uncompressed
 dns_error_t
-dns_record_expand (const dns_cursor_t *p,
-                   const dns_record_t *rr,
-                   dns_name_t          names[DNS_RECORD_NAMES_MAX],
-                   dns_record_t       *out);
+dns_record_to_uncompressed (const dns_cursor_t *p,
+                            const dns_record_t *rr,
+                            dns_name_t          names[DNS_RECORD_NAMES_MAX],
+                            dns_record_t       *out);
 
 // display
 const char *

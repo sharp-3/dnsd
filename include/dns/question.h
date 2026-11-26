@@ -29,12 +29,12 @@ dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q);
 dns_error_t
 dns_question_to_bytes_with_compress (dns_cursor_t *p, const dns_question_t *q);
 
-// compressed --> expanded
+// compressed --> uncompressed
 dns_error_t
-dns_question_expand (const dns_cursor_t   *p,
-                     const dns_question_t *q,
-                     dns_name_t           *qname,
-                     dns_question_t       *out);
+dns_question_to_uncompressed (const dns_cursor_t   *p,
+                              const dns_question_t *q,
+                              dns_name_t           *qname,
+                              dns_question_t       *out);
 
 // display
 const char *

@@ -30,11 +30,11 @@ dns_rdata_soa_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_soa_t *rd
 size_t
 dns_rdata_soa_length (const dns_rdata_soa_t *rdata);
 
-// compressed --> expanded
+// compressed --> uncompressed
 dns_error_t
-dns_rdata_soa_expand (const dns_cursor_t    *p,
-                      const dns_rdata_soa_t *rdata,
-                      dns_name_t             names[2],
-                      dns_rdata_soa_t       *out);
+dns_rdata_soa_to_uncompressed (const dns_cursor_t    *p,
+                               const dns_rdata_soa_t *rdata,
+                               dns_name_t             names[2],
+                               dns_rdata_soa_t       *out);
 
 #endif

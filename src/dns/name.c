@@ -115,18 +115,18 @@ dns_name_from_string (const char *str, dns_name_t *out)
     return DNS_NAME_MAX < n ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
-// Expands the name at src into out (room for cap octets) and stores its full length in
+// Uncompresses the name at src into out (room for cap octets) and stores its full length in
 // *out_len; octets past cap are counted but not copied. Pointers only go back to label starts
 // of earlier names, so each name is followed at most once and the length is bounded by the
 // message size.
 static dns_error_t
-expand (const dns_cursor_t *p,
-        const uint8_t      *src,
-        size_t              end,
-        size_t              limit,
-        uint8_t            *out,
-        size_t              cap,
-        size_t             *out_len)
+to_uncompressed (const dns_cursor_t *p,
+                 const uint8_t      *src,
+                 size_t              end,
+                 size_t              limit,
+                 uint8_t            *out,
+                 size_t              cap,
+                 size_t             *out_len)
 {
     size_t           len   = 0;
     size_t           bound = limit;
@@ -154,21 +154,21 @@ expand (const dns_cursor_t *p,
 }
 
 dns_error_t
-dns_name_expand_length (const dns_cursor_t *p, const dns_name_ref_t *name, size_t *len)
+dns_name_to_uncompressed_length (const dns_cursor_t *p, const dns_name_ref_t *name, size_t *len)
 {
-    return expand (p, name->ptr, name->len, p->cur.len, NULL, 0, len);
+    return to_uncompressed (p, name->ptr, name->len, p->cur.len, NULL, 0, len);
 }
 
 dns_error_t
-dns_name_expand (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *out)
+dns_name_to_uncompressed (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *out)
 {
     // Check and measure first, so that out is left alone on any error.
     size_t      n;
-    dns_error_t err = expand (p, name->ptr, name->len, p->cur.len, NULL, 0, &n);
+    dns_error_t err = to_uncompressed (p, name->ptr, name->len, p->cur.len, NULL, 0, &n);
     if (!dns_is_ok (err)) return err;
     if (out->cap < n) return DNS_ERR_NO_SPACE;
 
-    expand (p, name->ptr, name->len, p->cur.len, out->ptr, out->cap, &n);
+    to_uncompressed (p, name->ptr, name->len, p->cur.len, out->ptr, out->cap, &n);
     out->len = n;
     return err;
 }
@@ -196,8 +196,8 @@ find_suffix (
         size_t  n;
         // Only names that fit in name[] can match; longer ones are not compressed.
         if (dns_cursor_test_label (p, t) &&
-            dns_is_ok (
-                expand (p, p->cur.buf + t, nbytes_off - t, nbytes_off, name, sizeof name, &n)) &&
+            dns_is_ok (to_uncompressed (
+                p, p->cur.buf + t, nbytes_off - t, nbytes_off, name, sizeof name, &n)) &&
             n == len && n <= sizeof name && labels_equal (name, suffix, len))
         {
             *target = t;

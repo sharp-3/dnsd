@@ -49,15 +49,15 @@ dns_name_from_string (const char *str, dns_name_t *out);
 dns_error_t
 dns_name_to_string (const dns_name_ref_t *name, char *buf, size_t len);
 
-// compressed --> expanded
+// compressed --> uncompressed
 dns_error_t
-dns_name_expand (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *out);
+dns_name_to_uncompressed (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *out);
 
 // length
 dns_error_t
 dns_name_length (const dns_cursor_t *p, size_t *size);
 dns_error_t
-dns_name_expand_length (const dns_cursor_t *p, const dns_name_ref_t *name, size_t *len);
+dns_name_to_uncompressed_length (const dns_cursor_t *p, const dns_name_ref_t *name, size_t *len);
 
 // check
 dns_error_t

@@ -40,12 +40,12 @@ dns_rdata_srv_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_srv_t *rd
 }
 
 dns_error_t
-dns_rdata_srv_expand (const dns_cursor_t    *p,
-                      const dns_rdata_srv_t *rdata,
-                      dns_name_t            *name,
-                      dns_rdata_srv_t       *out)
+dns_rdata_srv_to_uncompressed (const dns_cursor_t    *p,
+                               const dns_rdata_srv_t *rdata,
+                               dns_name_t            *name,
+                               dns_rdata_srv_t       *out)
 {
-    dns_error_t err = dns_name_expand (p, &rdata->target, name);
+    dns_error_t err = dns_name_to_uncompressed (p, &rdata->target, name);
     if (!dns_is_ok (err)) return err;
 
     *out        = *rdata;

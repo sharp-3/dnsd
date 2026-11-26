@@ -211,7 +211,7 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
         {
             // On failure the record is shown as read (compressed). A warning the read already
             // gave is not repeated.
-            dns_error_t xerr = dns_record_expand (p, &record, expanded, &record);
+            dns_error_t xerr = dns_record_to_uncompressed (p, &record, expanded, &record);
             if (xerr != DNS_OK && xerr != err)
                 printf (
                     ";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (xerr));
@@ -253,7 +253,7 @@ print_reply (uint8_t *msg, size_t len)
         dns_question_t *q = &question;
         if (expand)
         {
-            err = dns_name_expand (&parser, &q->qname, &expanded[0]);
+            err = dns_name_to_uncompressed (&parser, &q->qname, &expanded[0]);
             if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
             if (dns_is_ok (err)) q->qname = dns_name_to_ref (&expanded[0]);
         }

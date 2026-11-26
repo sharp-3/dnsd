@@ -124,15 +124,16 @@ fail:
 
 // Expands the owner name into names[0], then the names in the RDATA into the rest.
 dns_error_t
-dns_record_expand (const dns_cursor_t *p,
-                   const dns_record_t *rr,
-                   dns_name_t          names[DNS_RECORD_NAMES_MAX],
-                   dns_record_t       *out)
+dns_record_to_uncompressed (const dns_cursor_t *p,
+                            const dns_record_t *rr,
+                            dns_name_t          names[DNS_RECORD_NAMES_MAX],
+                            dns_record_t       *out)
 {
-    dns_error_t err = dns_name_expand (p, &rr->name, &names[0]);
+    dns_error_t err = dns_name_to_uncompressed (p, &rr->name, &names[0]);
     if (!dns_is_ok (err)) return err;
     dns_rdata_t rdata;
-    dns_error_t rerr = dns_rdata_expand (p, rr->type, rr->class, &rr->rdata, names + 1, &rdata);
+    dns_error_t rerr =
+        dns_rdata_to_uncompressed (p, rr->type, rr->class, &rr->rdata, names + 1, &rdata);
     if (!dns_is_ok (rerr)) return rerr;
 
     *out       = *rr;

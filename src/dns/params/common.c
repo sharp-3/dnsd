@@ -27,7 +27,7 @@ generic_from_string (const params_table_t *t, const char *str, uint32_t *out)
         if (!ascii_isdigit (*str)) return false;
         uint32_t digit = (uint32_t)(*str - '0');
         // value * 10 + digit > max, checked without overflow
-        if (digit > t->max || value > (t->max - digit) / 10) return false;
+        if (t->max < digit || (t->max - digit) / 10 < value) return false;
         value = value * 10 + digit;
     }
     *out = value;

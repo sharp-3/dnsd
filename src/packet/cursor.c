@@ -66,7 +66,7 @@ write_bits (const cursor_t *c, size_t nbits, uint64_t value)
     size_t   end    = offset + nbits;
 
     // From the last octet back, each taking the low bits of value left.
-    for (size_t i = (end + OCTET_BITS - 1) / OCTET_BITS; i-- > 0;)
+    for (size_t i = (end + OCTET_BITS - 1) / OCTET_BITS; 0 < i--;)
     {
         size_t       start = start_bits (i, offset);
         size_t       last  = last_bits (i, end);

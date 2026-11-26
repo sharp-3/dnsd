@@ -63,7 +63,7 @@ dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
     dns_error_t soft = err;
 
     size_t rdlength = dns_rdata_length (rr->type, rr->class, &rr->rdata);
-    if (rdlength > UINT16_MAX)
+    if (UINT16_MAX < rdlength)
     {
         err = DNS_ERR_BAD_RDATA;
         goto fail;
@@ -108,7 +108,7 @@ dns_record_to_bytes_with_compress (dns_cursor_t *p, const dns_record_t *rr)
     err                = dns_rdata_to_bytes_with_compress (p, rr->type, rr->class, &rr->rdata);
     if (!dns_is_ok (err)) goto fail;
     size_t rdlength = cursor_bytes (&p->cur) - rdata_start;
-    if (rdlength > UINT16_MAX)
+    if (UINT16_MAX < rdlength)
     {
         err = DNS_ERR_BAD_RDATA;
         goto fail;
@@ -154,7 +154,7 @@ dns_record_display_r (const dns_record_t *rr, char *buf, size_t len)
                       dns_class_display (rr->class),
                       dns_type_display (rr->type));
     if (n < 0) buf[0] = '\0';
-    if (n < 0 || (size_t)n >= len) return buf;
+    if (n < 0 || len <= (size_t)n) return buf;
 
     dns_rdata_display_r (rr->type, rr->class, &rr->rdata, buf + n, len - n);
     return buf;

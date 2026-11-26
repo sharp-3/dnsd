@@ -11,7 +11,7 @@ static dns_error_t
 check_pointer (const dns_cursor_t *p, const uint8_t *label, size_t bound, size_t *target)
 {
     *target = dns_label_pointer_target (label);
-    if (*target >= bound || !dns_cursor_test_label (p, *target)) return DNS_ERR_NAME_BAD_POINTER;
+    if (bound <= *target || !dns_cursor_test_label (p, *target)) return DNS_ERR_NAME_BAD_POINTER;
     return DNS_OK;
 }
 
@@ -24,10 +24,10 @@ dns_name_to_ref (const dns_name_t *name)
 dns_error_t
 dns_name_to_owned (const dns_name_ref_t *ref, dns_name_t *out)
 {
-    if (ref->len > out->cap) return DNS_ERR_NO_SPACE;
+    if (out->cap < ref->len) return DNS_ERR_NO_SPACE;
     memmove (out->ptr, ref->ptr, ref->len); // ref may point into out
     out->len = ref->len;
-    return ref->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return DNS_NAME_MAX < ref->len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 dns_error_t
@@ -73,7 +73,7 @@ dns_name_length (const dns_cursor_t *p, size_t *size)
     if (it.err != DNS_OK) return it.err;
 
     *size = it.pos - start;
-    return *size > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return DNS_NAME_MAX < *size ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 // Parses str (see dns_name_from_string) and stores the length of its wire form in *len; with
@@ -108,11 +108,11 @@ dns_name_from_string (const char *str, dns_name_t *out)
     size_t      n;
     dns_error_t err = name_parse (str, NULL, &n);
     if (err != DNS_OK) return err;
-    if (n > out->cap) return DNS_ERR_NO_SPACE;
+    if (out->cap < n) return DNS_ERR_NO_SPACE;
 
     name_parse (str, out->ptr, &n);
     out->len = n;
-    return n > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return DNS_NAME_MAX < n ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 // Expands the name at src into out (room for cap octets) and stores its full length in
@@ -150,7 +150,7 @@ expand (const dns_cursor_t *p,
     if (it.err != DNS_OK) return it.err;
 
     *out_len = len;
-    return len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return DNS_NAME_MAX < len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 dns_error_t
@@ -166,7 +166,7 @@ dns_name_expand (const dns_cursor_t *p, const dns_name_ref_t *name, dns_name_t *
     size_t      n;
     dns_error_t err = expand (p, name->ptr, name->len, p->cur.len, NULL, 0, &n);
     if (!dns_is_ok (err)) return err;
-    if (n > out->cap) return DNS_ERR_NO_SPACE;
+    if (out->cap < n) return DNS_ERR_NO_SPACE;
 
     expand (p, name->ptr, name->len, p->cur.len, out->ptr, out->cap, &n);
     out->len = n;
@@ -216,7 +216,7 @@ dns_name_check_uncompressed (const dns_name_ref_t *name)
         if (dns_label_type (it.label) == DNS_LABEL_TYPE_POINTER) return DNS_ERR_NAME_COMPRESSED;
     if (it.err != DNS_OK) return it.err;
     if (it.pos != name->len) return DNS_ERR_NAME_TRAILING_DATA;
-    return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return DNS_NAME_MAX < name->len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 // Records where the labels of the name just written at the position (n octets) start (not the
@@ -257,7 +257,7 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
     if (!cursor_fits (&p->cur, name->len, 0)) return DNS_ERR_NO_SPACE;
     memcpy (cursor_ptr (&p->cur), name->ptr, name->len);
     mark_written (p, name->len);
-    return name->len > DNS_NAME_MAX ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return DNS_NAME_MAX < name->len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 dns_error_t
@@ -298,7 +298,7 @@ dns_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name)
 dns_error_t
 dns_name_to_string (const dns_name_ref_t *name, char *buf, size_t len)
 {
-    if (len > 0) buf[0] = '\0';
+    if (0 < len) buf[0] = '\0';
 
     dns_error_t err = dns_name_check_uncompressed (name);
     if (!dns_is_ok (err)) return err;

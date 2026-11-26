@@ -31,7 +31,7 @@ static dns_error_t
 read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out, dns_error_t *soft)
 {
     dns_question_t *qs = NULL;
-    if (count > 0 && !(qs = calloc (count, sizeof *qs))) return DNS_ERR_NOMEM;
+    if (0 < count && !(qs = calloc (count, sizeof *qs))) return DNS_ERR_NOMEM;
 
     for (unsigned i = 0; i < count; i++)
     {
@@ -52,7 +52,7 @@ static dns_error_t
 read_records (dns_cursor_t *p, unsigned count, dns_record_t **out, dns_error_t *soft)
 {
     dns_record_t *rrs = NULL;
-    if (count > 0 && !(rrs = calloc (count, sizeof *rrs))) return DNS_ERR_NOMEM;
+    if (0 < count && !(rrs = calloc (count, sizeof *rrs))) return DNS_ERR_NOMEM;
 
     for (unsigned i = 0; i < count; i++)
     {

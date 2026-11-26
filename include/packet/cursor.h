@@ -63,7 +63,7 @@ cursor_ptr (const cursor_t *c)
 static inline bool
 cursor_fits (const cursor_t *c, size_t nbytes, size_t nbits)
 {
-    if (c->overflow || c->nbytes > c->len) return false;
+    if (c->overflow || c->len < c->nbytes) return false;
     // Octets touched from the position's octet on: nbytes + ceil ((c->nbits + nbits) / 8),
     // computed so that it cannot overflow.
     size_t avail = c->len - c->nbytes;

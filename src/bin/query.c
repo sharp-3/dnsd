@@ -153,7 +153,7 @@ exchange_udp (const struct addrinfo *ai, const uint8_t *q, size_t qlen, uint8_t 
         while (wait_readable (fd, TIMEOUT_MS))
         {
             n = recv (fd, r, rmax, 0);
-            if (n >= 2 && r[0] == q[0] && r[1] == q[1]) break;
+            if (2 <= n && r[0] == q[0] && r[1] == q[1]) break;
             n = -1;
         }
     }
@@ -350,7 +350,7 @@ main (int argc, char **argv)
     else
     {
         rlen = exchange_udp (ai, query, qlen, reply, sizeof reply);
-        if (rlen >= DNS_HEADER_SIZE && (reply[2] & 0x02))
+        if (DNS_HEADER_SIZE <= rlen && (reply[2] & 0x02))
         {
             printf (";; Truncated, retrying in TCP mode.\n");
             struct addrinfo  thints = {.ai_family = ai->ai_family, .ai_socktype = SOCK_STREAM};

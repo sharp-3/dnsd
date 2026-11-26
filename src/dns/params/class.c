@@ -20,16 +20,16 @@ dns_class_is_reserved (dns_class_t class)
 bool
 dns_class_is_qonly_or_meta (dns_class_t class)
 {
-    return (class >= DNS_CLASS_QONLY_OR_META_LOW_MIN && class <= DNS_CLASS_QONLY_OR_META_LOW_MAX) ||
-           (class >= DNS_CLASS_QONLY_OR_META_HIGH_MIN && class <= DNS_CLASS_QONLY_OR_META_HIGH_MAX);
+    return (DNS_CLASS_QONLY_OR_META_LOW_MIN <= class && class <= DNS_CLASS_QONLY_OR_META_LOW_MAX) ||
+           (DNS_CLASS_QONLY_OR_META_HIGH_MIN <= class && class <= DNS_CLASS_QONLY_OR_META_HIGH_MAX);
 }
 
 bool
 dns_class_is_data (dns_class_t class)
 {
-    return (class >= DNS_CLASS_DATA_LOW_MIN && class <= DNS_CLASS_DATA_LOW_MAX) ||
-           (class >= DNS_CLASS_DATA_MID_MIN && class <= DNS_CLASS_DATA_MID_MAX) ||
-           (class >= DNS_CLASS_DATA_HIGH_MIN && class <= DNS_CLASS_DATA_HIGH_MAX);
+    return (DNS_CLASS_DATA_LOW_MIN <= class && class <= DNS_CLASS_DATA_LOW_MAX) ||
+           (DNS_CLASS_DATA_MID_MIN <= class && class <= DNS_CLASS_DATA_MID_MAX) ||
+           (DNS_CLASS_DATA_HIGH_MIN <= class && class <= DNS_CLASS_DATA_HIGH_MAX);
 }
 
 const char *

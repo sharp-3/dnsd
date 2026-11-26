@@ -63,14 +63,14 @@ dns_label_equal (const uint8_t *a, const uint8_t *b)
 dns_error_t
 dns_label_to_string (const uint8_t *label, char *buf, size_t len, size_t *out)
 {
-    if (*out >= len) return DNS_ERR_NO_SPACE;
+    if (len <= *out) return DNS_ERR_NO_SPACE;
 
     char *s   = buf + *out;
     char *lim = buf + len - 1;
     for (size_t j = 1; j <= label[0]; j++)
     {
         uint8_t c = label[j];
-        if (c < 0x21 || c > 0x7e)
+        if (c < 0x21 || 0x7e < c)
         {
             if (lim - s < (ptrdiff_t)DNS_LABEL_ESCAPE_SIZE) goto no_space;
             *s++ = '\\';
@@ -107,7 +107,7 @@ parse_decimal_escape (const char *p, uint8_t *out)
     for (int i = 0; i < 3; i++)
         if (!ascii_isdigit (p[i])) return false;
     unsigned v = (p[0] - '0') * 100 + (p[1] - '0') * 10 + (p[2] - '0');
-    if (v > 255) return false;
+    if (255 < v) return false;
     *out = v;
     return true;
 }
@@ -139,10 +139,10 @@ dns_label_from_string (const char **str, uint8_t *label, size_t len)
                 return DNS_ERR_BAD_TEXT;
             }
         }
-        if (1 + n >= len) return DNS_ERR_NO_SPACE;
+        if (len <= 1 + n) return DNS_ERR_NO_SPACE;
         label[1 + n++] = c;
     }
-    if (n > DNS_LABEL_MAX) return DNS_ERR_NAME_LABEL_TOO_LONG;
+    if (DNS_LABEL_MAX < n) return DNS_ERR_NAME_LABEL_TOO_LONG;
 
     label[0] = n;
     *str     = p;
@@ -159,7 +159,7 @@ bool
 dns_label_iter_next (dns_label_iter_t *it)
 {
     if (it->end || it->err != DNS_OK) return false;
-    if (it->pos >= it->len)
+    if (it->len <= it->pos)
     {
         it->err = DNS_ERR_NAME_TRUNCATED;
         return false;

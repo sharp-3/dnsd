@@ -24,24 +24,24 @@ bool
 dns_type_is_reserved (dns_type_t type)
 {
     return type == DNS_TYPE_RESERVED_LOW ||
-           (type >= DNS_TYPE_RESERVED_MID_MIN && type <= DNS_TYPE_RESERVED_MID_MAX) ||
+           (DNS_TYPE_RESERVED_MID_MIN <= type && type <= DNS_TYPE_RESERVED_MID_MAX) ||
            type == DNS_TYPE_RESERVED_HIGH;
 }
 
 bool
 dns_type_is_qonly_or_meta (dns_type_t type)
 {
-    return (type >= DNS_TYPE_QONLY_OR_META_MIN && type <= DNS_TYPE_QONLY_OR_META_MAX) ||
+    return (DNS_TYPE_QONLY_OR_META_MIN <= type && type <= DNS_TYPE_QONLY_OR_META_MAX) ||
            type == DNS_TYPE_OPT;
 }
 
 bool
 dns_type_is_data (dns_type_t type)
 {
-    return (type >= DNS_TYPE_DATA_LOW_MIN && type <= DNS_TYPE_DATA_LOW_MAX &&
+    return (DNS_TYPE_DATA_LOW_MIN <= type && type <= DNS_TYPE_DATA_LOW_MAX &&
             type != DNS_TYPE_OPT) ||
-           (type >= DNS_TYPE_DATA_MID_MIN && type <= DNS_TYPE_DATA_MID_MAX) ||
-           (type >= DNS_TYPE_DATA_HIGH_MIN && type <= DNS_TYPE_DATA_HIGH_MAX);
+           (DNS_TYPE_DATA_MID_MIN <= type && type <= DNS_TYPE_DATA_MID_MAX) ||
+           (DNS_TYPE_DATA_HIGH_MIN <= type && type <= DNS_TYPE_DATA_HIGH_MAX);
 }
 
 const char *

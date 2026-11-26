@@ -31,9 +31,9 @@ dns_test_run (int            argc,
               const uint8_t *response,
               size_t         response_len)
 {
-    const char *host = argc > 1 ? argv[1] : "127.0.0.1";
-    const char *port = argc > 2 ? argv[2] : "53";
-    if (argc > 3)
+    const char *host = 1 < argc ? argv[1] : "127.0.0.1";
+    const char *port = 2 < argc ? argv[2] : "53";
+    if (3 < argc)
     {
         fprintf (stderr, "usage: %s [host [port]]\n", argv[0]);
         return 2;

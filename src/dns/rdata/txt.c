@@ -77,7 +77,7 @@ rdata_txt_display (const dns_rdata_txt_t *rd, char *buf, size_t len)
                 put (buf, len, &n, '\\');
                 put (buf, len, &n, (char)c);
             }
-            else if (c < 0x20 || c > 0x7e)
+            else if (c < 0x20 || 0x7e < c)
             {
                 put (buf, len, &n, '\\');
                 put (buf, len, &n, (char)('0' + c / 100));

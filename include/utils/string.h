@@ -8,19 +8,19 @@
 static inline bool
 ascii_isdigit (uint8_t c)
 {
-    return c >= '0' && c <= '9';
+    return '0' <= c && c <= '9';
 }
 
 static inline bool
 ascii_isprint (uint8_t c)
 {
-    return c >= 0x20 && c <= 0x7e;
+    return 0x20 <= c && c <= 0x7e;
 }
 
 static inline uint8_t
 ascii_tolower (uint8_t c)
 {
-    return c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c;
+    return 'A' <= c && c <= 'Z' ? c + ('a' - 'A') : c;
 }
 
 // comparison

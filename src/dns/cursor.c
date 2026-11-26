@@ -20,7 +20,7 @@ dns_cursor_mark_label (dns_cursor_t *p, size_t nbytes_off)
 void
 dns_cursor_clear_labels (dns_cursor_t *p, size_t from)
 {
-    if (from > DNS_LABEL_POINTER_MAX) return;
+    if (DNS_LABEL_POINTER_MAX < from) return;
 
     size_t byte = from >> 3;
     p->label_bitmap[byte] &= (1 << (from & 0b111)) - 1;

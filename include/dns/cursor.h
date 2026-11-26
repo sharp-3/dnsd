@@ -10,7 +10,7 @@
 typedef struct
 {
     cursor_t cur; // the message and the read / write position in it
-    uint8_t  label_bitmap[(DNS_LABEL_POINTER_MAX + 1) / 8]; // offsets where a (normal) label starts
+    uint8_t  label_bitmap[(DNS_LABEL_POINTER_MAX + 1) / 8]; // offsets where a label starts
 } dns_cursor_t;
 
 // init

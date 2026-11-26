@@ -41,11 +41,11 @@ dns_name_from_bytes (dns_cursor_t *p, dns_name_ref_t *out)
     size_t         start = cursor_bytes (&p->cur);
     dns_cursor_clear_labels (p, start);
 
-    // Record where the labels start (not the pointer) as targets for later names, as
-    // dns_name_to_bytes does.
+    // Record where every label starts (normal ones, the root included, and the pointer) as
+    // targets for later names, so that a later pointer may go to any of them.
     dns_label_iter_t it;
     dns_label_iter_init (&it, ptr, len, 0);
-    while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
+    while (dns_label_iter_next (&it))
         dns_cursor_mark_label (p, start + it.off);
     cursor_add (&p->cur, len, 0);
 
@@ -219,15 +219,16 @@ dns_name_check_uncompressed (const dns_name_ref_t *name)
     return DNS_NAME_MAX < name->len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
-// Records where the labels of the name just written at the position (n octets) start (not the
-// pointer) as targets for later names, and moves past it.
+// Records where the normal labels of the name just written at the position (n octets) start
+// (not the root label or the pointer) as targets for later names, and moves past it.
 static void
 mark_written (dns_cursor_t *p, size_t n)
 {
     size_t           start = cursor_bytes (&p->cur);
     dns_label_iter_t it;
     dns_label_iter_init (&it, cursor_ptr (&p->cur), n, 0);
-    while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL)
+    while (dns_label_iter_next (&it) && dns_label_type (it.label) == DNS_LABEL_TYPE_NORMAL &&
+           it.label[0] != 0)
         dns_cursor_mark_label (p, start + it.off);
     cursor_add (&p->cur, n, 0);
 }

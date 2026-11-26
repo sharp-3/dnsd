@@ -3,22 +3,48 @@
 
 #include "packet/cursor.h"
 
+#define OCTET_BITS 8
+
+// The field is bits offset..end-1 counted from the high bit of the position's octet. In octet
+// i it takes bits start..last (from the high bit), leaving tail low bits: bits many, at mask.
+
+// First bit of octet i the field takes.
+static inline size_t
+start_bits (size_t i, size_t offset)
+{
+    return i == 0 ? offset : 0;
+}
+
+// Last bit of octet i the field takes.
+static inline size_t
+last_bits (size_t i, size_t end)
+{
+    return ((i + 1) * OCTET_BITS <= end ? OCTET_BITS : end - i * OCTET_BITS) - 1;
+}
+
 uint64_t
 read_bits (const cursor_t *c, size_t nbits)
 {
     assert (nbits <= 64);
-    if (!cursor_fits (c, 0, nbits)) return 0;
+    if (nbits == 0 || !cursor_fits (c, 0, nbits)) return 0;
 
-    const uint8_t *p   = cursor_ptr (c);
-    size_t         end = cursor_bits (c) + nbits;
-    uint64_t       acc = 0;
-    size_t         i   = 0;
+    const uint8_t *p      = cursor_ptr (c);
+    size_t         offset = cursor_bits (c);
+    size_t         end    = offset + nbits;
+    uint64_t       acc    = 0;
 
-    for (; (i + 1) * 8 <= end; i++)
-        acc = (acc << 8) | p[i];
-    if (end % 8) acc = (acc << end % 8) | (p[i] >> (8 - end % 8));
+    // From the first octet on, each adding its bits below the ones before.
+    for (size_t i = 0; i * OCTET_BITS < end; i++)
+    {
+        size_t       start = start_bits (i, offset);
+        size_t       last  = last_bits (i, end);
+        size_t       tail  = OCTET_BITS - 1 - last;
+        size_t       bits  = last - start + 1;
+        unsigned int mask  = ((1u << bits) - 1) << tail;
 
-    return nbits == 64 ? acc : acc & ((UINT64_C (1) << nbits) - 1);
+        acc = (acc << bits) | ((p[i] & mask) >> tail);
+    }
+    return acc;
 }
 
 void
@@ -35,21 +61,21 @@ write_bits (const cursor_t *c, size_t nbits, uint64_t value)
     assert (nbits <= 64);
     if (nbits == 0 || !cursor_fits (c, 0, nbits)) return;
 
-    uint8_t *p    = cursor_ptr (c);
-    size_t   head = cursor_bits (c);
-    size_t   end  = head + nbits;
-    size_t   last = (end - 1) >> 3;
-    size_t   tail = (8 - (end & 0b111)) & 0b111;
+    uint8_t *p      = cursor_ptr (c);
+    size_t   offset = cursor_bits (c);
+    size_t   end    = offset + nbits;
 
-    for (size_t i = last + 1; i-- > 0;)
+    // From the last octet back, each taking the low bits of value left.
+    for (size_t i = (end + OCTET_BITS - 1) / OCTET_BITS; i-- > 0;)
     {
-        size_t       lo   = i == last ? tail : 0;
-        size_t       hi   = i == 0 ? head : 0;
-        size_t       n    = 8 - lo - hi;
-        unsigned int mask = ((1u << n) - 1) << lo;
+        size_t       start = start_bits (i, offset);
+        size_t       last  = last_bits (i, end);
+        size_t       tail  = OCTET_BITS - 1 - last;
+        size_t       bits  = last - start + 1;
+        unsigned int mask  = ((1u << bits) - 1) << tail;
 
-        p[i] = (p[i] & ~mask) | ((value << lo) & mask);
-        value >>= n;
+        p[i] = (p[i] & ~mask) | ((value << tail) & mask);
+        value >>= bits;
     }
 }
 

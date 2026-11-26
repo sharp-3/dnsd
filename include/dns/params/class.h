@@ -18,7 +18,20 @@ typedef enum : uint16_t
     DNS_CLASS_ANY  = 255, // any class (QCLASS only)
 } dns_class_t;
 
-// category (RFC 6895 3.2)
+// category (RFC 6895 3.2): the ranges of each, in order
+#define DNS_CLASS_RESERVED_LOW 0x0000
+#define DNS_CLASS_DATA_LOW_MIN 0x0001
+#define DNS_CLASS_DATA_LOW_MAX 0x007F
+#define DNS_CLASS_QONLY_OR_META_LOW_MIN 0x0080
+#define DNS_CLASS_QONLY_OR_META_LOW_MAX 0x00FF
+#define DNS_CLASS_DATA_MID_MIN 0x0100
+#define DNS_CLASS_DATA_MID_MAX 0xDFFF
+#define DNS_CLASS_QONLY_OR_META_HIGH_MIN 0xE000
+#define DNS_CLASS_QONLY_OR_META_HIGH_MAX 0xFEFF
+#define DNS_CLASS_DATA_HIGH_MIN 0xFF00
+#define DNS_CLASS_DATA_HIGH_MAX 0xFFFE
+#define DNS_CLASS_RESERVED_HIGH 0xFFFF
+
 bool
 dns_class_is_data (dns_class_t class);
 bool

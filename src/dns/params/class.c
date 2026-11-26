@@ -14,19 +14,22 @@ static const params_table_t table = PARAMS_TABLE (names, "CLASS", UINT16_MAX);
 bool
 dns_class_is_reserved (dns_class_t class)
 {
-    return class == 0 || class == 0xFFFF;
+    return class == DNS_CLASS_RESERVED_LOW || class == DNS_CLASS_RESERVED_HIGH;
 }
 
 bool
 dns_class_is_qonly_or_meta (dns_class_t class)
 {
-    return (class >= 0x0080 && class <= 0x00FF) || (class >= 0xE000 && class <= 0xFEFF);
+    return (class >= DNS_CLASS_QONLY_OR_META_LOW_MIN && class <= DNS_CLASS_QONLY_OR_META_LOW_MAX) ||
+           (class >= DNS_CLASS_QONLY_OR_META_HIGH_MIN && class <= DNS_CLASS_QONLY_OR_META_HIGH_MAX);
 }
 
 bool
 dns_class_is_data (dns_class_t class)
 {
-    return !dns_class_is_reserved (class) && !dns_class_is_qonly_or_meta (class);
+    return (class >= DNS_CLASS_DATA_LOW_MIN && class <= DNS_CLASS_DATA_LOW_MAX) ||
+           (class >= DNS_CLASS_DATA_MID_MIN && class <= DNS_CLASS_DATA_MID_MAX) ||
+           (class >= DNS_CLASS_DATA_HIGH_MIN && class <= DNS_CLASS_DATA_HIGH_MAX);
 }
 
 const char *

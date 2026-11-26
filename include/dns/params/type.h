@@ -40,7 +40,21 @@ typedef enum : uint16_t
     DNS_TYPE_CAA        = 257, // certification authority authorization (RFC 8659)
 } dns_type_t;
 
-// category (RFC 6895 3.1)
+// category (RFC 6895 3.1): the ranges of each, in order; OPT (in the low data range) is a
+// meta-TYPE too
+#define DNS_TYPE_RESERVED_LOW 0x0000
+#define DNS_TYPE_DATA_LOW_MIN 0x0001
+#define DNS_TYPE_DATA_LOW_MAX 0x007F
+#define DNS_TYPE_QONLY_OR_META_MIN 0x0080
+#define DNS_TYPE_QONLY_OR_META_MAX 0x00FF
+#define DNS_TYPE_DATA_MID_MIN 0x0100
+#define DNS_TYPE_DATA_MID_MAX 0xEFFF
+#define DNS_TYPE_RESERVED_MID_MIN 0xF000
+#define DNS_TYPE_RESERVED_MID_MAX 0xFEFF
+#define DNS_TYPE_DATA_HIGH_MIN 0xFF00
+#define DNS_TYPE_DATA_HIGH_MAX 0xFFFE
+#define DNS_TYPE_RESERVED_HIGH 0xFFFF
+
 bool
 dns_type_is_data (dns_type_t type);
 bool

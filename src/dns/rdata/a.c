@@ -26,15 +26,6 @@ dns_rdata_a_to_bytes (dns_cursor_t *p, const dns_rdata_a_t *rd, bool compress)
     return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
-// No domain names: nothing to uncompress.
-dns_error_t
-dns_rdata_a_to_uncompressed (const dns_cursor_t *p, const dns_rdata_a_t *rdata, dns_rdata_a_t *out)
-{
-    (void)p;
-    *out = *rdata;
-    return DNS_OK;
-}
-
 size_t
 dns_rdata_a_length (const dns_rdata_a_t *rd)
 {

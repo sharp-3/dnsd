@@ -56,15 +56,6 @@ dns_rdata_to_bytes (
 size_t
 dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
 
-// compressed --> uncompressed
-dns_error_t
-dns_rdata_to_uncompressed (const dns_cursor_t *p,
-                           dns_type_t          type,
-                           dns_class_t         class,
-                           const dns_rdata_t  *rdata,
-                           dns_name_t          names[DNS_RDATA_NAMES_MAX],
-                           dns_rdata_t        *out);
-
 // debug
 const char *
 dns_rdata_debug_r (

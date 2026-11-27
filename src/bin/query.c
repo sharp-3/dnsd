@@ -196,6 +196,57 @@ exchange_tcp (const struct addrinfo *ai, const uint8_t *q, size_t qlen, uint8_t 
     return n;
 }
 
+// Expands the owner name into uncompressed_names[0], then the names in the RDATA into the rest.
+// On failure rr is left as read.
+static dns_error_t
+uncompress_record (const dns_cursor_t *p, dns_record_t *rr)
+{
+    dns_record_t    out                         = *rr;
+    dns_name_ref_t *names[DNS_RECORD_NAMES_MAX] = {&out.name};
+    size_t          n                           = 1;
+    if (dns_rdata_known (rr->type, rr->class))
+    {
+        switch (rr->type)
+        {
+        case DNS_TYPE_NS:
+            names[n++] = &out.rdata.ns.nsdname;
+            break;
+        case DNS_TYPE_CNAME:
+            names[n++] = &out.rdata.cname.cname;
+            break;
+        case DNS_TYPE_PTR:
+            names[n++] = &out.rdata.ptr.ptrdname;
+            break;
+        case DNS_TYPE_DNAME:
+            names[n++] = &out.rdata.dname.target;
+            break;
+        case DNS_TYPE_MX:
+            names[n++] = &out.rdata.mx.exchange;
+            break;
+        case DNS_TYPE_SRV:
+            names[n++] = &out.rdata.srv.target;
+            break;
+        case DNS_TYPE_SOA:
+            names[n++] = &out.rdata.soa.mname;
+            names[n++] = &out.rdata.soa.rname;
+            break;
+        default: // no domain names
+            break;
+        }
+    }
+
+    dns_error_t err = DNS_OK;
+    for (size_t i = 0; i < n; i++)
+    {
+        dns_error_t nerr = dns_name_to_uncompressed (p, names[i], &uncompressed_names[i]);
+        if (!dns_is_ok (nerr)) return nerr;
+        err       = dns_merge_soft (err, nerr);
+        *names[i] = dns_name_to_ref (&uncompressed_names[i]);
+    }
+    *rr = out;
+    return err;
+}
+
 static bool
 print_records (const char *title, unsigned count, dns_cursor_t *p)
 {
@@ -213,7 +264,7 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
         {
             // On failure the record is shown as read (compressed). A warning the read already
             // gave is not repeated.
-            dns_error_t xerr = dns_record_to_uncompressed (p, &record, uncompressed_names, &record);
+            dns_error_t xerr = uncompress_record (p, &record);
             if (xerr != DNS_OK && xerr != err)
                 printf (
                     ";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (xerr));

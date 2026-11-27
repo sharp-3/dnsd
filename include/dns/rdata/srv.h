@@ -26,11 +26,4 @@ dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rdata, bool comp
 size_t
 dns_rdata_srv_length (const dns_rdata_srv_t *rdata);
 
-// compressed --> uncompressed
-dns_error_t
-dns_rdata_srv_to_uncompressed (const dns_cursor_t    *p,
-                               const dns_rdata_srv_t *rdata,
-                               dns_name_t            *name,
-                               dns_rdata_srv_t       *out);
-
 #endif

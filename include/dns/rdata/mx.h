@@ -24,11 +24,4 @@ dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rdata, bool compre
 size_t
 dns_rdata_mx_length (const dns_rdata_mx_t *rdata);
 
-// compressed --> uncompressed
-dns_error_t
-dns_rdata_mx_to_uncompressed (const dns_cursor_t   *p,
-                              const dns_rdata_mx_t *rdata,
-                              dns_name_t           *name,
-                              dns_rdata_mx_t       *out);
-
 #endif

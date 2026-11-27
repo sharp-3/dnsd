@@ -24,44 +24,6 @@ dns_rdata_known (dns_type_t type, dns_class_t class)
 }
 
 dns_error_t
-dns_rdata_to_uncompressed (const dns_cursor_t *p,
-                           dns_type_t          type,
-                           dns_class_t         class,
-                           const dns_rdata_t  *rdata,
-                           dns_name_t          names[DNS_RDATA_NAMES_MAX],
-                           dns_rdata_t        *out)
-{
-    if (!dns_rdata_known (type, class))
-        return dns_rdata_unknown_to_uncompressed (p, &rdata->unknown, &out->unknown);
-
-    switch (type)
-    {
-    case DNS_TYPE_A:
-        return dns_rdata_a_to_uncompressed (p, &rdata->a, &out->a);
-    case DNS_TYPE_AAAA:
-        return dns_rdata_aaaa_to_uncompressed (p, &rdata->aaaa, &out->aaaa);
-    case DNS_TYPE_NS:
-        return dns_rdata_ns_to_uncompressed (p, &rdata->ns, &names[0], &out->ns);
-    case DNS_TYPE_CNAME:
-        return dns_rdata_cname_to_uncompressed (p, &rdata->cname, &names[0], &out->cname);
-    case DNS_TYPE_PTR:
-        return dns_rdata_ptr_to_uncompressed (p, &rdata->ptr, &names[0], &out->ptr);
-    case DNS_TYPE_DNAME:
-        return dns_rdata_dname_to_uncompressed (p, &rdata->dname, &names[0], &out->dname);
-    case DNS_TYPE_MX:
-        return dns_rdata_mx_to_uncompressed (p, &rdata->mx, &names[0], &out->mx);
-    case DNS_TYPE_SRV:
-        return dns_rdata_srv_to_uncompressed (p, &rdata->srv, &names[0], &out->srv);
-    case DNS_TYPE_SOA:
-        return dns_rdata_soa_to_uncompressed (p, &rdata->soa, names, &out->soa);
-    case DNS_TYPE_TXT:
-        return dns_rdata_txt_to_uncompressed (p, &rdata->txt, &out->txt);
-    default:
-        return dns_rdata_unknown_to_uncompressed (p, &rdata->unknown, &out->unknown);
-    }
-}
-
-dns_error_t
 dns_rdata_from_bytes (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out)
 {

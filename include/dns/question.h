@@ -28,13 +28,6 @@ dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out);
 dns_error_t
 dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q, bool compress);
 
-// compressed --> uncompressed
-dns_error_t
-dns_question_to_uncompressed (const dns_cursor_t   *p,
-                              const dns_question_t *q,
-                              dns_name_t           *qname,
-                              dns_question_t       *out);
-
 // debug
 const char *
 dns_question_debug_r (const dns_question_t *q, char *buf, size_t len);

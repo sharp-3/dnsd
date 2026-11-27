@@ -31,13 +31,6 @@ dns_record_from_bytes (dns_cursor_t *p, dns_record_t *out);
 dns_error_t
 dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr, bool compress);
 
-// compressed --> uncompressed
-dns_error_t
-dns_record_to_uncompressed (const dns_cursor_t *p,
-                            const dns_record_t *rr,
-                            dns_name_t          names[DNS_RECORD_NAMES_MAX],
-                            dns_record_t       *out);
-
 // debug
 const char *
 dns_record_debug_r (const dns_record_t *rr, char *buf, size_t len);

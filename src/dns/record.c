@@ -55,42 +55,14 @@ fail:
 }
 
 dns_error_t
-dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr)
+dns_record_to_bytes (dns_cursor_t *p, const dns_record_t *rr, bool compress)
 {
     cursor_t    start = p->cur;
-    dns_error_t err   = dns_name_to_bytes (p, &rr->name);
+    dns_error_t err   = dns_name_to_bytes (p, &rr->name, compress);
     if (!dns_is_ok (err)) return err;
     dns_error_t soft = err;
 
-    size_t rdlength = dns_rdata_length (rr->type, rr->class, &rr->rdata);
-    if (UINT16_MAX < rdlength)
-    {
-        err = DNS_ERR_BAD_RDATA;
-        goto fail;
-    }
-
-    emit_bits (&p->cur, DNS_TYPE_SIZE * 8, rr->type);
-    emit_bits (&p->cur, DNS_CLASS_SIZE * 8, rr->class);
-    emit_bits (&p->cur, RR_TTL_SIZE * 8, rr->ttl);
-    emit_bits (&p->cur, RR_RDLENGTH_SIZE * 8, rdlength);
-    err = dns_rdata_to_bytes (p, rr->type, rr->class, &rr->rdata);
-    if (!dns_is_ok (err)) goto fail;
-    return dns_merge_soft (soft, err);
-
-fail:
-    dns_cursor_rewind (p, &start);
-    return err;
-}
-
-dns_error_t
-dns_record_to_bytes_with_compress (dns_cursor_t *p, const dns_record_t *rr)
-{
-    cursor_t    start = p->cur;
-    dns_error_t err   = dns_name_to_bytes_with_compress (p, &rr->name);
-    if (!dns_is_ok (err)) return err;
-    dns_error_t soft = err;
-
-    // RDLENGTH is known only once the RDATA is written (its names compressed): written as 0
+    // RDLENGTH is known only once the RDATA is written (its names may be compressed): written as 0
     // first, then set.
     emit_bits (&p->cur, DNS_TYPE_SIZE * 8, rr->type);
     emit_bits (&p->cur, DNS_CLASS_SIZE * 8, rr->class);
@@ -104,7 +76,7 @@ dns_record_to_bytes_with_compress (dns_cursor_t *p, const dns_record_t *rr)
     }
 
     size_t rdata_start = cursor_bytes (&p->cur);
-    err                = dns_rdata_to_bytes_with_compress (p, rr->type, rr->class, &rr->rdata);
+    err                = dns_rdata_to_bytes (p, rr->type, rr->class, &rr->rdata, compress);
     if (!dns_is_ok (err)) goto fail;
     size_t rdlength = cursor_bytes (&p->cur) - rdata_start;
     if (UINT16_MAX < rdlength)

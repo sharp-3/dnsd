@@ -1,6 +1,7 @@
 #ifndef DNSD_DNS_QUESTION_H
 #define DNSD_DNS_QUESTION_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -25,9 +26,7 @@ typedef struct
 dns_error_t
 dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out);
 dns_error_t
-dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q);
-dns_error_t
-dns_question_to_bytes_with_compress (dns_cursor_t *p, const dns_question_t *q);
+dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q, bool compress);
 
 // compressed --> uncompressed
 dns_error_t

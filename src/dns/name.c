@@ -234,7 +234,7 @@ mark_written (dns_cursor_t *p, size_t n)
 }
 
 dns_error_t
-dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name, bool compress)
 {
     assert (cursor_is_aligned (&p->cur));
 
@@ -242,37 +242,25 @@ dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
     dns_error_t err = dns_name_check_uncompressed (name);
     if (!dns_is_ok (err)) return err;
 
-    dns_cursor_clear_labels (p, cursor_bytes (&p->cur));
-    if (!cursor_fits (&p->cur, name->len, 0)) return DNS_ERR_NO_SPACE;
-    memcpy (cursor_ptr (&p->cur), name->ptr, name->len);
-    mark_written (p, name->len);
-    return err;
-}
-
-dns_error_t
-dns_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name)
-{
-    assert (cursor_is_aligned (&p->cur));
-
-    dns_error_t err = dns_name_check_uncompressed (name);
-    if (!dns_is_ok (err)) return err;
-
     size_t start = cursor_bytes (&p->cur);
     dns_cursor_clear_labels (p, start);
 
-    // i: octets kept as labels; the rest (if found earlier in the message) becomes a pointer to
-    // target. The leftmost suffix found is the longest one.
-    size_t           i      = name->len;
-    size_t           target = 0;
-    bool             found  = false;
-    dns_label_iter_t it;
-    dns_label_iter_init (&it, name->ptr, name->len, 0);
-    while (dns_label_iter_next (&it) && it.label[0] != 0)
+    // i: octets kept as labels; with compress, the rest (if found earlier in the message) becomes
+    // a pointer to target. The leftmost suffix found is the longest one.
+    size_t i      = name->len;
+    size_t target = 0;
+    bool   found  = false;
+    if (compress)
     {
-        if ((found = find_suffix (p, start, it.label, name->len - it.off, &target)))
+        dns_label_iter_t it;
+        dns_label_iter_init (&it, name->ptr, name->len, 0);
+        while (dns_label_iter_next (&it) && it.label[0] != 0)
         {
-            i = it.off;
-            break;
+            if ((found = find_suffix (p, start, it.label, name->len - it.off, &target)))
+            {
+                i = it.off;
+                break;
+            }
         }
     }
 

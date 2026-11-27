@@ -21,19 +21,14 @@ dns_rdata_txt_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out)
     return err;
 }
 
+// No domain names: compress has no effect.
 dns_error_t
-dns_rdata_txt_to_bytes (dns_cursor_t *p, const dns_rdata_txt_t *rd)
+dns_rdata_txt_to_bytes (dns_cursor_t *p, const dns_rdata_txt_t *rd, bool compress)
 {
+    (void)compress;
     cursor_t start = p->cur;
     emit_bytes (&p->cur, rd->data, rd->len);
     return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
-}
-
-// No domain names: written as by dns_rdata_txt_to_bytes.
-dns_error_t
-dns_rdata_txt_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_txt_t *rd)
-{
-    return dns_rdata_txt_to_bytes (p, rd);
 }
 
 // No domain names: nothing to uncompress.

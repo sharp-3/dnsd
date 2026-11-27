@@ -19,21 +19,16 @@ dns_rdata_srv_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_srv_t *out)
 }
 
 dns_error_t
-dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd)
+dns_rdata_srv_to_bytes (dns_cursor_t *p, const dns_rdata_srv_t *rd, bool compress)
 {
-    // The target must not be compressed (RFC 2782); dns_name_to_bytes rejects that.
+    // The target must not be compressed (RFC 2782): written uncompressed whatever compress is;
+    // dns_name_to_bytes rejects a compressed one.
+    (void)compress;
     cursor_t start = p->cur;
     emit_bits (&p->cur, 16, rd->priority);
     emit_bits (&p->cur, 16, rd->weight);
     emit_bits (&p->cur, 16, rd->port);
-    return rdata_end (p, &start, dns_name_to_bytes (p, &rd->target), DNS_ERR_NO_SPACE);
-}
-
-// The target must not be compressed (RFC 2782): written as by dns_rdata_srv_to_bytes.
-dns_error_t
-dns_rdata_srv_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_srv_t *rd)
-{
-    return dns_rdata_srv_to_bytes (p, rd);
+    return rdata_end (p, &start, dns_name_to_bytes (p, &rd->target, false), DNS_ERR_NO_SPACE);
 }
 
 dns_error_t

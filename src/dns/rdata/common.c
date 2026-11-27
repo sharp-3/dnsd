@@ -20,17 +20,10 @@ rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_ref_t *out)
 }
 
 dns_error_t
-rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name)
+rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name, bool compress)
 {
     cursor_t start = p->cur;
-    return rdata_end (p, &start, dns_name_to_bytes (p, name), DNS_ERR_NO_SPACE);
-}
-
-dns_error_t
-rdata_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name)
-{
-    cursor_t start = p->cur;
-    return rdata_end (p, &start, dns_name_to_bytes_with_compress (p, name), DNS_ERR_NO_SPACE);
+    return rdata_end (p, &start, dns_name_to_bytes (p, name, compress), DNS_ERR_NO_SPACE);
 }
 
 void

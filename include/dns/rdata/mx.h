@@ -1,6 +1,7 @@
 #ifndef DNSD_DNS_RDATA_MX_H
 #define DNSD_DNS_RDATA_MX_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -19,9 +20,7 @@ typedef struct
 dns_error_t
 dns_rdata_mx_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_mx_t *out);
 dns_error_t
-dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rdata);
-dns_error_t
-dns_rdata_mx_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_mx_t *rdata);
+dns_rdata_mx_to_bytes (dns_cursor_t *p, const dns_rdata_mx_t *rdata, bool compress);
 size_t
 dns_rdata_mx_length (const dns_rdata_mx_t *rdata);
 

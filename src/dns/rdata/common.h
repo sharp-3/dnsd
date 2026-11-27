@@ -3,6 +3,7 @@
 
 // Shared by the per-type RDATA files and rdata.c; not part of the public API.
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -20,9 +21,7 @@ rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err, dns_error_t 
 dns_error_t
 rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_ref_t *out);
 dns_error_t
-rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name);
-dns_error_t
-rdata_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name);
+rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name, bool compress);
 
 // display
 void

@@ -26,13 +26,11 @@ dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out)
     return err;
 }
 
-typedef dns_error_t (*name_write_t) (dns_cursor_t *p, const dns_name_ref_t *name);
-
-static dns_error_t
-question_write (dns_cursor_t *p, const dns_question_t *q, name_write_t name_write)
+dns_error_t
+dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q, bool compress)
 {
     cursor_t    start = p->cur;
-    dns_error_t err   = name_write (p, &q->qname);
+    dns_error_t err   = dns_name_to_bytes (p, &q->qname, compress);
     if (!dns_is_ok (err)) return err;
 
     emit_bits (&p->cur, DNS_TYPE_SIZE * 8, q->qtype);
@@ -43,18 +41,6 @@ question_write (dns_cursor_t *p, const dns_question_t *q, name_write_t name_writ
         return DNS_ERR_NO_SPACE;
     }
     return err;
-}
-
-dns_error_t
-dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q)
-{
-    return question_write (p, q, dns_name_to_bytes);
-}
-
-dns_error_t
-dns_question_to_bytes_with_compress (dns_cursor_t *p, const dns_question_t *q)
-{
-    return question_write (p, q, dns_name_to_bytes_with_compress);
 }
 
 dns_error_t

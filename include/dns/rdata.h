@@ -1,6 +1,7 @@
 #ifndef DNSD_DNS_RDATA_H
 #define DNSD_DNS_RDATA_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -48,14 +49,10 @@ dns_rdata_known (dns_type_t type, dns_class_t class);
 dns_error_t
 dns_rdata_from_bytes (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out);
+// With compress, compresses the names where RFC 3597 allows it (NS, CNAME, PTR, MX, SOA).
 dns_error_t
-dns_rdata_to_bytes (dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
-// Compresses the names where RFC 3597 allows it (NS, CNAME, PTR, MX, SOA).
-dns_error_t
-dns_rdata_to_bytes_with_compress (dns_cursor_t      *p,
-                                  dns_type_t         type,
-                                  dns_class_t        class,
-                                  const dns_rdata_t *rdata);
+dns_rdata_to_bytes (
+    dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rdata, bool compress);
 size_t
 dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
 

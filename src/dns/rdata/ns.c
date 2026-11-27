@@ -7,15 +7,9 @@ dns_rdata_ns_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_ns_t *out)
 }
 
 dns_error_t
-dns_rdata_ns_to_bytes (dns_cursor_t *p, const dns_rdata_ns_t *rd)
+dns_rdata_ns_to_bytes (dns_cursor_t *p, const dns_rdata_ns_t *rd, bool compress)
 {
-    return rdata_name_to_bytes (p, &rd->nsdname);
-}
-
-dns_error_t
-dns_rdata_ns_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_ns_t *rd)
-{
-    return rdata_name_to_bytes_with_compress (p, &rd->nsdname);
+    return rdata_name_to_bytes (p, &rd->nsdname, compress);
 }
 
 dns_error_t

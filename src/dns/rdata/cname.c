@@ -7,15 +7,9 @@ dns_rdata_cname_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_cname_t *out)
 }
 
 dns_error_t
-dns_rdata_cname_to_bytes (dns_cursor_t *p, const dns_rdata_cname_t *rd)
+dns_rdata_cname_to_bytes (dns_cursor_t *p, const dns_rdata_cname_t *rd, bool compress)
 {
-    return rdata_name_to_bytes (p, &rd->cname);
-}
-
-dns_error_t
-dns_rdata_cname_to_bytes_with_compress (dns_cursor_t *p, const dns_rdata_cname_t *rd)
-{
-    return rdata_name_to_bytes_with_compress (p, &rd->cname);
+    return rdata_name_to_bytes (p, &rd->cname, compress);
 }
 
 dns_error_t

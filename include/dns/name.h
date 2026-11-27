@@ -36,12 +36,10 @@ dns_name_from_ref (const dns_name_ref_t *ref, dns_name_t *out);
 // dns_name_ref_t <--> uint8_t * (wire format)
 dns_error_t
 dns_name_from_bytes (dns_cursor_t *p, dns_name_ref_t *out);
+// Writes the (uncompressed) name; with compress, ending it with a pointer to the longest suffix
+// already in the message.
 dns_error_t
-dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name);
-// Writes the (uncompressed) name, ending it with a pointer to the longest suffix already in the
-// message.
-dns_error_t
-dns_name_to_bytes_with_compress (dns_cursor_t *p, const dns_name_ref_t *name);
+dns_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name, bool compress);
 
 // dns_name_ref_t <--> char * (string)
 dns_error_t

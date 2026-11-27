@@ -127,70 +127,36 @@ dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rd)
 }
 
 dns_error_t
-dns_rdata_to_bytes (dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rd)
-{
-    if (!dns_rdata_known (type, class)) return dns_rdata_unknown_to_bytes (p, &rd->unknown);
-
-    switch (type)
-    {
-    case DNS_TYPE_A:
-        return dns_rdata_a_to_bytes (p, &rd->a);
-    case DNS_TYPE_AAAA:
-        return dns_rdata_aaaa_to_bytes (p, &rd->aaaa);
-    case DNS_TYPE_NS:
-        return dns_rdata_ns_to_bytes (p, &rd->ns);
-    case DNS_TYPE_CNAME:
-        return dns_rdata_cname_to_bytes (p, &rd->cname);
-    case DNS_TYPE_PTR:
-        return dns_rdata_ptr_to_bytes (p, &rd->ptr);
-    case DNS_TYPE_DNAME:
-        return dns_rdata_dname_to_bytes (p, &rd->dname);
-    case DNS_TYPE_MX:
-        return dns_rdata_mx_to_bytes (p, &rd->mx);
-    case DNS_TYPE_SRV:
-        return dns_rdata_srv_to_bytes (p, &rd->srv);
-    case DNS_TYPE_SOA:
-        return dns_rdata_soa_to_bytes (p, &rd->soa);
-    case DNS_TYPE_TXT:
-        return dns_rdata_txt_to_bytes (p, &rd->txt);
-    default:
-        return dns_rdata_unknown_to_bytes (p, &rd->unknown);
-    }
-}
-
-dns_error_t
-dns_rdata_to_bytes_with_compress (dns_cursor_t      *p,
-                                  dns_type_t         type,
-                                  dns_class_t        class,
-                                  const dns_rdata_t *rd)
+dns_rdata_to_bytes (
+    dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rd, bool compress)
 {
     if (!dns_rdata_known (type, class))
-        return dns_rdata_unknown_to_bytes_with_compress (p, &rd->unknown);
+        return dns_rdata_unknown_to_bytes (p, &rd->unknown, compress);
 
     switch (type)
     {
     case DNS_TYPE_A:
-        return dns_rdata_a_to_bytes_with_compress (p, &rd->a);
+        return dns_rdata_a_to_bytes (p, &rd->a, compress);
     case DNS_TYPE_AAAA:
-        return dns_rdata_aaaa_to_bytes_with_compress (p, &rd->aaaa);
+        return dns_rdata_aaaa_to_bytes (p, &rd->aaaa, compress);
     case DNS_TYPE_NS:
-        return dns_rdata_ns_to_bytes_with_compress (p, &rd->ns);
+        return dns_rdata_ns_to_bytes (p, &rd->ns, compress);
     case DNS_TYPE_CNAME:
-        return dns_rdata_cname_to_bytes_with_compress (p, &rd->cname);
+        return dns_rdata_cname_to_bytes (p, &rd->cname, compress);
     case DNS_TYPE_PTR:
-        return dns_rdata_ptr_to_bytes_with_compress (p, &rd->ptr);
+        return dns_rdata_ptr_to_bytes (p, &rd->ptr, compress);
     case DNS_TYPE_DNAME:
-        return dns_rdata_dname_to_bytes_with_compress (p, &rd->dname);
+        return dns_rdata_dname_to_bytes (p, &rd->dname, compress);
     case DNS_TYPE_MX:
-        return dns_rdata_mx_to_bytes_with_compress (p, &rd->mx);
+        return dns_rdata_mx_to_bytes (p, &rd->mx, compress);
     case DNS_TYPE_SRV:
-        return dns_rdata_srv_to_bytes_with_compress (p, &rd->srv);
+        return dns_rdata_srv_to_bytes (p, &rd->srv, compress);
     case DNS_TYPE_SOA:
-        return dns_rdata_soa_to_bytes_with_compress (p, &rd->soa);
+        return dns_rdata_soa_to_bytes (p, &rd->soa, compress);
     case DNS_TYPE_TXT:
-        return dns_rdata_txt_to_bytes_with_compress (p, &rd->txt);
+        return dns_rdata_txt_to_bytes (p, &rd->txt, compress);
     default:
-        return dns_rdata_unknown_to_bytes_with_compress (p, &rd->unknown);
+        return dns_rdata_unknown_to_bytes (p, &rd->unknown, compress);
     }
 }
 

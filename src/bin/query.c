@@ -230,6 +230,25 @@ uncompress_record (const dns_cursor_t *p, dns_record_t *rr)
             names[n++] = &out.rdata.soa.mname;
             names[n++] = &out.rdata.soa.rname;
             break;
+        case DNS_TYPE_MD:
+            names[n++] = &out.rdata.md.madname;
+            break;
+        case DNS_TYPE_MF:
+            names[n++] = &out.rdata.mf.madname;
+            break;
+        case DNS_TYPE_MB:
+            names[n++] = &out.rdata.mb.madname;
+            break;
+        case DNS_TYPE_MG:
+            names[n++] = &out.rdata.mg.mgmname;
+            break;
+        case DNS_TYPE_MR:
+            names[n++] = &out.rdata.mr.newname;
+            break;
+        case DNS_TYPE_MINFO:
+            names[n++] = &out.rdata.minfo.rmailbx;
+            names[n++] = &out.rdata.minfo.emailbx;
+            break;
         default: // no domain names
             break;
         }

@@ -14,9 +14,15 @@ typedef enum : uint16_t
     DNS_TYPE_A          = 1,   // IPv4 address
     DNS_TYPE_NS         = 2,   // name server
     DNS_TYPE_CNAME      = 5,   // canonical name
+    DNS_TYPE_MD         = 3,   // mail destination (obsolete: use MX)
+    DNS_TYPE_MF         = 4,   // mail forwarder (obsolete: use MX)
     DNS_TYPE_SOA        = 6,   // start of authority
+    DNS_TYPE_MB         = 7,   // mailbox domain name (experimental)
+    DNS_TYPE_MG         = 8,   // mail group member (experimental)
+    DNS_TYPE_MR         = 9,   // mail rename domain name (experimental)
     DNS_TYPE_PTR        = 12,  // domain name pointer
     DNS_TYPE_HINFO      = 13,  // host information
+    DNS_TYPE_MINFO      = 14,  // mailbox or mail list information
     DNS_TYPE_MX         = 15,  // mail exchange
     DNS_TYPE_TXT        = 16,  // text strings
     DNS_TYPE_AAAA       = 28,  // IPv6 address (RFC 3596)

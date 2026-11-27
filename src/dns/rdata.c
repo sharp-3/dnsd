@@ -16,6 +16,12 @@ dns_rdata_known (dns_type_t type, dns_class_t class)
     case DNS_TYPE_MX:
     case DNS_TYPE_SRV:
     case DNS_TYPE_SOA:
+    case DNS_TYPE_MD:
+    case DNS_TYPE_MF:
+    case DNS_TYPE_MB:
+    case DNS_TYPE_MG:
+    case DNS_TYPE_MR:
+    case DNS_TYPE_MINFO:
     case DNS_TYPE_TXT:
         return true;
     default:
@@ -49,6 +55,18 @@ dns_rdata_from_bytes (
         return dns_rdata_srv_from_bytes (p, len, &out->srv);
     case DNS_TYPE_SOA:
         return dns_rdata_soa_from_bytes (p, len, &out->soa);
+    case DNS_TYPE_MD:
+        return dns_rdata_md_from_bytes (p, len, &out->md);
+    case DNS_TYPE_MF:
+        return dns_rdata_mf_from_bytes (p, len, &out->mf);
+    case DNS_TYPE_MB:
+        return dns_rdata_mb_from_bytes (p, len, &out->mb);
+    case DNS_TYPE_MG:
+        return dns_rdata_mg_from_bytes (p, len, &out->mg);
+    case DNS_TYPE_MR:
+        return dns_rdata_mr_from_bytes (p, len, &out->mr);
+    case DNS_TYPE_MINFO:
+        return dns_rdata_minfo_from_bytes (p, len, &out->minfo);
     case DNS_TYPE_TXT:
         return dns_rdata_txt_from_bytes (p, len, &out->txt);
     default:
@@ -81,6 +99,18 @@ dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rd)
         return dns_rdata_srv_length (&rd->srv);
     case DNS_TYPE_SOA:
         return dns_rdata_soa_length (&rd->soa);
+    case DNS_TYPE_MD:
+        return dns_rdata_md_length (&rd->md);
+    case DNS_TYPE_MF:
+        return dns_rdata_mf_length (&rd->mf);
+    case DNS_TYPE_MB:
+        return dns_rdata_mb_length (&rd->mb);
+    case DNS_TYPE_MG:
+        return dns_rdata_mg_length (&rd->mg);
+    case DNS_TYPE_MR:
+        return dns_rdata_mr_length (&rd->mr);
+    case DNS_TYPE_MINFO:
+        return dns_rdata_minfo_length (&rd->minfo);
     case DNS_TYPE_TXT:
         return dns_rdata_txt_length (&rd->txt);
     default:
@@ -115,6 +145,18 @@ dns_rdata_to_bytes (
         return dns_rdata_srv_to_bytes (p, &rd->srv, compress);
     case DNS_TYPE_SOA:
         return dns_rdata_soa_to_bytes (p, &rd->soa, compress);
+    case DNS_TYPE_MD:
+        return dns_rdata_md_to_bytes (p, &rd->md, compress);
+    case DNS_TYPE_MF:
+        return dns_rdata_mf_to_bytes (p, &rd->mf, compress);
+    case DNS_TYPE_MB:
+        return dns_rdata_mb_to_bytes (p, &rd->mb, compress);
+    case DNS_TYPE_MG:
+        return dns_rdata_mg_to_bytes (p, &rd->mg, compress);
+    case DNS_TYPE_MR:
+        return dns_rdata_mr_to_bytes (p, &rd->mr, compress);
+    case DNS_TYPE_MINFO:
+        return dns_rdata_minfo_to_bytes (p, &rd->minfo, compress);
     case DNS_TYPE_TXT:
         return dns_rdata_txt_to_bytes (p, &rd->txt, compress);
     default:
@@ -161,6 +203,24 @@ dns_rdata_debug_r (dns_type_t type, dns_class_t class, const dns_rdata_t *rd, ch
         break;
     case DNS_TYPE_SOA:
         rdata_soa_debug (&rd->soa, buf, len);
+        break;
+    case DNS_TYPE_MD:
+        rdata_md_debug (&rd->md, buf, len);
+        break;
+    case DNS_TYPE_MF:
+        rdata_mf_debug (&rd->mf, buf, len);
+        break;
+    case DNS_TYPE_MB:
+        rdata_mb_debug (&rd->mb, buf, len);
+        break;
+    case DNS_TYPE_MG:
+        rdata_mg_debug (&rd->mg, buf, len);
+        break;
+    case DNS_TYPE_MR:
+        rdata_mr_debug (&rd->mr, buf, len);
+        break;
+    case DNS_TYPE_MINFO:
+        rdata_minfo_debug (&rd->minfo, buf, len);
         break;
     case DNS_TYPE_TXT:
         rdata_txt_debug (&rd->txt, buf, len);

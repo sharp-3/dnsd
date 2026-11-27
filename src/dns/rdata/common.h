@@ -45,6 +45,18 @@ rdata_srv_debug (const dns_rdata_srv_t *rd, char *buf, size_t len);
 void
 rdata_soa_debug (const dns_rdata_soa_t *rd, char *buf, size_t len);
 void
+rdata_md_debug (const dns_rdata_md_t *rd, char *buf, size_t len);
+void
+rdata_mf_debug (const dns_rdata_mf_t *rd, char *buf, size_t len);
+void
+rdata_mb_debug (const dns_rdata_mb_t *rd, char *buf, size_t len);
+void
+rdata_mg_debug (const dns_rdata_mg_t *rd, char *buf, size_t len);
+void
+rdata_mr_debug (const dns_rdata_mr_t *rd, char *buf, size_t len);
+void
+rdata_minfo_debug (const dns_rdata_minfo_t *rd, char *buf, size_t len);
+void
 rdata_txt_debug (const dns_rdata_txt_t *rd, char *buf, size_t len);
 void
 rdata_unknown_debug (const dns_rdata_unknown_t *rd, char *buf, size_t len);

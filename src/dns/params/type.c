@@ -4,6 +4,9 @@
 static const params_name_t names[] = {
     {DNS_TYPE_A, "A"},         {DNS_TYPE_NS, "NS"},
     {DNS_TYPE_CNAME, "CNAME"}, {DNS_TYPE_SOA, "SOA"},
+    {DNS_TYPE_MD, "MD"},       {DNS_TYPE_MF, "MF"},
+    {DNS_TYPE_MB, "MB"},       {DNS_TYPE_MG, "MG"},
+    {DNS_TYPE_MR, "MR"},       {DNS_TYPE_MINFO, "MINFO"},
     {DNS_TYPE_PTR, "PTR"},     {DNS_TYPE_HINFO, "HINFO"},
     {DNS_TYPE_MX, "MX"},       {DNS_TYPE_TXT, "TXT"},
     {DNS_TYPE_AAAA, "AAAA"},   {DNS_TYPE_SRV, "SRV"},

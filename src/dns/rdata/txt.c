@@ -58,7 +58,7 @@ put (char *buf, size_t len, size_t *n, char c)
 // Each <character-string> quoted, separated by spaces; '"' and '\\' are escaped as \X and
 // other non-printable octets as \DDD.
 void
-rdata_txt_display (const dns_rdata_txt_t *rd, char *buf, size_t len)
+rdata_txt_debug (const dns_rdata_txt_t *rd, char *buf, size_t len)
 {
     const uint8_t *d = rd->data;
     size_t         n = 0;

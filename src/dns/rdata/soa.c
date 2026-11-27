@@ -63,7 +63,7 @@ dns_rdata_soa_length (const dns_rdata_soa_t *rd)
 }
 
 void
-rdata_soa_display (const dns_rdata_soa_t *rd, char *buf, size_t len)
+rdata_soa_debug (const dns_rdata_soa_t *rd, char *buf, size_t len)
 {
     if (len == 0) return;
 

@@ -58,7 +58,7 @@ dns_question_to_uncompressed (const dns_cursor_t   *p,
 }
 
 const char *
-dns_question_display_r (const dns_question_t *q, char *buf, size_t len)
+dns_question_debug_r (const dns_question_t *q, char *buf, size_t len)
 {
     if (len == 0) return buf;
 

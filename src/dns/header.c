@@ -64,7 +64,7 @@ dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
 }
 
 const char *
-dns_header_display_r (const dns_header_t *hdr, char *buf, size_t len)
+dns_header_debug_r (const dns_header_t *hdr, char *buf, size_t len)
 {
     snprintf (buf,
               len,

@@ -10,7 +10,7 @@
 #include "dns/params/rcode.h"
 
 #define DNS_HEADER_SIZE 12
-#define DNS_HEADER_DISPLAY_SIZE                                                                    \
+#define DNS_HEADER_DEBUG_SIZE                                                                      \
     sizeof "id=0xFFFF qr aa tc rd ra z ad cd opcode=OPCODE255 rcode=RCODE255 "                     \
            "qdcount=65535 ancount=65535 nscount=65535 arcount=65535"
 
@@ -39,10 +39,10 @@ dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out);
 dns_error_t
 dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr);
 
-// display
+// debug
 const char *
-dns_header_display_r (const dns_header_t *hdr, char *buf, size_t len);
-#define dns_header_display(hdr)                                                                    \
-    dns_header_display_r ((hdr), (char[DNS_HEADER_DISPLAY_SIZE]){}, DNS_HEADER_DISPLAY_SIZE)
+dns_header_debug_r (const dns_header_t *hdr, char *buf, size_t len);
+#define dns_header_debug(hdr)                                                                      \
+    dns_header_debug_r ((hdr), (char[DNS_HEADER_DEBUG_SIZE]){}, DNS_HEADER_DEBUG_SIZE)
 
 #endif

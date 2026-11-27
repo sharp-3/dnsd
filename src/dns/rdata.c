@@ -161,51 +161,50 @@ dns_rdata_to_bytes (
 }
 
 const char *
-dns_rdata_display_r (
-    dns_type_t type, dns_class_t class, const dns_rdata_t *rd, char *buf, size_t len)
+dns_rdata_debug_r (dns_type_t type, dns_class_t class, const dns_rdata_t *rd, char *buf, size_t len)
 {
     if (len == 0) return buf;
 
     if (!dns_rdata_known (type, class))
     {
-        rdata_unknown_display (&rd->unknown, buf, len);
+        rdata_unknown_debug (&rd->unknown, buf, len);
         return buf;
     }
 
     switch (type)
     {
     case DNS_TYPE_A:
-        rdata_a_display (&rd->a, buf, len);
+        rdata_a_debug (&rd->a, buf, len);
         break;
     case DNS_TYPE_AAAA:
-        rdata_aaaa_display (&rd->aaaa, buf, len);
+        rdata_aaaa_debug (&rd->aaaa, buf, len);
         break;
     case DNS_TYPE_NS:
-        rdata_ns_display (&rd->ns, buf, len);
+        rdata_ns_debug (&rd->ns, buf, len);
         break;
     case DNS_TYPE_CNAME:
-        rdata_cname_display (&rd->cname, buf, len);
+        rdata_cname_debug (&rd->cname, buf, len);
         break;
     case DNS_TYPE_PTR:
-        rdata_ptr_display (&rd->ptr, buf, len);
+        rdata_ptr_debug (&rd->ptr, buf, len);
         break;
     case DNS_TYPE_DNAME:
-        rdata_dname_display (&rd->dname, buf, len);
+        rdata_dname_debug (&rd->dname, buf, len);
         break;
     case DNS_TYPE_MX:
-        rdata_mx_display (&rd->mx, buf, len);
+        rdata_mx_debug (&rd->mx, buf, len);
         break;
     case DNS_TYPE_SRV:
-        rdata_srv_display (&rd->srv, buf, len);
+        rdata_srv_debug (&rd->srv, buf, len);
         break;
     case DNS_TYPE_SOA:
-        rdata_soa_display (&rd->soa, buf, len);
+        rdata_soa_debug (&rd->soa, buf, len);
         break;
     case DNS_TYPE_TXT:
-        rdata_txt_display (&rd->txt, buf, len);
+        rdata_txt_debug (&rd->txt, buf, len);
         break;
     default:
-        rdata_unknown_display (&rd->unknown, buf, len);
+        rdata_unknown_debug (&rd->unknown, buf, len);
         break;
     }
     return buf;

@@ -47,12 +47,12 @@ dns_rdata_aaaa_length (const dns_rdata_aaaa_t *rd)
 }
 
 void
-rdata_aaaa_display (const dns_rdata_aaaa_t *rd, char *buf, size_t len)
+rdata_aaaa_debug (const dns_rdata_aaaa_t *rd, char *buf, size_t len)
 {
     char addr[INET6_ADDRSTRLEN];
     if (!inet_ntop (AF_INET6, rd->addr, addr, sizeof addr))
     {
-        rdata_unknown_display (
+        rdata_unknown_debug (
             &(dns_rdata_unknown_t){.data = rd->addr, .len = sizeof rd->addr}, buf, len);
         return;
     }

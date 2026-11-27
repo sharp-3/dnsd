@@ -65,9 +65,9 @@ dns_rdata_to_uncompressed (const dns_cursor_t *p,
                            dns_name_t          names[DNS_RDATA_NAMES_MAX],
                            dns_rdata_t        *out);
 
-// display
+// debug
 const char *
-dns_rdata_display_r (
+dns_rdata_debug_r (
     dns_type_t type, dns_class_t class, const dns_rdata_t *rdata, char *buf, size_t len);
 
 #endif

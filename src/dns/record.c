@@ -113,7 +113,7 @@ dns_record_to_uncompressed (const dns_cursor_t *p,
 }
 
 const char *
-dns_record_display_r (const dns_record_t *rr, char *buf, size_t len)
+dns_record_debug_r (const dns_record_t *rr, char *buf, size_t len)
 {
     if (len == 0) return buf;
 
@@ -129,6 +129,6 @@ dns_record_display_r (const dns_record_t *rr, char *buf, size_t len)
     if (m < 0 || len - n <= (size_t)m) return buf;
     n += m;
 
-    dns_rdata_display_r (rr->type, rr->class, &rr->rdata, buf + n, len - n);
+    dns_rdata_debug_r (rr->type, rr->class, &rr->rdata, buf + n, len - n);
     return buf;
 }

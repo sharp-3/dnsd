@@ -42,7 +42,7 @@ dns_rdata_a_length (const dns_rdata_a_t *rd)
 }
 
 void
-rdata_a_display (const dns_rdata_a_t *rd, char *buf, size_t len)
+rdata_a_debug (const dns_rdata_a_t *rd, char *buf, size_t len)
 {
     const uint8_t *a = rd->addr;
     snprintf (buf, len, "%u.%u.%u.%u", a[0], a[1], a[2], a[3]);

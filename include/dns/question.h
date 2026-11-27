@@ -11,7 +11,7 @@
 #include "dns/params/class.h"
 #include "dns/params/type.h"
 
-#define DNS_QUESTION_DISPLAY_SIZE                                                                  \
+#define DNS_QUESTION_DEBUG_SIZE                                                                    \
     (sizeof "\t\t" + (DNS_NAME_DEBUG_SIZE - 1) + (DNS_TYPE_DISPLAY_SIZE - 1) +                     \
      (DNS_CLASS_DISPLAY_SIZE - 1))
 
@@ -35,11 +35,11 @@ dns_question_to_uncompressed (const dns_cursor_t   *p,
                               dns_name_t           *qname,
                               dns_question_t       *out);
 
-// display
+// debug
 const char *
-dns_question_display_r (const dns_question_t *q, char *buf, size_t len);
+dns_question_debug_r (const dns_question_t *q, char *buf, size_t len);
 
-#define dns_question_display(q)                                                                    \
-    dns_question_display_r ((q), (char[DNS_QUESTION_DISPLAY_SIZE]){}, DNS_QUESTION_DISPLAY_SIZE)
+#define dns_question_debug(q)                                                                      \
+    dns_question_debug_r ((q), (char[DNS_QUESTION_DEBUG_SIZE]){}, DNS_QUESTION_DEBUG_SIZE)
 
 #endif

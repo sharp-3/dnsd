@@ -45,7 +45,7 @@ dns_rdata_unknown_length (const dns_rdata_unknown_t *rd)
 }
 
 void
-rdata_unknown_display (const dns_rdata_unknown_t *rd, char *buf, size_t len)
+rdata_unknown_debug (const dns_rdata_unknown_t *rd, char *buf, size_t len)
 {
     static const char hex[] = "0123456789abcdef";
 

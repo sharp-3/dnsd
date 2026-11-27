@@ -46,7 +46,7 @@ dns_rdata_mx_length (const dns_rdata_mx_t *rd)
 }
 
 void
-rdata_mx_display (const dns_rdata_mx_t *rd, char *buf, size_t len)
+rdata_mx_debug (const dns_rdata_mx_t *rd, char *buf, size_t len)
 {
     int n = snprintf (buf, len, "%u ", (unsigned)rd->preference);
     if (n < 0 || len <= (size_t)n) return;

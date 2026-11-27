@@ -27,7 +27,7 @@ rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name, bool compress)
 }
 
 void
-rdata_name_display (const dns_name_ref_t *name, char *buf, size_t len)
+rdata_name_debug (const dns_name_ref_t *name, char *buf, size_t len)
 {
     dns_name_debug_r (name, buf, len);
 }

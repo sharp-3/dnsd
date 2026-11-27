@@ -12,7 +12,7 @@
 #include "dns/params/type.h"
 #include "dns/rdata.h"
 
-#define DNS_RECORD_DISPLAY_SIZE 4096
+#define DNS_RECORD_DEBUG_SIZE 4096
 #define DNS_RECORD_NAMES_MAX (1 + DNS_RDATA_NAMES_MAX) // owner name and RDATA names
 
 // name and rdata point into the message they were read from; keep it alive while rr is used.
@@ -38,11 +38,11 @@ dns_record_to_uncompressed (const dns_cursor_t *p,
                             dns_name_t          names[DNS_RECORD_NAMES_MAX],
                             dns_record_t       *out);
 
-// display
+// debug
 const char *
-dns_record_display_r (const dns_record_t *rr, char *buf, size_t len);
+dns_record_debug_r (const dns_record_t *rr, char *buf, size_t len);
 
-#define dns_record_display(rr)                                                                     \
-    dns_record_display_r ((rr), (char[DNS_RECORD_DISPLAY_SIZE]){}, DNS_RECORD_DISPLAY_SIZE)
+#define dns_record_debug(rr)                                                                       \
+    dns_record_debug_r ((rr), (char[DNS_RECORD_DEBUG_SIZE]){}, DNS_RECORD_DEBUG_SIZE)
 
 #endif

@@ -218,7 +218,7 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
                 printf (
                     ";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (xerr));
         }
-        puts (dns_record_display_r (&record, record_line, sizeof record_line));
+        puts (dns_record_debug_r (&record, record_line, sizeof record_line));
     }
     return true;
 }
@@ -238,7 +238,7 @@ print_reply (uint8_t *msg, size_t len)
     }
 
     const dns_header_t *hdr = &header;
-    printf (";; ->>HEADER<<- %s\n", dns_header_display (hdr));
+    printf (";; ->>HEADER<<- %s\n", dns_header_debug (hdr));
 
     bool ok = true;
     if (hdr->qdcount) printf ("\n;; QUESTION SECTION:\n");
@@ -259,7 +259,7 @@ print_reply (uint8_t *msg, size_t len)
             if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
             if (dns_is_ok (err)) q->qname = dns_name_to_ref (&uncompressed_names[0]);
         }
-        printf (";%s\n", dns_question_display_r (q, record_line, sizeof record_line));
+        printf (";%s\n", dns_question_debug_r (q, record_line, sizeof record_line));
     }
 
     ok = ok && print_records ("ANSWER", hdr->ancount, &parser) &&

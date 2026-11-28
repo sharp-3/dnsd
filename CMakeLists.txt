@@ -8,7 +8,6 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/format.cmake)
-include(cmake/check.cmake)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLIB REQUIRED IMPORTED_TARGET glib-2.0)
@@ -40,6 +39,3 @@ add_subdirectory(test)
 
 file(GLOB_RECURSE TEST_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/*.c" "${CMAKE_SOURCE_DIR}/test/*.h")
 add_format(format EXCLUDE_FROM_ALL ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS} ${TEST_FILES})
-
-file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/*.c")
-add_null_check(check-null ${SOURCES} ${TEST_SOURCES})

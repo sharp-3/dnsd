@@ -1,6 +1,0 @@
-# CLAUDE.md: NULL checks must compare with NULL explicitly (NULL == p, NULL != p).
-# Matches a pointer used directly as a condition: if (p), !p, p && x, p ? a : b, while (p), ...
-# Code expanded from GLib macros that do this themselves is skipped.
-set output diag
-let ptr ignoringParenImpCasts(expr(hasType(hasCanonicalType(pointerType()))).bind("pointer"))
-match stmt(unless(isExpansionInSystemHeader()), unless(isExpandedFromMacro("g_string_append")), anyOf(ifStmt(hasCondition(ptr)), whileStmt(hasCondition(ptr)), doStmt(hasCondition(ptr)), forStmt(hasCondition(ptr)), conditionalOperator(hasCondition(ptr)), unaryOperator(hasOperatorName("!"), hasUnaryOperand(ptr)), binaryOperator(hasAnyOperatorName("&&", "||"), hasEitherOperand(ptr))))

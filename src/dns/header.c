@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -35,6 +36,8 @@ dns_header_from_wire (dns_cursor_t *p, dns_header_t *out)
 dns_error_t
 dns_header_to_wire (dns_cursor_t *p, const dns_header_t *hdr)
 {
+    assert (hdr->opcode <= DNS_OPCODE_MAX);
+    assert (hdr->rcode <= DNS_RCODE_MAX);
     cursor_t start = p->cur;
     emit_bits (&p->cur, 16, hdr->id);
     emit_bits (&p->cur, 1, hdr->qr);

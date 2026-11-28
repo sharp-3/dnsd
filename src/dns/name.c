@@ -75,6 +75,7 @@ dns_name_from_wire (dns_cursor_t *p, dns_name_ref_t *out)
 static dns_error_t
 name_parse (const char *str, uint8_t *buf, size_t *len)
 {
+    if ('\0' == str[0]) return DNS_ERR_BAD_TEXT;
     const char *s = 0 == strcmp (str, ".") ? str + 1 : str;
     size_t      n = 0;
 
@@ -99,11 +100,12 @@ dns_name_from_string (dns_name_t *self, const char *str)
     size_t      n;
     dns_error_t err = name_parse (str, NULL, &n);
     if (DNS_OK != err) return err;
+    if (DNS_NAME_MAX < n) return DNS_ERR_NAME_TOO_LONG;
     if (self->cap < n) return DNS_ERR_NO_SPACE;
 
     name_parse (str, self->ptr, &n);
     self->len = n;
-    return DNS_NAME_MAX < n ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+    return DNS_OK;
 }
 
 static dns_error_t
@@ -271,7 +273,7 @@ dns_name_to_string (const dns_name_ref_t *self, GString *gs)
     if (!dns_is_ok (err)) return err;
 
     append_labels (self, NULL, gs);
-    return DNS_OK;
+    return err;
 }
 
 GString *

@@ -372,8 +372,11 @@ main (int argc, char **argv)
     uint8_t     name_buf[UDP_MAX];
     dns_name_t  name = {.ptr = name_buf, .cap = sizeof name_buf};
     dns_error_t err  = dns_name_from_string (&name, qname);
-    if (DNS_OK != err) fprintf (stderr, "query: bad name '%s': %s\n", qname, dns_error_str (err));
-    if (!dns_is_ok (err)) return 1;
+    if (DNS_OK != err)
+    {
+        fprintf (stderr, "query: bad name '%s': %s\n", qname, dns_error_str (err));
+        return 1;
+    }
 
     dns_question_t q = {.qtype = qtype, .qclass = qclass};
     dns_name_to_ref (&name, &q.qname);

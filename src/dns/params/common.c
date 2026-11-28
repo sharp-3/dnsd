@@ -20,7 +20,7 @@ static bool
 generic_from_string (const params_table_t *t, const char *str, uint32_t *out)
 {
     size_t prefix_len = strlen (t->prefix);
-    if (0 != g_ascii_strncasecmp (str, t->prefix, prefix_len)) return false;
+    if (0 != strncmp (str, t->prefix, prefix_len)) return false;
 
     guint64 value;
     if (!g_ascii_string_to_unsigned (str + prefix_len, 10, 0, t->max, &value, NULL)) return false;
@@ -33,7 +33,7 @@ params_from_string (const params_table_t *t, const char *str, uint32_t *out)
 {
     for (size_t i = 0; i < t->count; i++)
     {
-        if (0 == g_ascii_strcasecmp (str, t->names[i].name))
+        if (0 == strcmp (str, t->names[i].name))
         {
             *out = t->names[i].value;
             return true;

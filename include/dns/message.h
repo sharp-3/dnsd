@@ -22,14 +22,6 @@ dns_message_header_from_wire (dns_cursor_t *p, dns_message_t *out);
 dns_error_t
 dns_message_body_from_wire (dns_cursor_t *p, dns_message_t *msg);
 
-// query validation
-dns_error_t
-dns_message_header_query_validation (const dns_message_t *msg);
-dns_error_t
-dns_message_body_query_validation (const dns_cursor_t *p, const dns_message_t *msg);
-dns_error_t
-dns_message_query_validation (const dns_cursor_t *p, const dns_message_t *msg);
-
 // memory
 void
 dns_message_free (dns_message_t *msg);

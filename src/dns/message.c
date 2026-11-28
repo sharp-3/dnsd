@@ -13,18 +13,6 @@ dns_message_header_from_wire (dns_cursor_t *p, dns_message_t *out)
     return DNS_OK;
 }
 
-dns_error_t
-dns_message_header_query_validation (const dns_message_t *msg)
-{
-    if (msg->header.qr) return DNS_ERR_NOT_QUERY;
-    if (DNS_OPCODE_QUERY != msg->header.opcode) return DNS_ERR_NOT_IMPLEMENTED;
-    if (1 != msg->header.qdcount) return DNS_ERR_BAD_QDCOUNT;
-    if (0 != msg->header.ancount) return DNS_ERR_BAD_ANCOUNT;
-    if (0 != msg->header.nscount) return DNS_ERR_BAD_NSCOUNT;
-    if (0 != msg->header.arcount) return DNS_ERR_BAD_ARCOUNT;
-    return DNS_OK;
-}
-
 static dns_error_t
 read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out, dns_error_t *soft)
 {
@@ -92,33 +80,6 @@ dns_message_body_from_wire (dns_cursor_t *p, dns_message_t *msg)
     msg->authority  = ns;
     msg->additional = ar;
     return soft;
-}
-
-dns_error_t
-dns_message_body_query_validation (const dns_cursor_t *p, const dns_message_t *msg)
-{
-    for (unsigned i = 0; i < msg->header.qdcount; i++)
-    {
-        size_t      len;
-        dns_error_t err = dns_name_to_uncompressed_length (p, &msg->question[i].qname, &len);
-        if (DNS_OK != err) return err;
-    }
-    return DNS_OK;
-}
-
-dns_error_t
-dns_message_query_validation (const dns_cursor_t *p, const dns_message_t *msg)
-{
-    dns_error_t err = dns_message_header_query_validation (msg);
-    if (DNS_OK != err) return err;
-
-    err = dns_message_body_query_validation (p, msg);
-    if (DNS_OK_NAME_TOO_LONG == err) return DNS_ERR_NAME_TOO_LONG;
-    if (DNS_OK != err) return err;
-
-    if (!cursor_is_aligned (&p->cur) || cursor_bytes (&p->cur) != p->cur.len)
-        return DNS_ERR_TRAILING_DATA;
-    return DNS_OK;
 }
 
 void

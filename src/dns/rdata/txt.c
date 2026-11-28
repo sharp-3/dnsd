@@ -31,12 +31,6 @@ dns_rdata_txt_to_wire (dns_cursor_t *p, const dns_rdata_txt_t *rd, bool compress
     return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
-size_t
-dns_rdata_txt_length (const dns_rdata_txt_t *rd)
-{
-    return rd->len;
-}
-
 // Each <character-string> quoted, separated by spaces; '"' and '\\' are escaped as \X and
 // other non-printable octets as \DDD.
 void

@@ -12,12 +12,6 @@ dns_rdata_mf_to_wire (dns_cursor_t *p, const dns_rdata_mf_t *rd, bool compress)
     return rdata_name_to_wire (p, &rd->madname, compress);
 }
 
-size_t
-dns_rdata_mf_length (const dns_rdata_mf_t *rd)
-{
-    return rd->madname.len;
-}
-
 void
 rdata_mf_debug (const dns_rdata_mf_t *self, GString *gs)
 {

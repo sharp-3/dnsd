@@ -25,12 +25,6 @@ dns_rdata_unknown_to_wire (dns_cursor_t *p, const dns_rdata_unknown_t *rd, bool 
     return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
-size_t
-dns_rdata_unknown_length (const dns_rdata_unknown_t *rd)
-{
-    return rd->len;
-}
-
 void
 rdata_unknown_debug (const dns_rdata_unknown_t *self, GString *gs)
 {

@@ -23,12 +23,6 @@ dns_rdata_mx_to_wire (dns_cursor_t *p, const dns_rdata_mx_t *rd, bool compress)
     return rdata_end (p, &start, dns_name_to_wire (p, &rd->exchange, compress), DNS_ERR_NO_SPACE);
 }
 
-size_t
-dns_rdata_mx_length (const dns_rdata_mx_t *rd)
-{
-    return 2 + rd->exchange.len;
-}
-
 void
 rdata_mx_debug (const dns_rdata_mx_t *self, GString *gs)
 {

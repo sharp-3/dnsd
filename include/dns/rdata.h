@@ -68,8 +68,6 @@ dns_rdata_from_wire (
 dns_error_t
 dns_rdata_to_wire (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rdata, bool compress);
-size_t
-dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
 
 // debug
 // type and class tell which member of self is used.

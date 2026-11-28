@@ -54,8 +54,6 @@ dns_name_to_uncompressed (const dns_name_ref_t *self, const dns_cursor_t *p, dns
 
 // length
 dns_error_t
-dns_name_length (const dns_cursor_t *p, size_t *size);
-dns_error_t
 dns_name_to_uncompressed_length (const dns_cursor_t *p, const dns_name_ref_t *name, size_t *len);
 
 // check

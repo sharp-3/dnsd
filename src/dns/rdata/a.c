@@ -24,12 +24,6 @@ dns_rdata_a_to_wire (dns_cursor_t *p, const dns_rdata_a_t *rd, bool compress)
     return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
-size_t
-dns_rdata_a_length (const dns_rdata_a_t *rd)
-{
-    return sizeof rd->addr;
-}
-
 void
 rdata_a_debug (const dns_rdata_a_t *self, GString *gs)
 {

@@ -25,12 +25,6 @@ dns_rdata_minfo_to_wire (dns_cursor_t *p, const dns_rdata_minfo_t *rd, bool comp
     return rdata_end (p, &start, err, DNS_ERR_NO_SPACE);
 }
 
-size_t
-dns_rdata_minfo_length (const dns_rdata_minfo_t *rd)
-{
-    return rd->rmailbx.len + rd->emailbx.len;
-}
-
 void
 rdata_minfo_debug (const dns_rdata_minfo_t *self, GString *gs)
 {

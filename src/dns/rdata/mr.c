@@ -12,12 +12,6 @@ dns_rdata_mr_to_wire (dns_cursor_t *p, const dns_rdata_mr_t *rd, bool compress)
     return rdata_name_to_wire (p, &rd->newname, compress);
 }
 
-size_t
-dns_rdata_mr_length (const dns_rdata_mr_t *rd)
-{
-    return rd->newname.len;
-}
-
 void
 rdata_mr_debug (const dns_rdata_mr_t *self, GString *gs)
 {

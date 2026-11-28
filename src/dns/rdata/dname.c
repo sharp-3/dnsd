@@ -15,12 +15,6 @@ dns_rdata_dname_to_wire (dns_cursor_t *p, const dns_rdata_dname_t *rd, bool comp
     return rdata_name_to_wire (p, &rd->target, false);
 }
 
-size_t
-dns_rdata_dname_length (const dns_rdata_dname_t *rd)
-{
-    return rd->target.len;
-}
-
 void
 rdata_dname_debug (const dns_rdata_dname_t *self, GString *gs)
 {

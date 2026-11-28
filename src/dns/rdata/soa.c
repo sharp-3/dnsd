@@ -35,12 +35,6 @@ dns_rdata_soa_to_wire (dns_cursor_t *p, const dns_rdata_soa_t *rd, bool compress
     return rdata_end (p, &start, err, DNS_ERR_NO_SPACE);
 }
 
-size_t
-dns_rdata_soa_length (const dns_rdata_soa_t *rd)
-{
-    return rd->mname.len + rd->rname.len + 20;
-}
-
 void
 rdata_soa_debug (const dns_rdata_soa_t *self, GString *gs)
 {

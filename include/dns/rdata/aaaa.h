@@ -18,7 +18,5 @@ dns_error_t
 dns_rdata_aaaa_from_wire (dns_cursor_t *p, size_t len, dns_rdata_aaaa_t *out);
 dns_error_t
 dns_rdata_aaaa_to_wire (dns_cursor_t *p, const dns_rdata_aaaa_t *rdata, bool compress);
-size_t
-dns_rdata_aaaa_length (const dns_rdata_aaaa_t *rdata);
 
 #endif

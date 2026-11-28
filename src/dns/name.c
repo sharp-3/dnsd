@@ -30,32 +30,8 @@ dns_name_from_ref (dns_name_t *self, const dns_name_ref_t *value)
     return DNS_NAME_MAX < value->len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
-dns_error_t
-dns_name_from_wire (dns_cursor_t *p, dns_name_ref_t *out)
-{
-    size_t      len;
-    dns_error_t err = dns_name_length (p, &len);
-    if (!dns_is_ok (err)) return err;
-
-    const uint8_t *ptr   = cursor_ptr (&p->cur);
-    size_t         start = cursor_bytes (&p->cur);
-    dns_cursor_clear_labels (p, start);
-
-    // Record where every label starts (normal ones, the root included, and the pointer) as
-    // targets for later names, so that a later pointer may go to any of them.
-    dns_label_iter_t it;
-    dns_label_iter_init (&it, ptr, len, 0);
-    while (dns_label_iter_next (&it))
-        dns_cursor_mark_label (p, start + it.off);
-    cursor_add (&p->cur, len, 0);
-
-    out->ptr = ptr;
-    out->len = len;
-    return err;
-}
-
-dns_error_t
-dns_name_length (const dns_cursor_t *p, size_t *size)
+static dns_error_t
+name_length (const dns_cursor_t *p, size_t *size)
 {
     assert (cursor_is_aligned (&p->cur));
     if (cursor_is_overflow (&p->cur)) return DNS_ERR_NAME_TRUNCATED;
@@ -74,6 +50,30 @@ dns_name_length (const dns_cursor_t *p, size_t *size)
 
     *size = it.pos - start;
     return DNS_NAME_MAX < *size ? DNS_OK_NAME_TOO_LONG : DNS_OK;
+}
+
+dns_error_t
+dns_name_from_wire (dns_cursor_t *p, dns_name_ref_t *out)
+{
+    size_t      len;
+    dns_error_t err = name_length (p, &len);
+    if (!dns_is_ok (err)) return err;
+
+    const uint8_t *ptr   = cursor_ptr (&p->cur);
+    size_t         start = cursor_bytes (&p->cur);
+    dns_cursor_clear_labels (p, start);
+
+    // Record where every label starts (normal ones, the root included, and the pointer) as
+    // targets for later names, so that a later pointer may go to any of them.
+    dns_label_iter_t it;
+    dns_label_iter_init (&it, ptr, len, 0);
+    while (dns_label_iter_next (&it))
+        dns_cursor_mark_label (p, start + it.off);
+    cursor_add (&p->cur, len, 0);
+
+    out->ptr = ptr;
+    out->len = len;
+    return err;
 }
 
 // Parses str (see dns_name_from_string) and stores the length of its wire form in *len; with

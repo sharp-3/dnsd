@@ -1,8 +1,6 @@
 #ifndef DNSD_DNS_PARAMS_COMMON_H
 #define DNSD_DNS_PARAMS_COMMON_H
 
-// Shared by the parameter files (class, type, opcode, rcode); not part of the public API.
-
 #include <stddef.h>
 #include <stdint.h>
 
@@ -14,7 +12,6 @@ typedef struct
     const char *name; // mnemonic
 } params_name_t;
 
-// One parameter: its mnemonics and its generic form <prefix><decimal> (e.g. "TYPE65535").
 typedef struct
 {
     const params_name_t *names;

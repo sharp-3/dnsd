@@ -33,26 +33,11 @@ bool
 dns_label_equal (const uint8_t *a, const uint8_t *b);
 
 // label <--> text
-// Reads one label from *str (up to the next '.' or the end) into self, which has room for
-// 1 + DNS_LABEL_MAX octets, and moves *str past it. Errors leave self and *str unchanged.
 dns_error_t
 dns_label_from_string (uint8_t *self, const char **str);
-// Appends the text form of the normal label self (without a dot) to gs.
 dns_error_t
 dns_label_to_string (const uint8_t *self, GString *gs);
 
-// Walks the labels of a name in buf (len octets), starting at offset pos, without following
-// compression pointers:
-//
-//     dns_label_iter_t it;
-//     dns_label_iter_init (&it, buf, len, 0);
-//     while (dns_label_iter_next (&it))
-//         use (it.label, it.off);
-//     if (it.err != DNS_OK) ...
-//
-// Each label it yields is whole within buf and of type NORMAL or POINTER. The name ends after
-// the root label or a pointer, which are yielded too; to go on at the target of a pointer,
-// init the iterator again there.
 typedef struct
 {
     const uint8_t *buf;

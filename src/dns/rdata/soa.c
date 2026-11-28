@@ -20,7 +20,6 @@ dns_rdata_soa_from_wire (dns_cursor_t *p, size_t len, dns_rdata_soa_t *out)
     return err;
 }
 
-// With compress, RNAME may be compressed against MNAME too.
 dns_error_t
 dns_rdata_soa_to_wire (dns_cursor_t *p, const dns_rdata_soa_t *rd, bool compress)
 {

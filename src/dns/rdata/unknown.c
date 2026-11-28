@@ -15,7 +15,6 @@ dns_rdata_unknown_from_wire (dns_cursor_t *p, size_t len, dns_rdata_unknown_t *o
     return err;
 }
 
-// No domain names: compress has no effect.
 dns_error_t
 dns_rdata_unknown_to_wire (dns_cursor_t *p, const dns_rdata_unknown_t *rd, bool compress)
 {

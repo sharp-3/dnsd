@@ -9,7 +9,6 @@
 #include "dns/error.h"
 #include "dns/name.h"
 
-// rmailbx and emailbx point into the message they were read from.
 typedef struct
 {
     dns_name_ref_t rmailbx; // mailbox responsible for the mailing list or mailbox

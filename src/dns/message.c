@@ -25,8 +25,6 @@ dns_message_header_query_validation (const dns_message_t *msg)
     return DNS_OK;
 }
 
-// Reads count questions into a new array stored in *out (NULL when count is 0). Errors
-// leave *out unchanged.
 static dns_error_t
 read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out, dns_error_t *soft)
 {
@@ -47,7 +45,6 @@ read_questions (dns_cursor_t *p, unsigned count, dns_question_t **out, dns_error
     return DNS_OK;
 }
 
-// Like read_questions, for resource records.
 static dns_error_t
 read_records (dns_cursor_t *p, unsigned count, dns_record_t **out, dns_error_t *soft)
 {

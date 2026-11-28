@@ -15,7 +15,6 @@ params_to_string (const params_table_t *t, uint32_t value, GString *gs)
     g_string_append_printf (gs, "%s%lu", t->prefix, (unsigned long)value);
 }
 
-// Parses the generic form of t into *out; see params_from_string.
 static bool
 generic_from_string (const params_table_t *t, const char *str, uint32_t *out)
 {
@@ -29,7 +28,6 @@ generic_from_string (const params_table_t *t, const char *str, uint32_t *out)
     {
         if (!ascii_isdigit (*str)) return false;
         uint32_t digit = (uint32_t)(*str - '0');
-        // value * 10 + digit > max, checked without overflow
         if (t->max < digit || (t->max - digit) / 10 < value) return false;
         value = value * 10 + digit;
     }

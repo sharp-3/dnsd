@@ -8,7 +8,6 @@
 #include "dns/cursor.h"
 #include "dns/error.h"
 
-// data points into the message it was read from.
 typedef struct
 {
     const uint8_t *data; // one or more <character-string>s (length octet + octets)

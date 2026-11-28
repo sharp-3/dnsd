@@ -6,9 +6,6 @@ dns_rdata_txt_from_wire (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out)
 {
     cursor_t start = p->cur;
 
-    // One or more <character-string>s (length octet + octets) filling exactly the len octets:
-    // .len describes the strings, so a string running past them is checked here and not only
-    // by the record.
     dns_rdata_txt_t rd  = {.data = cursor_ptr (&p->cur), .len = len};
     size_t          end = cursor_bytes (&p->cur) + len;
     dns_error_t     err = 0 == len ? DNS_ERR_BAD_RDATA : DNS_OK;
@@ -21,7 +18,6 @@ dns_rdata_txt_from_wire (dns_cursor_t *p, size_t len, dns_rdata_txt_t *out)
     return err;
 }
 
-// No domain names: compress has no effect.
 dns_error_t
 dns_rdata_txt_to_wire (dns_cursor_t *p, const dns_rdata_txt_t *rd, bool compress)
 {
@@ -31,8 +27,6 @@ dns_rdata_txt_to_wire (dns_cursor_t *p, const dns_rdata_txt_t *rd, bool compress
     return rdata_end (p, &start, DNS_OK, DNS_ERR_NO_SPACE);
 }
 
-// Each <character-string> quoted, separated by spaces; '"' and '\\' are escaped as \X and
-// other non-printable octets as \DDD.
 void
 rdata_txt_debug (const dns_rdata_txt_t *self, GString *gs)
 {

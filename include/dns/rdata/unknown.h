@@ -8,8 +8,6 @@
 #include "dns/cursor.h"
 #include "dns/error.h"
 
-// RDATA of a (type, class) without its own member in dns_rdata_t, kept as is (RFC 3597).
-// data points into the message it was read from.
 typedef struct
 {
     const uint8_t *data;

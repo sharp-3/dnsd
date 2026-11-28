@@ -6,7 +6,6 @@ dns_question_from_wire (dns_cursor_t *p, dns_question_t *out)
 {
     cursor_t start = p->cur;
 
-    // QNAME
     dns_name_ref_t name;
     dns_error_t    err = dns_name_from_wire (p, &name);
     if (!dns_is_ok (err)) return err;

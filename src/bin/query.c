@@ -25,11 +25,8 @@
 #define NI_MAXHOST 1025
 #endif
 
-// A record or question line being shown.
-static GString *line;
-static bool     uncompressed;
-// Room for the names of one record once uncompressed, each up to a whole message (names over
-// DNS_NAME_MAX octets are shown uncompressed too).
+static GString   *line;
+static bool       uncompressed;
 static uint8_t    uncompressed_buf[DNS_RECORD_NAMES_MAX][MSG_MAX];
 static dns_name_t uncompressed_names[DNS_RECORD_NAMES_MAX];
 
@@ -43,7 +40,6 @@ usage (void)
     exit (1);
 }
 
-// +FLAG sets a header flag, +noFLAG clears it.
 static bool
 parse_flag (const char *a, dns_header_t *hdr)
 {
@@ -195,8 +191,6 @@ exchange_tcp (const struct addrinfo *ai, const uint8_t *q, size_t qlen, uint8_t 
     return n;
 }
 
-// Expands the owner name into uncompressed_names[0], then the names in the RDATA into the rest.
-// On failure rr is left as read.
 static dns_error_t
 uncompress_record (const dns_cursor_t *p, dns_record_t *rr)
 {
@@ -280,8 +274,6 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
         if (!dns_is_ok (err)) return false;
         if (uncompressed)
         {
-            // On failure the record is shown as read (compressed). A warning the read already
-            // gave is not repeated.
             dns_error_t xerr = uncompress_record (p, &record);
             if (DNS_OK != xerr && xerr != err)
                 printf (
@@ -377,7 +369,6 @@ main (int argc, char **argv)
     if (NULL == qname) usage ();
     if (NULL == server) server = default_server ();
 
-    // A name too long for this buffer would not fit in the query either.
     uint8_t     name_buf[UDP_MAX];
     dns_name_t  name = {.ptr = name_buf, .cap = sizeof name_buf};
     dns_error_t err  = dns_name_from_string (&name, qname);

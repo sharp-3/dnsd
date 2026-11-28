@@ -16,7 +16,6 @@ dns_cursor_mark_label (dns_cursor_t *p, size_t nbytes_off)
         p->label_bitmap[nbytes_off >> 3] |= 1 << (nbytes_off & 0b111);
 }
 
-// Forget every label start at or after from (not yet read / written).
 void
 dns_cursor_clear_labels (dns_cursor_t *p, size_t from)
 {

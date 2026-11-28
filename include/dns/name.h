@@ -18,8 +18,6 @@ typedef struct
     size_t         len; // octets at ptr (wire format, not limited to DNS_NAME_MAX)
 } dns_name_ref_t;
 
-// A name written into storage the caller provides (ptr, cap); a dns_name_ref_t to it comes from
-// dns_name_to_ref.
 typedef struct
 {
     uint8_t *ptr; // wire format
@@ -36,19 +34,16 @@ dns_name_from_ref (dns_name_t *self, const dns_name_ref_t *value);
 // dns_name_ref_t <--> uint8_t * (wire format)
 dns_error_t
 dns_name_from_wire (dns_cursor_t *p, dns_name_ref_t *out);
-// Writes the (uncompressed) name; with compress, ending it with a pointer to the longest suffix
-// already in the message.
 dns_error_t
 dns_name_to_wire (dns_cursor_t *p, const dns_name_ref_t *name, bool compress);
 
 // dns_name_t <-- text, dns_name_ref_t --> text
 dns_error_t
 dns_name_from_string (dns_name_t *self, const char *str);
-// Fails with DNS_ERR_NAME_COMPRESSED on a name ending with a pointer (see dns_name_debug).
 dns_error_t
 dns_name_to_string (const dns_name_ref_t *self, GString *gs);
 
-// compressed --> uncompressed; p is the message self was read from.
+// compressed --> uncompressed
 dns_error_t
 dns_name_to_uncompressed (const dns_name_ref_t *self, const dns_cursor_t *p, dns_name_t *value);
 

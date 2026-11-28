@@ -16,7 +16,6 @@
 
 #define DNS_RECORD_NAMES_MAX (1 + DNS_RDATA_NAMES_MAX) // owner name and RDATA names
 
-// name and rdata point into the message they were read from; keep it alive while rr is used.
 typedef struct
 {
     dns_name_ref_t name;  // owner name

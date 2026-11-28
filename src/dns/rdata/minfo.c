@@ -15,7 +15,6 @@ dns_rdata_minfo_from_wire (dns_cursor_t *p, size_t len, dns_rdata_minfo_t *out)
     return err;
 }
 
-// With compress, EMAILBX may be compressed against RMAILBX too.
 dns_error_t
 dns_rdata_minfo_to_wire (dns_cursor_t *p, const dns_rdata_minfo_t *rd, bool compress)
 {

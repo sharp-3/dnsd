@@ -20,13 +20,9 @@ dns_record_from_wire (dns_cursor_t *p, dns_record_t *out)
     uint32_t    ttl      = take_bits (&p->cur, RR_TTL_SIZE * 8);
     uint16_t    rdlength = take_bits (&p->cur, RR_RDLENGTH_SIZE * 8);
 
-    // The fields above and RDLENGTH octets of RDATA must be in the message.
     if (cursor_is_overflow (&p->cur) || !cursor_fits (&p->cur, rdlength, 0))
         return dns_cursor_rewind_return_error (start, p, DNS_ERR_TRUNCATED);
 
-    // The RDATA must take exactly RDLENGTH octets. It is read with the message cut after them,
-    // so that running past them (in a field or a name) fails as truncated instead of reading
-    // the next record's octets.
     size_t      rdata_start = cursor_bytes (&p->cur);
     size_t      msg_len     = p->cur.len;
     dns_rdata_t rdata;
@@ -36,8 +32,6 @@ dns_record_from_wire (dns_cursor_t *p, dns_record_t *out)
     if (DNS_ERR_TRUNCATED == err || DNS_ERR_NAME_TRUNCATED == err) err = DNS_ERR_BAD_RDATA;
     if (dns_is_ok (err) && cursor_bytes (&p->cur) - rdata_start != rdlength)
         err = DNS_ERR_BAD_RDATA;
-    // The names read may have marked label starts past the record (an RDATA name can run past
-    // RDLENGTH): the rewind unmarks them.
     if (!dns_is_ok (err)) return dns_cursor_rewind_return_error (start, p, err);
 
     *out = (dns_record_t){.name = name, .type = type, .class = class, .ttl = ttl, .rdata = rdata};
@@ -52,8 +46,6 @@ dns_record_to_wire (dns_cursor_t *p, const dns_record_t *rr, bool compress)
     if (!dns_is_ok (err)) return err;
     dns_error_t soft = err;
 
-    // RDLENGTH is known only once the RDATA is written (its names may be compressed): written as 0
-    // first, then set.
     emit_bits (&p->cur, DNS_TYPE_SIZE * 8, rr->type);
     emit_bits (&p->cur, DNS_CLASS_SIZE * 8, rr->class);
     emit_bits (&p->cur, RR_TTL_SIZE * 8, rr->ttl);

@@ -5,17 +5,12 @@
 
 #define OCTET_BITS 8
 
-// The field is bits offset..end-1 counted from the high bit of the position's octet. In octet
-// i it takes bits start..last (from the high bit), leaving tail low bits: bits many, at mask.
-
-// First bit of octet i the field takes.
 static inline size_t
 start_bits (size_t i, size_t offset)
 {
     return 0 == i ? offset : 0;
 }
 
-// Last bit of octet i the field takes.
 static inline size_t
 last_bits (size_t i, size_t end)
 {
@@ -33,7 +28,6 @@ read_bits (const cursor_t *c, size_t nbits)
     size_t         end    = offset + nbits;
     uint64_t       acc    = 0;
 
-    // From the first octet on, each adding its bits below the ones before.
     for (size_t i = 0; i * OCTET_BITS < end; i++)
     {
         size_t       start = start_bits (i, offset);
@@ -65,7 +59,6 @@ write_bits (const cursor_t *c, size_t nbits, uint64_t value)
     size_t   offset = cursor_bits (c);
     size_t   end    = offset + nbits;
 
-    // From the last octet back, each taking the low bits of value left.
     for (size_t i = (end + OCTET_BITS - 1) / OCTET_BITS; 0 < i--;)
     {
         size_t       start = start_bits (i, offset);

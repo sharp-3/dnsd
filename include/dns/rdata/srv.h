@@ -9,7 +9,6 @@
 #include "dns/error.h"
 #include "dns/name.h"
 
-// target points into the message it was read from.
 typedef struct
 {
     uint16_t       priority;

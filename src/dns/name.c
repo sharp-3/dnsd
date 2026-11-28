@@ -4,8 +4,6 @@
 #include "dns/label.h"
 #include "dns/name.h"
 
-// Checks the (whole) compression pointer at label: it must go back before offset bound to a
-// recorded label start. Stores its target in *target.
 static dns_error_t
 check_pointer (const dns_cursor_t *p, const uint8_t *label, size_t bound, size_t *target)
 {
@@ -63,8 +61,6 @@ dns_name_from_wire (dns_cursor_t *p, dns_name_ref_t *out)
     size_t         start = cursor_bytes (&p->cur);
     dns_cursor_clear_labels (p, start);
 
-    // Record where every label starts (normal ones, the root included, and the pointer) as
-    // targets for later names, so that a later pointer may go to any of them.
     dns_label_iter_t it;
     dns_label_iter_init (&it, ptr, len, 0);
     while (dns_label_iter_next (&it))
@@ -76,8 +72,6 @@ dns_name_from_wire (dns_cursor_t *p, dns_name_ref_t *out)
     return err;
 }
 
-// Parses str (see dns_name_from_string) and stores the length of its wire form in *len; with
-// buf, also writes that form there (the caller checked it fits).
 static dns_error_t
 name_parse (const char *str, uint8_t *buf, size_t *len)
 {
@@ -102,7 +96,6 @@ name_parse (const char *str, uint8_t *buf, size_t *len)
 dns_error_t
 dns_name_from_string (dns_name_t *self, const char *str)
 {
-    // Check and measure first, so that self is left alone on any error.
     size_t      n;
     dns_error_t err = name_parse (str, NULL, &n);
     if (DNS_OK != err) return err;
@@ -113,10 +106,6 @@ dns_name_from_string (dns_name_t *self, const char *str)
     return DNS_NAME_MAX < n ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
-// Uncompresses the name at src into out (room for cap octets) and stores its full length in
-// *out_len; octets past cap are counted but not copied. Pointers only go back to label starts
-// of earlier names, so each name is followed at most once and the length is bounded by the
-// message size.
 static dns_error_t
 to_uncompressed (const dns_cursor_t *p,
                  const uint8_t      *src,
@@ -160,7 +149,6 @@ dns_name_to_uncompressed_length (const dns_cursor_t *p, const dns_name_ref_t *na
 dns_error_t
 dns_name_to_uncompressed (const dns_name_ref_t *self, const dns_cursor_t *p, dns_name_t *value)
 {
-    // Check and measure first, so that value is left alone on any error.
     size_t      n;
     dns_error_t err = to_uncompressed (p, self->ptr, self->len, p->cur.len, NULL, 0, &n);
     if (!dns_is_ok (err)) return err;
@@ -171,7 +159,6 @@ dns_name_to_uncompressed (const dns_name_ref_t *self, const dns_cursor_t *p, dns
     return err;
 }
 
-// Whether the uncompressed names a and b, len octets each, are equal ignoring ASCII case.
 static bool
 labels_equal (const uint8_t *a, const uint8_t *b, size_t len)
 {
@@ -192,7 +179,6 @@ find_suffix (
     {
         uint8_t name[DNS_NAME_MAX];
         size_t  n;
-        // Only names that fit in name[] can match; longer ones are not compressed.
         if (dns_cursor_test_label (p, t) &&
             dns_is_ok (to_uncompressed (
                 p, p->cur.buf + t, nbytes_off - t, nbytes_off, name, sizeof name, &n)) &&
@@ -217,8 +203,6 @@ dns_name_check_uncompressed (const dns_name_ref_t *name)
     return DNS_NAME_MAX < name->len ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
-// Records where the normal labels of the name just written at the position (n octets) start
-// (not the root label or the pointer) as targets for later names, and moves past it.
 static void
 mark_written (dns_cursor_t *p, size_t n)
 {
@@ -236,15 +220,12 @@ dns_name_to_wire (dns_cursor_t *p, const dns_name_ref_t *name, bool compress)
 {
     assert (cursor_is_aligned (&p->cur));
 
-    // A pointer in name goes into the message it was read from, not necessarily this one.
     dns_error_t err = dns_name_check_uncompressed (name);
     if (!dns_is_ok (err)) return err;
 
     size_t start = cursor_bytes (&p->cur);
     dns_cursor_clear_labels (p, start);
 
-    // i: octets kept as labels; with compress, the rest (if found earlier in the message) becomes
-    // a pointer to target. The leftmost suffix found is the longest one.
     size_t i      = name->len;
     size_t target = 0;
     bool   found  = false;
@@ -270,8 +251,6 @@ dns_name_to_wire (dns_cursor_t *p, const dns_name_ref_t *name, bool compress)
     return err;
 }
 
-// Appends the labels of self up to stop (the end, or the pointer ending it), each followed by a
-// dot; the root label only shows when it is the whole name (".").
 static void
 append_labels (const dns_name_ref_t *self, const uint8_t *stop, GString *gs)
 {
@@ -298,7 +277,6 @@ dns_name_to_string (const dns_name_ref_t *self, GString *gs)
 GString *
 dns_name_debug (const dns_name_ref_t *self, GString *gs)
 {
-    // Find the pointer ending the name; without one, it is shown like dns_name_to_string.
     dns_label_iter_t it;
     dns_label_iter_init (&it, self->ptr, self->len, 0);
     while (dns_label_iter_next (&it) && DNS_LABEL_TYPE_NORMAL == dns_label_type (it.label))

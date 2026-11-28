@@ -4,7 +4,6 @@
 #include "packet/cursor.h"
 #include "utils/string.h"
 
-// A cursor over the first octets of label, for reading only (hence the cast).
 static cursor_t
 label_cursor (const uint8_t *label, size_t len)
 {
@@ -73,8 +72,6 @@ dns_label_to_string (const uint8_t *self, GString *gs)
     return DNS_OK;
 }
 
-// p points just past the backslash. Accepts exactly three decimal
-// digits with value <= 255 and stores it in *out.
 static bool
 parse_decimal_escape (const char *p, uint8_t *out)
 {

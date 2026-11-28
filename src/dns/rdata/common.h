@@ -1,8 +1,6 @@
 #ifndef DNSD_DNS_RDATA_COMMON_H
 #define DNSD_DNS_RDATA_COMMON_H
 
-// Shared by the per-type RDATA files and rdata.c; not part of the public API.
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

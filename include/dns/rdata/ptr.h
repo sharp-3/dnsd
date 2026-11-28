@@ -9,7 +9,6 @@
 #include "dns/error.h"
 #include "dns/name.h"
 
-// ptrdname points into the message it was read from.
 typedef struct
 {
     dns_name_ref_t ptrdname;

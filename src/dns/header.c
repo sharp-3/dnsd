@@ -59,25 +59,22 @@ dns_header_to_wire (dns_cursor_t *p, const dns_header_t *hdr)
 GString *
 dns_header_debug (const dns_header_t *self, GString *gs)
 {
-    g_string_append_printf (gs,
-                            "id=0x%04X%s%s%s%s%s%s%s%s opcode=",
-                            self->id,
-                            self->qr ? " qr" : "",
-                            self->aa ? " aa" : "",
-                            self->tc ? " tc" : "",
-                            self->rd ? " rd" : "",
-                            self->ra ? " ra" : "",
-                            self->z ? " z" : "",
-                            self->ad ? " ad" : "",
-                            self->cd ? " cd" : "");
+    g_string_append_printf (gs, "id=0x%04X", self->id);
+    g_string_append (gs, self->qr ? " qr" : "");
+    g_string_append (gs, self->aa ? " aa" : "");
+    g_string_append (gs, self->tc ? " tc" : "");
+    g_string_append (gs, self->rd ? " rd" : "");
+    g_string_append (gs, self->ra ? " ra" : "");
+    g_string_append (gs, self->z ? " z" : "");
+    g_string_append (gs, self->ad ? " ad" : "");
+    g_string_append (gs, self->cd ? " cd" : "");
+    g_string_append (gs, " opcode=");
     dns_opcode_to_string (self->opcode, gs);
     g_string_append (gs, " rcode=");
     dns_rcode_to_string (self->rcode, gs);
-    g_string_append_printf (gs,
-                            " qdcount=%u ancount=%u nscount=%u arcount=%u",
-                            self->qdcount,
-                            self->ancount,
-                            self->nscount,
-                            self->arcount);
+    g_string_append_printf (gs, " qdcount=%u", self->qdcount);
+    g_string_append_printf (gs, " ancount=%u", self->ancount);
+    g_string_append_printf (gs, " nscount=%u", self->nscount);
+    g_string_append_printf (gs, " arcount=%u", self->arcount);
     return gs;
 }

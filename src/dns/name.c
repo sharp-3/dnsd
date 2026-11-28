@@ -100,12 +100,11 @@ dns_name_from_string (dns_name_t *self, const char *str)
     size_t      n;
     dns_error_t err = name_parse (str, NULL, &n);
     if (DNS_OK != err) return err;
-    if (DNS_NAME_MAX < n) return DNS_ERR_NAME_TOO_LONG;
     if (self->cap < n) return DNS_ERR_NO_SPACE;
 
     name_parse (str, self->ptr, &n);
     self->len = n;
-    return DNS_OK;
+    return DNS_NAME_MAX < n ? DNS_OK_NAME_TOO_LONG : DNS_OK;
 }
 
 static dns_error_t

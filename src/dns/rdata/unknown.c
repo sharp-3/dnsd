@@ -1,10 +1,8 @@
-#include <stdio.h>
-
 #include "common.h"
 #include "packet/cursor.h"
 
 dns_error_t
-dns_rdata_unknown_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_unknown_t *out)
+dns_rdata_unknown_from_wire (dns_cursor_t *p, size_t len, dns_rdata_unknown_t *out)
 {
     cursor_t start = p->cur;
 
@@ -19,7 +17,7 @@ dns_rdata_unknown_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_unknown_t *
 
 // No domain names: compress has no effect.
 dns_error_t
-dns_rdata_unknown_to_bytes (dns_cursor_t *p, const dns_rdata_unknown_t *rd, bool compress)
+dns_rdata_unknown_to_wire (dns_cursor_t *p, const dns_rdata_unknown_t *rd, bool compress)
 {
     (void)compress;
     cursor_t start = p->cur;
@@ -34,17 +32,10 @@ dns_rdata_unknown_length (const dns_rdata_unknown_t *rd)
 }
 
 void
-rdata_unknown_debug (const dns_rdata_unknown_t *rd, char *buf, size_t len)
+rdata_unknown_debug (const dns_rdata_unknown_t *self, GString *gs)
 {
-    static const char hex[] = "0123456789abcdef";
-
-    int    k = snprintf (buf, len, "\\# %zu", rd->len);
-    size_t n = k < 0 ? 0 : (size_t)k < len ? (size_t)k : len - 1;
-    for (size_t i = 0; i < rd->len && n + 1 < len; i++)
-    {
-        if (i == 0) buf[n++] = ' ';
-        if (n + 1 < len) buf[n++] = hex[rd->data[i] >> 4];
-        if (n + 1 < len) buf[n++] = hex[rd->data[i] & 0xf];
-    }
-    buf[n] = '\0';
+    g_string_append_printf (gs, "\\# %zu", self->len);
+    if (0 < self->len) g_string_append_c (gs, ' ');
+    for (size_t i = 0; i < self->len; i++)
+        g_string_append_printf (gs, "%02x", self->data[i]);
 }

@@ -5,15 +5,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <glib.h>
+
 #include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/name.h"
 #include "dns/params/class.h"
 #include "dns/params/type.h"
-
-#define DNS_QUESTION_DEBUG_SIZE                                                                    \
-    (sizeof "\t\t" + (DNS_NAME_DEBUG_SIZE - 1) + (DNS_TYPE_DISPLAY_SIZE - 1) +                     \
-     (DNS_CLASS_DISPLAY_SIZE - 1))
 
 typedef struct
 {
@@ -24,15 +22,12 @@ typedef struct
 
 // dns_question_t <--> uint8_t * (wire format)
 dns_error_t
-dns_question_from_bytes (dns_cursor_t *p, dns_question_t *out);
+dns_question_from_wire (dns_cursor_t *p, dns_question_t *out);
 dns_error_t
-dns_question_to_bytes (dns_cursor_t *p, const dns_question_t *q, bool compress);
+dns_question_to_wire (dns_cursor_t *p, const dns_question_t *q, bool compress);
 
 // debug
-const char *
-dns_question_debug_r (const dns_question_t *q, char *buf, size_t len);
-
-#define dns_question_debug(q)                                                                      \
-    dns_question_debug_r ((q), (char[DNS_QUESTION_DEBUG_SIZE]){}, DNS_QUESTION_DEBUG_SIZE)
+GString *
+dns_question_debug (const dns_question_t *self, GString *gs);
 
 #endif

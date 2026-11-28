@@ -12,17 +12,18 @@ static const params_name_t names[] = {
 
 static const params_table_t table = PARAMS_TABLE (names, "OPCODE", DNS_OPCODE_MAX);
 
-const char *
-dns_opcode_display_r (dns_opcode_t value, char *buf, size_t len)
-{
-    return params_display_r (&table, value, buf, len);
-}
-
 dns_error_t
-dns_opcode_from_string (const char *str, dns_opcode_t *out)
+dns_opcode_from_string (dns_opcode_t *self, const char *str)
 {
     uint32_t value;
     if (!params_from_string (&table, str, &value)) return DNS_ERR_BAD_TEXT;
-    *out = (dns_opcode_t)value;
+    *self = (dns_opcode_t)value;
+    return DNS_OK;
+}
+
+dns_error_t
+dns_opcode_to_string (dns_opcode_t self, GString *gs)
+{
+    params_to_string (&table, self, gs);
     return DNS_OK;
 }

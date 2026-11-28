@@ -23,7 +23,7 @@ hexdump (const uint8_t *pkt, size_t nbytes_len)
         {
             if (i < chunk_len) printf ("%02X ", pkt[nbytes_off + i]);
             else printf ("   ");
-            if (i == 7) printf (" ");
+            if (7 == i) printf (" ");
         }
 
         printf (" |");

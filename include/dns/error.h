@@ -64,7 +64,7 @@ dns_merge_soft (dns_error_t a, dns_error_t b)
 {
     if (!dns_is_ok (a)) return a;
     if (!dns_is_ok (b)) return b;
-    return a != DNS_OK ? a : b;
+    return DNS_OK != a ? a : b;
 }
 
 // dns_error_t --> char * (string)

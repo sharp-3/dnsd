@@ -1,13 +1,12 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <arpa/inet.h>
-#include <stdio.h>
 
 #include "common.h"
 #include "packet/cursor.h"
 
 dns_error_t
-dns_rdata_aaaa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_aaaa_t *out)
+dns_rdata_aaaa_from_wire (dns_cursor_t *p, size_t len, dns_rdata_aaaa_t *out)
 {
     cursor_t start = p->cur;
 
@@ -21,7 +20,7 @@ dns_rdata_aaaa_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_aaaa_t *out)
 
 // No domain names: compress has no effect.
 dns_error_t
-dns_rdata_aaaa_to_bytes (dns_cursor_t *p, const dns_rdata_aaaa_t *rd, bool compress)
+dns_rdata_aaaa_to_wire (dns_cursor_t *p, const dns_rdata_aaaa_t *rd, bool compress)
 {
     (void)compress;
     cursor_t start = p->cur;
@@ -36,14 +35,14 @@ dns_rdata_aaaa_length (const dns_rdata_aaaa_t *rd)
 }
 
 void
-rdata_aaaa_debug (const dns_rdata_aaaa_t *rd, char *buf, size_t len)
+rdata_aaaa_debug (const dns_rdata_aaaa_t *self, GString *gs)
 {
     char addr[INET6_ADDRSTRLEN];
-    if (!inet_ntop (AF_INET6, rd->addr, addr, sizeof addr))
+    if (NULL == inet_ntop (AF_INET6, self->addr, addr, sizeof addr))
     {
-        rdata_unknown_debug (
-            &(dns_rdata_unknown_t){.data = rd->addr, .len = sizeof rd->addr}, buf, len);
+        rdata_unknown_debug (&(dns_rdata_unknown_t){.data = self->addr, .len = sizeof self->addr},
+                             gs);
         return;
     }
-    snprintf (buf, len, "%s", addr);
+    g_string_append (gs, addr);
 }

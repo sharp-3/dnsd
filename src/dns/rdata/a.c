@@ -1,10 +1,8 @@
-#include <stdio.h>
-
 #include "common.h"
 #include "packet/cursor.h"
 
 dns_error_t
-dns_rdata_a_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_a_t *out)
+dns_rdata_a_from_wire (dns_cursor_t *p, size_t len, dns_rdata_a_t *out)
 {
     cursor_t start = p->cur;
 
@@ -18,7 +16,7 @@ dns_rdata_a_from_bytes (dns_cursor_t *p, size_t len, dns_rdata_a_t *out)
 
 // No domain names: compress has no effect.
 dns_error_t
-dns_rdata_a_to_bytes (dns_cursor_t *p, const dns_rdata_a_t *rd, bool compress)
+dns_rdata_a_to_wire (dns_cursor_t *p, const dns_rdata_a_t *rd, bool compress)
 {
     (void)compress;
     cursor_t start = p->cur;
@@ -33,8 +31,8 @@ dns_rdata_a_length (const dns_rdata_a_t *rd)
 }
 
 void
-rdata_a_debug (const dns_rdata_a_t *rd, char *buf, size_t len)
+rdata_a_debug (const dns_rdata_a_t *self, GString *gs)
 {
-    const uint8_t *a = rd->addr;
-    snprintf (buf, len, "%u.%u.%u.%u", a[0], a[1], a[2], a[3]);
+    const uint8_t *a = self->addr;
+    g_string_append_printf (gs, "%u.%u.%u.%u", a[0], a[1], a[2], a[3]);
 }

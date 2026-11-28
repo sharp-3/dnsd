@@ -7,6 +7,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <glib.h>
+
 #include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/name.h"
@@ -19,46 +21,46 @@ rdata_end (dns_cursor_t *p, const cursor_t *start, dns_error_t err, dns_error_t 
 
 // RDATA made of a single name (NS, CNAME, PTR, DNAME)
 dns_error_t
-rdata_name_from_bytes (dns_cursor_t *p, size_t len, dns_name_ref_t *out);
+rdata_name_from_wire (dns_cursor_t *p, size_t len, dns_name_ref_t *out);
 dns_error_t
-rdata_name_to_bytes (dns_cursor_t *p, const dns_name_ref_t *name, bool compress);
+rdata_name_to_wire (dns_cursor_t *p, const dns_name_ref_t *name, bool compress);
 
-// debug
+// debug: append to gs
 void
-rdata_name_debug (const dns_name_ref_t *name, char *buf, size_t len);
+rdata_name_debug (const dns_name_ref_t *self, GString *gs);
 void
-rdata_a_debug (const dns_rdata_a_t *rd, char *buf, size_t len);
+rdata_a_debug (const dns_rdata_a_t *self, GString *gs);
 void
-rdata_aaaa_debug (const dns_rdata_aaaa_t *rd, char *buf, size_t len);
+rdata_aaaa_debug (const dns_rdata_aaaa_t *self, GString *gs);
 void
-rdata_ns_debug (const dns_rdata_ns_t *rd, char *buf, size_t len);
+rdata_ns_debug (const dns_rdata_ns_t *self, GString *gs);
 void
-rdata_cname_debug (const dns_rdata_cname_t *rd, char *buf, size_t len);
+rdata_cname_debug (const dns_rdata_cname_t *self, GString *gs);
 void
-rdata_ptr_debug (const dns_rdata_ptr_t *rd, char *buf, size_t len);
+rdata_ptr_debug (const dns_rdata_ptr_t *self, GString *gs);
 void
-rdata_dname_debug (const dns_rdata_dname_t *rd, char *buf, size_t len);
+rdata_dname_debug (const dns_rdata_dname_t *self, GString *gs);
 void
-rdata_mx_debug (const dns_rdata_mx_t *rd, char *buf, size_t len);
+rdata_mx_debug (const dns_rdata_mx_t *self, GString *gs);
 void
-rdata_srv_debug (const dns_rdata_srv_t *rd, char *buf, size_t len);
+rdata_srv_debug (const dns_rdata_srv_t *self, GString *gs);
 void
-rdata_soa_debug (const dns_rdata_soa_t *rd, char *buf, size_t len);
+rdata_soa_debug (const dns_rdata_soa_t *self, GString *gs);
 void
-rdata_md_debug (const dns_rdata_md_t *rd, char *buf, size_t len);
+rdata_md_debug (const dns_rdata_md_t *self, GString *gs);
 void
-rdata_mf_debug (const dns_rdata_mf_t *rd, char *buf, size_t len);
+rdata_mf_debug (const dns_rdata_mf_t *self, GString *gs);
 void
-rdata_mb_debug (const dns_rdata_mb_t *rd, char *buf, size_t len);
+rdata_mb_debug (const dns_rdata_mb_t *self, GString *gs);
 void
-rdata_mg_debug (const dns_rdata_mg_t *rd, char *buf, size_t len);
+rdata_mg_debug (const dns_rdata_mg_t *self, GString *gs);
 void
-rdata_mr_debug (const dns_rdata_mr_t *rd, char *buf, size_t len);
+rdata_mr_debug (const dns_rdata_mr_t *self, GString *gs);
 void
-rdata_minfo_debug (const dns_rdata_minfo_t *rd, char *buf, size_t len);
+rdata_minfo_debug (const dns_rdata_minfo_t *self, GString *gs);
 void
-rdata_txt_debug (const dns_rdata_txt_t *rd, char *buf, size_t len);
+rdata_txt_debug (const dns_rdata_txt_t *self, GString *gs);
 void
-rdata_unknown_debug (const dns_rdata_unknown_t *rd, char *buf, size_t len);
+rdata_unknown_debug (const dns_rdata_unknown_t *self, GString *gs);
 
 #endif

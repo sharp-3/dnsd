@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <glib.h>
+
 #include "dns/cursor.h"
 #include "dns/error.h"
 #include "dns/params/class.h"
@@ -57,21 +59,21 @@ dns_rdata_known (dns_type_t type, dns_class_t class);
 
 // dns_rdata_t <--> uint8_t * (wire format)
 // len is RDLENGTH. Only TXT and unknown read by it; that the RDATA takes exactly len octets is
-// checked by dns_record_from_bytes.
+// checked by dns_record_from_wire.
 dns_error_t
-dns_rdata_from_bytes (
+dns_rdata_from_wire (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, size_t len, dns_rdata_t *out);
 // With compress, compresses the names where RFC 3597 allows it (NS, CNAME, PTR, MX, SOA, MD,
 // MF, MB, MG, MR, MINFO).
 dns_error_t
-dns_rdata_to_bytes (
+dns_rdata_to_wire (
     dns_cursor_t *p, dns_type_t type, dns_class_t class, const dns_rdata_t *rdata, bool compress);
 size_t
 dns_rdata_length (dns_type_t type, dns_class_t class, const dns_rdata_t *rdata);
 
 // debug
-const char *
-dns_rdata_debug_r (
-    dns_type_t type, dns_class_t class, const dns_rdata_t *rdata, char *buf, size_t len);
+// type and class tell which member of self is used.
+GString *
+dns_rdata_debug (const dns_rdata_t *self, dns_type_t type, dns_class_t class, GString *gs);
 
 #endif

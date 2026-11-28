@@ -1,13 +1,12 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include "dns/cursor.h"
 #include "dns/header.h"
 #include "packet/cursor.h"
 
 dns_error_t
-dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out)
+dns_header_from_wire (dns_cursor_t *p, dns_header_t *out)
 {
     cursor_t     start = p->cur;
     dns_header_t h;
@@ -27,17 +26,14 @@ dns_header_from_bytes (dns_cursor_t *p, dns_header_t *out)
     h.nscount = take_bits (&p->cur, 16);
     h.arcount = take_bits (&p->cur, 16);
     if (cursor_is_overflow (&p->cur))
-    {
-        dns_cursor_rewind (p, &start);
-        return DNS_ERR_TRUNCATED;
-    }
+        return dns_cursor_rewind_return_error (start, p, DNS_ERR_TRUNCATED);
 
     *out = h;
     return DNS_OK;
 }
 
 dns_error_t
-dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
+dns_header_to_wire (dns_cursor_t *p, const dns_header_t *hdr)
 {
     cursor_t start = p->cur;
     emit_bits (&p->cur, 16, hdr->id);
@@ -56,34 +52,32 @@ dns_header_to_bytes (dns_cursor_t *p, const dns_header_t *hdr)
     emit_bits (&p->cur, 16, hdr->nscount);
     emit_bits (&p->cur, 16, hdr->arcount);
     if (cursor_is_overflow (&p->cur))
-    {
-        dns_cursor_rewind (p, &start);
-        return DNS_ERR_NO_SPACE;
-    }
+        return dns_cursor_rewind_return_error (start, p, DNS_ERR_NO_SPACE);
     return DNS_OK;
 }
 
-const char *
-dns_header_debug_r (const dns_header_t *hdr, char *buf, size_t len)
+GString *
+dns_header_debug (const dns_header_t *self, GString *gs)
 {
-    snprintf (buf,
-              len,
-              "id=0x%04X%s%s%s%s%s%s%s%s opcode=%s rcode=%s "
-              "qdcount=%u ancount=%u nscount=%u arcount=%u",
-              hdr->id,
-              hdr->qr ? " qr" : "",
-              hdr->aa ? " aa" : "",
-              hdr->tc ? " tc" : "",
-              hdr->rd ? " rd" : "",
-              hdr->ra ? " ra" : "",
-              hdr->z ? " z" : "",
-              hdr->ad ? " ad" : "",
-              hdr->cd ? " cd" : "",
-              dns_opcode_display (hdr->opcode),
-              dns_rcode_display (hdr->rcode),
-              hdr->qdcount,
-              hdr->ancount,
-              hdr->nscount,
-              hdr->arcount);
-    return buf;
+    g_string_append_printf (gs,
+                            "id=0x%04X%s%s%s%s%s%s%s%s opcode=",
+                            self->id,
+                            self->qr ? " qr" : "",
+                            self->aa ? " aa" : "",
+                            self->tc ? " tc" : "",
+                            self->rd ? " rd" : "",
+                            self->ra ? " ra" : "",
+                            self->z ? " z" : "",
+                            self->ad ? " ad" : "",
+                            self->cd ? " cd" : "");
+    dns_opcode_to_string (self->opcode, gs);
+    g_string_append (gs, " rcode=");
+    dns_rcode_to_string (self->rcode, gs);
+    g_string_append_printf (gs,
+                            " qdcount=%u ancount=%u nscount=%u arcount=%u",
+                            self->qdcount,
+                            self->ancount,
+                            self->nscount,
+                            self->arcount);
+    return gs;
 }

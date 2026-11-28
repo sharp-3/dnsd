@@ -50,7 +50,7 @@ cursor_is_overflow (const cursor_t *c)
 static inline bool
 cursor_is_aligned (const cursor_t *c)
 {
-    return c->nbits == 0;
+    return 0 == c->nbits;
 }
 
 static inline uint8_t *

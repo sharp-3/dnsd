@@ -34,10 +34,17 @@ dns_cursor_rewind (dns_cursor_t *p, const cursor_t *pos)
     dns_cursor_clear_labels (p, cursor_bytes (pos));
 }
 
+dns_error_t
+dns_cursor_rewind_return_error (cursor_t pos, dns_cursor_t *p, dns_error_t err)
+{
+    dns_cursor_rewind (p, &pos);
+    return err;
+}
+
 bool
 dns_cursor_test_label (const dns_cursor_t *p, size_t nbytes_off)
 {
     if (nbytes_off <= DNS_LABEL_POINTER_MAX)
-        return (p->label_bitmap[nbytes_off >> 3] & (1 << (nbytes_off & 0b111))) != 0;
+        return 0 != (p->label_bitmap[nbytes_off >> 3] & (1 << (nbytes_off & 0b111)));
     return false;
 }

@@ -26,38 +26,39 @@ static const params_table_t table = PARAMS_TABLE (names, "TYPE", UINT16_MAX);
 bool
 dns_type_is_reserved (dns_type_t type)
 {
-    return type == DNS_TYPE_RESERVED_LOW ||
+    return DNS_TYPE_RESERVED_LOW == type ||
            (DNS_TYPE_RESERVED_MID_MIN <= type && type <= DNS_TYPE_RESERVED_MID_MAX) ||
-           type == DNS_TYPE_RESERVED_HIGH;
+           DNS_TYPE_RESERVED_HIGH == type;
 }
 
 bool
 dns_type_is_qonly_or_meta (dns_type_t type)
 {
     return (DNS_TYPE_QONLY_OR_META_MIN <= type && type <= DNS_TYPE_QONLY_OR_META_MAX) ||
-           type == DNS_TYPE_OPT;
+           DNS_TYPE_OPT == type;
 }
 
 bool
 dns_type_is_data (dns_type_t type)
 {
     return (DNS_TYPE_DATA_LOW_MIN <= type && type <= DNS_TYPE_DATA_LOW_MAX &&
-            type != DNS_TYPE_OPT) ||
+            DNS_TYPE_OPT != type) ||
            (DNS_TYPE_DATA_MID_MIN <= type && type <= DNS_TYPE_DATA_MID_MAX) ||
            (DNS_TYPE_DATA_HIGH_MIN <= type && type <= DNS_TYPE_DATA_HIGH_MAX);
 }
 
-const char *
-dns_type_display_r (dns_type_t value, char *buf, size_t len)
-{
-    return params_display_r (&table, value, buf, len);
-}
-
 dns_error_t
-dns_type_from_string (const char *str, dns_type_t *out)
+dns_type_from_string (dns_type_t *self, const char *str)
 {
     uint32_t value;
     if (!params_from_string (&table, str, &value)) return DNS_ERR_BAD_TEXT;
-    *out = (dns_type_t)value;
+    *self = (dns_type_t)value;
+    return DNS_OK;
+}
+
+dns_error_t
+dns_type_to_string (dns_type_t self, GString *gs)
+{
+    params_to_string (&table, self, gs);
     return DNS_OK;
 }

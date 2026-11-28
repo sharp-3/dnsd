@@ -4,9 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <glib.h>
+
 #include "dns/error.h"
 
-#define DNS_RCODE_DISPLAY_SIZE sizeof "RCODE255"
 #define DNS_RCODE_MAX 15 // RCODE is a 4-bit header field (EDNS extended RCODE not handled)
 
 typedef enum : uint8_t
@@ -25,15 +26,10 @@ typedef enum : uint8_t
     DNS_RCODE_DSOTYPENI = 11, // DSO-TYPE not implemented (RFC 8490)
 } dns_rcode_t;
 
-// dns_rcode_t <-- char * (string)
+// dns_rcode_t <--> text
 dns_error_t
-dns_rcode_from_string (const char *str, dns_rcode_t *out);
-
-// display
-const char *
-dns_rcode_display_r (dns_rcode_t value, char *buf, size_t len);
-
-#define dns_rcode_display(value)                                                                   \
-    dns_rcode_display_r ((value), (char[DNS_RCODE_DISPLAY_SIZE]){}, DNS_RCODE_DISPLAY_SIZE)
+dns_rcode_from_string (dns_rcode_t *self, const char *str);
+dns_error_t
+dns_rcode_to_string (dns_rcode_t self, GString *gs);
 
 #endif

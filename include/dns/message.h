@@ -18,9 +18,9 @@ typedef struct
 
 // dns_message_t <-- uint8_t * (wire format)
 dns_error_t
-dns_message_header_from_bytes (dns_cursor_t *p, dns_message_t *out);
+dns_message_header_from_wire (dns_cursor_t *p, dns_message_t *out);
 dns_error_t
-dns_message_body_from_bytes (dns_cursor_t *p, dns_message_t *msg);
+dns_message_body_from_wire (dns_cursor_t *p, dns_message_t *msg);
 
 // query validation
 dns_error_t

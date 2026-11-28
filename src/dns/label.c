@@ -61,42 +61,16 @@ dns_label_equal (const uint8_t *a, const uint8_t *b)
 }
 
 dns_error_t
-dns_label_to_string (const uint8_t *label, char *buf, size_t len, size_t *out)
+dns_label_to_string (const uint8_t *self, GString *gs)
 {
-    if (len <= *out) return DNS_ERR_NO_SPACE;
-
-    char *s   = buf + *out;
-    char *lim = buf + len - 1;
-    for (size_t j = 1; j <= label[0]; j++)
+    for (size_t j = 1; j <= self[0]; j++)
     {
-        uint8_t c = label[j];
-        if (c < 0x21 || 0x7e < c)
-        {
-            if (lim - s < (ptrdiff_t)DNS_LABEL_ESCAPE_SIZE) goto no_space;
-            *s++ = '\\';
-            *s++ = '0' + c / 100;
-            *s++ = '0' + c / 10 % 10;
-            *s++ = '0' + c % 10;
-        }
-        else if (strchr (".\\\"();@$", c) != NULL)
-        {
-            if (lim - s < 2) goto no_space;
-            *s++ = '\\';
-            *s++ = c;
-        }
-        else
-        {
-            if (lim - s < 1) goto no_space;
-            *s++ = c;
-        }
+        uint8_t c = self[j];
+        if (c < 0x21 || 0x7e < c) g_string_append_printf (gs, "\\%03u", c);
+        else if (NULL != strchr (".\\\"();@$", c)) g_string_append_printf (gs, "\\%c", c);
+        else g_string_append_c (gs, c);
     }
-    *s   = '\0';
-    *out = s - buf;
     return DNS_OK;
-
-no_space:
-    buf[*out] = '\0';
-    return DNS_ERR_NO_SPACE;
 }
 
 // p points just past the backslash. Accepts exactly three decimal
@@ -113,24 +87,23 @@ parse_decimal_escape (const char *p, uint8_t *out)
 }
 
 dns_error_t
-dns_label_from_string (const char **str, uint8_t *label, size_t len)
+dns_label_from_string (uint8_t *self, const char **str)
 {
+    uint8_t     label[1 + DNS_LABEL_MAX];
     const char *p = *str;
     size_t      n = 0;
 
-    if (len == 0) return DNS_ERR_NO_SPACE;
-
-    for (; *p != '.' && *p != '\0'; p++)
+    for (; '.' != *p && '\0' != *p; p++)
     {
         uint8_t c = (uint8_t)*p;
-        if (c == '\\')
+        if ('\\' == c)
         {
             if (ascii_isdigit (p[1]))
             {
                 if (!parse_decimal_escape (p + 1, &c)) return DNS_ERR_BAD_TEXT;
                 p += 3;
             }
-            else if (p[1] != '\0')
+            else if ('\0' != p[1])
             {
                 c = (uint8_t)*++p;
             }
@@ -139,13 +112,13 @@ dns_label_from_string (const char **str, uint8_t *label, size_t len)
                 return DNS_ERR_BAD_TEXT;
             }
         }
-        if (len <= 1 + n) return DNS_ERR_NO_SPACE;
+        if (DNS_LABEL_MAX <= n) return DNS_ERR_NAME_LABEL_TOO_LONG;
         label[1 + n++] = c;
     }
-    if (DNS_LABEL_MAX < n) return DNS_ERR_NAME_LABEL_TOO_LONG;
 
     label[0] = n;
-    *str     = p;
+    memcpy (self, label, 1 + n);
+    *str = p;
     return DNS_OK;
 }
 
@@ -158,7 +131,7 @@ dns_label_iter_init (dns_label_iter_t *it, const uint8_t *buf, size_t len, size_
 bool
 dns_label_iter_next (dns_label_iter_t *it)
 {
-    if (it->end || it->err != DNS_OK) return false;
+    if (it->end || DNS_OK != it->err) return false;
     if (it->len <= it->pos)
     {
         it->err = DNS_ERR_NAME_TRUNCATED;
@@ -169,7 +142,7 @@ dns_label_iter_next (dns_label_iter_t *it)
     switch (dns_label_type (label))
     {
     case DNS_LABEL_TYPE_NORMAL:
-        it->end = label[0] == 0;
+        it->end = 0 == label[0];
         break;
     case DNS_LABEL_TYPE_POINTER:
         it->end = true;

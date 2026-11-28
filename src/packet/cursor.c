@@ -12,7 +12,7 @@
 static inline size_t
 start_bits (size_t i, size_t offset)
 {
-    return i == 0 ? offset : 0;
+    return 0 == i ? offset : 0;
 }
 
 // Last bit of octet i the field takes.
@@ -26,7 +26,7 @@ uint64_t
 read_bits (const cursor_t *c, size_t nbits)
 {
     assert (nbits <= 64);
-    if (nbits == 0 || !cursor_fits (c, 0, nbits)) return 0;
+    if (0 == nbits || !cursor_fits (c, 0, nbits)) return 0;
 
     const uint8_t *p      = cursor_ptr (c);
     size_t         offset = cursor_bits (c);
@@ -59,7 +59,7 @@ void
 write_bits (const cursor_t *c, size_t nbits, uint64_t value)
 {
     assert (nbits <= 64);
-    if (nbits == 0 || !cursor_fits (c, 0, nbits)) return;
+    if (0 == nbits || !cursor_fits (c, 0, nbits)) return;
 
     uint8_t *p      = cursor_ptr (c);
     size_t   offset = cursor_bits (c);

@@ -4,10 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <glib.h>
+
 #include "dns/error.h"
 
 #define DNS_LABEL_MAX 63
-#define DNS_LABEL_ESCAPE_SIZE (sizeof "\\DDD" - 1)
 #define DNS_LABEL_POINTER_SIZE 2
 #define DNS_LABEL_POINTER_MAX 0x3FFF
 
@@ -31,11 +32,14 @@ dns_label_pointer_write (uint8_t *ptr, size_t target);
 bool
 dns_label_equal (const uint8_t *a, const uint8_t *b);
 
-// label <--> char * (string)
+// label <--> text
+// Reads one label from *str (up to the next '.' or the end) into self, which has room for
+// 1 + DNS_LABEL_MAX octets, and moves *str past it. Errors leave self and *str unchanged.
 dns_error_t
-dns_label_from_string (const char **str, uint8_t *label, size_t len);
+dns_label_from_string (uint8_t *self, const char **str);
+// Appends the text form of the normal label self (without a dot) to gs.
 dns_error_t
-dns_label_to_string (const uint8_t *label, char *buf, size_t len, size_t *out);
+dns_label_to_string (const uint8_t *self, GString *gs);
 
 // Walks the labels of a name in buf (len octets), starting at offset pos, without following
 // compression pointers:

@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <glib.h>
+
 typedef struct
 {
     uint32_t    value;
@@ -31,8 +33,8 @@ typedef struct
 bool
 params_from_string (const params_table_t *t, const char *str, uint32_t *out);
 
-// display
-const char *
-params_display_r (const params_table_t *t, uint32_t value, char *buf, size_t len);
+// value --> text (mnemonic, or else the generic form), appended to gs
+void
+params_to_string (const params_table_t *t, uint32_t value, GString *gs);
 
 #endif

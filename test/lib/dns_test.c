@@ -17,9 +17,9 @@ hexdump (const char *title, const uint8_t *buf, size_t len, size_t mark)
     printf ("%s (%zu octets):\n", title, len);
     for (size_t i = 0; i < len; i++)
     {
-        if (i % 16 == 0) printf ("  %04zx:", i);
+        if (0 == i % 16) printf ("  %04zx:", i);
         printf (i == mark ? " [%02x]" : " %02x", buf[i]);
-        if (i % 16 == 15 || i + 1 == len) putchar ('\n');
+        if (15 == i % 16 || i + 1 == len) putchar ('\n');
     }
 }
 
@@ -42,7 +42,7 @@ dns_test_run (int            argc,
     struct addrinfo  hints = {.ai_family = AF_UNSPEC, .ai_socktype = SOCK_DGRAM};
     struct addrinfo *ai;
     int              rc = getaddrinfo (host, port, &hints, &ai);
-    if (rc != 0)
+    if (0 != rc)
     {
         fprintf (stderr, "%s:%s: %s\n", host, port, gai_strerror (rc));
         return 2;
@@ -71,9 +71,9 @@ dns_test_run (int            argc,
     ssize_t        n = recv (fd, reply, sizeof reply, 0);
     close (fd);
 
-    if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+    if (n < 0 && (EAGAIN == errno || EWOULDBLOCK == errno))
     {
-        if (!response)
+        if (NULL == response)
         {
             puts ("OK (no reply)");
             return 0;
@@ -89,7 +89,7 @@ dns_test_run (int            argc,
     }
 
     size_t len = (size_t)n;
-    if (!response)
+    if (NULL == response)
     {
         puts ("MISMATCH: expected no reply");
         hexdump ("received", reply, len, (size_t)-1);

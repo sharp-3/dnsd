@@ -4,10 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <glib.h>
+
 #include "dns/error.h"
 
 #define DNS_CLASS_SIZE 2 // octets in wire format
-#define DNS_CLASS_DISPLAY_SIZE sizeof "CLASS65535"
 
 typedef enum : uint16_t
 {
@@ -39,14 +40,10 @@ dns_class_is_qonly_or_meta (dns_class_t class);
 bool
 dns_class_is_reserved (dns_class_t class);
 
-// dns_class_t <-- char * (string)
+// dns_class_t <--> text
 dns_error_t
-dns_class_from_string (const char *str, dns_class_t *out);
-
-// display
-const char *
-dns_class_display_r (dns_class_t value, char *buf, size_t len);
-#define dns_class_display(value)                                                                   \
-    dns_class_display_r ((value), (char[DNS_CLASS_DISPLAY_SIZE]){}, DNS_CLASS_DISPLAY_SIZE)
+dns_class_from_string (dns_class_t *self, const char *str);
+dns_error_t
+dns_class_to_string (dns_class_t self, GString *gs);
 
 #endif

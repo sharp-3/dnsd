@@ -9,6 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/format.cmake)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB REQUIRED IMPORTED_TARGET glib-2.0)
+
 set(HEADER_DIR "${CMAKE_SOURCE_DIR}/include")
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 
@@ -21,6 +24,7 @@ list(FILTER LIB_SOURCES EXCLUDE REGEX "^${SOURCE_DIR}/(main\\.c|bin/)")
 
 add_library(${PROJECT_NAME}_core STATIC ${LIB_SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
 target_include_directories(${PROJECT_NAME}_core PUBLIC "${HEADER_DIR}")
+target_link_libraries(${PROJECT_NAME}_core PUBLIC PkgConfig::GLIB)
 target_compile_options(${PROJECT_NAME}_core PUBLIC -Wall -Wextra)
 
 add_executable(${PROJECT_NAME} "${SOURCE_DIR}/main.c")

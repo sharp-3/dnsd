@@ -25,10 +25,9 @@
 #define NI_MAXHOST 1025
 #endif
 
-// Room for a record or question line: each name, and the rest of the RDATA, up to a whole
-// message with every octet escaped (\DDD).
-static char record_line[(DNS_RECORD_NAMES_MAX + 1) * MSG_MAX * DNS_LABEL_ESCAPE_SIZE];
-static bool uncompressed;
+// A record or question line being shown.
+static GString *line;
+static bool     uncompressed;
 // Room for the names of one record once uncompressed, each up to a whole message (names over
 // DNS_NAME_MAX octets are shown uncompressed too).
 static uint8_t    uncompressed_buf[DNS_RECORD_NAMES_MAX][MSG_MAX];
@@ -48,9 +47,9 @@ usage (void)
 static bool
 parse_flag (const char *a, dns_header_t *hdr)
 {
-    if (a[0] != '+') return false;
+    if ('+' != a[0]) return false;
 
-    bool        on = strncmp (a + 1, "no", 2) != 0;
+    bool        on = 0 != strncmp (a + 1, "no", 2);
     const char *f  = on ? a + 1 : a + 3;
     struct
     {
@@ -68,7 +67,7 @@ parse_flag (const char *a, dns_header_t *hdr)
     };
     for (size_t i = 0; i < sizeof flags / sizeof flags[0]; i++)
     {
-        if (strcmp (f, flags[i].name) == 0)
+        if (0 == strcmp (f, flags[i].name))
         {
             *flags[i].bit = on;
             return true;
@@ -84,11 +83,11 @@ default_server (void)
     FILE       *fp = fopen ("/etc/resolv.conf", "r");
     char        line[512];
 
-    if (fp)
+    if (NULL != fp)
     {
-        while (fgets (line, sizeof line, fp))
+        while (NULL != fgets (line, sizeof line, fp))
         {
-            if (sscanf (line, " nameserver %255s", addr) == 1)
+            if (1 == sscanf (line, " nameserver %255s", addr))
             {
                 fclose (fp);
                 return addr;
@@ -104,13 +103,13 @@ random_id (void)
 {
     uint16_t id = 0;
     FILE    *fp = fopen ("/dev/urandom", "rb");
-    if (!fp || fread (&id, sizeof id, 1, fp) != 1)
+    if (NULL == fp || 1 != fread (&id, sizeof id, 1, fp))
     {
         struct timespec ts;
         clock_gettime (CLOCK_REALTIME, &ts);
         id = (uint16_t)(ts.tv_nsec ^ getpid ());
     }
-    if (fp) fclose (fp);
+    if (NULL != fp) fclose (fp);
     return id;
 }
 
@@ -126,7 +125,7 @@ static bool
 wait_readable (int fd, int timeout_ms)
 {
     struct pollfd pfd = {.fd = fd, .events = POLLIN};
-    return poll (&pfd, 1, timeout_ms) == 1;
+    return 1 == poll (&pfd, 1, timeout_ms);
 }
 
 static int
@@ -185,7 +184,7 @@ exchange_tcp (const struct addrinfo *ai, const uint8_t *q, size_t qlen, uint8_t 
 
     uint8_t prefix[2] = {qlen >> 8, qlen & 0xff};
     ssize_t n         = -1;
-    if (send (fd, prefix, 2, 0) == 2 && send (fd, q, qlen, 0) == (ssize_t)qlen &&
+    if (2 == send (fd, prefix, 2, 0) && send (fd, q, qlen, 0) == (ssize_t)qlen &&
         read_full (fd, prefix, 2))
     {
         size_t len = (size_t)prefix[0] << 8 | prefix[1];
@@ -257,10 +256,10 @@ uncompress_record (const dns_cursor_t *p, dns_record_t *rr)
     dns_error_t err = DNS_OK;
     for (size_t i = 0; i < n; i++)
     {
-        dns_error_t nerr = dns_name_to_uncompressed (p, names[i], &uncompressed_names[i]);
+        dns_error_t nerr = dns_name_to_uncompressed (names[i], p, &uncompressed_names[i]);
         if (!dns_is_ok (nerr)) return nerr;
-        err       = dns_merge_soft (err, nerr);
-        *names[i] = dns_name_to_ref (&uncompressed_names[i]);
+        err = dns_merge_soft (err, nerr);
+        dns_name_to_ref (&uncompressed_names[i], names[i]);
     }
     *rr = out;
     return err;
@@ -269,14 +268,14 @@ uncompress_record (const dns_cursor_t *p, dns_record_t *rr)
 static bool
 print_records (const char *title, unsigned count, dns_cursor_t *p)
 {
-    if (count == 0) return true;
+    if (0 == count) return true;
 
     printf ("\n;; %s SECTION:\n", title);
     for (unsigned i = 0; i < count; i++)
     {
         dns_record_t record;
-        dns_error_t  err = dns_record_from_bytes (p, &record);
-        if (err != DNS_OK)
+        dns_error_t  err = dns_record_from_wire (p, &record);
+        if (DNS_OK != err)
             printf (";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (err));
         if (!dns_is_ok (err)) return false;
         if (uncompressed)
@@ -284,11 +283,12 @@ print_records (const char *title, unsigned count, dns_cursor_t *p)
             // On failure the record is shown as read (compressed). A warning the read already
             // gave is not repeated.
             dns_error_t xerr = uncompress_record (p, &record);
-            if (xerr != DNS_OK && xerr != err)
+            if (DNS_OK != xerr && xerr != err)
                 printf (
                     ";; error in %s section, record %u: %s\n", title, i + 1, dns_error_str (xerr));
         }
-        puts (dns_record_debug_r (&record, record_line, sizeof record_line));
+        g_string_truncate (line, 0);
+        puts (dns_record_debug (&record, line)->str);
     }
     return true;
 }
@@ -300,22 +300,23 @@ print_reply (uint8_t *msg, size_t len)
     dns_cursor_init (&parser, msg, len);
 
     dns_header_t header;
-    dns_error_t  err = dns_header_from_bytes (&parser, &header);
-    if (err != DNS_OK)
+    dns_error_t  err = dns_header_from_wire (&parser, &header);
+    if (DNS_OK != err)
     {
         printf (";; error in header: %s\n", dns_error_str (err));
         return false;
     }
 
     const dns_header_t *hdr = &header;
-    printf (";; ->>HEADER<<- %s\n", dns_header_debug (hdr));
+    g_string_truncate (line, 0);
+    printf (";; ->>HEADER<<- %s\n", dns_header_debug (hdr, line)->str);
 
     bool ok = true;
     if (hdr->qdcount) printf ("\n;; QUESTION SECTION:\n");
     for (unsigned i = 0; ok && i < hdr->qdcount; i++)
     {
         dns_question_t question;
-        if ((err = dns_question_from_bytes (&parser, &question)) != DNS_OK)
+        if (DNS_OK != (err = dns_question_from_wire (&parser, &question)))
             printf (";; error in QUESTION section: %s\n", dns_error_str (err));
         if (!dns_is_ok (err))
         {
@@ -325,11 +326,12 @@ print_reply (uint8_t *msg, size_t len)
         dns_question_t *q = &question;
         if (uncompressed)
         {
-            err = dns_name_to_uncompressed (&parser, &q->qname, &uncompressed_names[0]);
-            if (err != DNS_OK) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
-            if (dns_is_ok (err)) q->qname = dns_name_to_ref (&uncompressed_names[0]);
+            err = dns_name_to_uncompressed (&q->qname, &parser, &uncompressed_names[0]);
+            if (DNS_OK != err) printf (";; error in QUESTION section: %s\n", dns_error_str (err));
+            if (dns_is_ok (err)) dns_name_to_ref (&uncompressed_names[0], &q->qname);
         }
-        printf (";%s\n", dns_question_debug_r (q, record_line, sizeof record_line));
+        g_string_truncate (line, 0);
+        printf (";%s\n", dns_question_debug (q, line)->str);
     }
 
     ok = ok && print_records ("ANSWER", hdr->ancount, &parser) &&
@@ -344,6 +346,7 @@ print_reply (uint8_t *msg, size_t len)
 int
 main (int argc, char **argv)
 {
+    line = g_string_new (NULL);
     for (size_t i = 0; i < DNS_RECORD_NAMES_MAX; i++)
         uncompressed_names[i] =
             (dns_name_t){.ptr = uncompressed_buf[i], .cap = sizeof uncompressed_buf[i]};
@@ -360,33 +363,34 @@ main (int argc, char **argv)
     for (int i = 1; i < argc; i++)
     {
         const char *a = argv[i];
-        if (a[0] == '@' && a[1]) server = a + 1;
-        else if (strcmp (a, "-p") == 0 && i + 1 < argc) port = argv[++i];
-        else if (strcmp (a, "+tcp") == 0) tcp = true;
-        else if (strcmp (a, "+uncompressed") == 0) uncompressed = true;
+        if ('@' == a[0] && a[1]) server = a + 1;
+        else if (0 == strcmp (a, "-p") && i + 1 < argc) port = argv[++i];
+        else if (0 == strcmp (a, "+tcp")) tcp = true;
+        else if (0 == strcmp (a, "+uncompressed")) uncompressed = true;
         else if (parse_flag (a, &hdr)) continue;
-        else if (a[0] == '+') usage ();
-        else if (!qname) qname = a;
-        else if (!have_type && dns_type_from_string (a, &qtype) == DNS_OK) have_type = true;
-        else if (!have_class && dns_class_from_string (a, &qclass) == DNS_OK) have_class = true;
+        else if ('+' == a[0]) usage ();
+        else if (NULL == qname) qname = a;
+        else if (!have_type && DNS_OK == dns_type_from_string (&qtype, a)) have_type = true;
+        else if (!have_class && DNS_OK == dns_class_from_string (&qclass, a)) have_class = true;
         else usage ();
     }
-    if (!qname) usage ();
-    if (!server) server = default_server ();
+    if (NULL == qname) usage ();
+    if (NULL == server) server = default_server ();
 
     // A name too long for this buffer would not fit in the query either.
     uint8_t     name_buf[UDP_MAX];
     dns_name_t  name = {.ptr = name_buf, .cap = sizeof name_buf};
-    dns_error_t err  = dns_name_from_string (qname, &name);
-    if (err != DNS_OK) fprintf (stderr, "query: bad name '%s': %s\n", qname, dns_error_str (err));
+    dns_error_t err  = dns_name_from_string (&name, qname);
+    if (DNS_OK != err) fprintf (stderr, "query: bad name '%s': %s\n", qname, dns_error_str (err));
     if (!dns_is_ok (err)) return 1;
 
-    dns_question_t      q = {.qname = dns_name_to_ref (&name), .qtype = qtype, .qclass = qclass};
+    dns_question_t q = {.qtype = qtype, .qclass = qclass};
+    dns_name_to_ref (&name, &q.qname);
     uint8_t             query[UDP_MAX];
     static dns_cursor_t writer;
     dns_cursor_init (&writer, query, sizeof query);
-    err = dns_header_to_bytes (&writer, &hdr);
-    if (err == DNS_OK) err = dns_question_to_bytes (&writer, &q, true);
+    err = dns_header_to_wire (&writer, &hdr);
+    if (DNS_OK == err) err = dns_question_to_wire (&writer, &q, true);
     size_t qlen = cursor_bytes (&writer.cur);
     if (!dns_is_ok (err))
     {
@@ -397,7 +401,7 @@ main (int argc, char **argv)
     struct addrinfo hints = {.ai_family = AF_UNSPEC, .ai_socktype = tcp ? SOCK_STREAM : SOCK_DGRAM};
     struct addrinfo *ai;
     int              gai = getaddrinfo (server, port, &hints, &ai);
-    if (gai != 0)
+    if (0 != gai)
     {
         fprintf (stderr, "query: %s: %s\n", server, gai_strerror (gai));
         return 1;
@@ -406,10 +410,11 @@ main (int argc, char **argv)
     char host[NI_MAXHOST] = "?";
     getnameinfo (ai->ai_addr, ai->ai_addrlen, host, sizeof host, NULL, 0, NI_NUMERICHOST);
 
-    printf ("; <<>> query <<>> %s %s %s\n",
-            qname,
-            dns_type_display (qtype),
-            dns_class_display (qclass));
+    g_string_assign (line, "");
+    dns_type_to_string (qtype, line);
+    g_string_append_c (line, ' ');
+    dns_class_to_string (qclass, line);
+    printf ("; <<>> query <<>> %s %s\n", qname, line->str);
 
     static uint8_t  reply[MSG_MAX];
     struct timespec start;
@@ -429,7 +434,7 @@ main (int argc, char **argv)
             struct addrinfo  thints = {.ai_family = ai->ai_family, .ai_socktype = SOCK_STREAM};
             struct addrinfo *tai;
             tcp = true;
-            if (getaddrinfo (host, port, &thints, &tai) == 0)
+            if (0 == getaddrinfo (host, port, &thints, &tai))
             {
                 rlen = exchange_tcp (tai, query, qlen, reply, sizeof reply);
                 freeaddrinfo (tai);

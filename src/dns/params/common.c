@@ -1,15 +1,18 @@
-#include <stdio.h>
-
 #include "common.h"
 #include "utils/string.h"
 
-const char *
-params_display_r (const params_table_t *t, uint32_t value, char *buf, size_t len)
+void
+params_to_string (const params_table_t *t, uint32_t value, GString *gs)
 {
     for (size_t i = 0; i < t->count; i++)
-        if (t->names[i].value == value) return t->names[i].name;
-    snprintf (buf, len, "%s%lu", t->prefix, (unsigned long)value);
-    return buf;
+    {
+        if (t->names[i].value == value)
+        {
+            g_string_append (gs, t->names[i].name);
+            return;
+        }
+    }
+    g_string_append_printf (gs, "%s%lu", t->prefix, (unsigned long)value);
 }
 
 // Parses the generic form of t into *out; see params_from_string.
@@ -19,7 +22,7 @@ generic_from_string (const params_table_t *t, const char *str, uint32_t *out)
     for (const char *prefix = t->prefix; *prefix; prefix++, str++)
         if (ascii_tolower (*str) != ascii_tolower (*prefix)) return false;
 
-    if (*str == '\0') return false;
+    if ('\0' == *str) return false;
 
     uint32_t value = 0;
     for (; *str; str++)

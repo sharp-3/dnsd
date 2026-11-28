@@ -2,8 +2,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <glib.h>
+
 #include "packet/hexdump.h"
-#include "utils/string.h"
 
 #define BYTES_PER_LINE 16
 
@@ -31,7 +32,7 @@ hexdump (const uint8_t *pkt, size_t nbytes_len)
         for (size_t i = 0; i < chunk_len; i++)
         {
             uint8_t c = pkt[nbytes_off + i];
-            if (ascii_isprint (c)) putchar (c);
+            if (g_ascii_isprint (c)) putchar (c);
             else putchar ('.');
         }
         printf ("|\n");

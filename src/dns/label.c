@@ -2,7 +2,6 @@
 
 #include "dns/label.h"
 #include "packet/cursor.h"
-#include "utils/string.h"
 
 static cursor_t
 label_cursor (const uint8_t *label, size_t len)
@@ -55,7 +54,7 @@ dns_label_equal (const uint8_t *a, const uint8_t *b)
 {
     if (a[0] != b[0]) return false;
     for (size_t i = 1; i <= a[0]; i++)
-        if (ascii_tolower (a[i]) != ascii_tolower (b[i])) return false;
+        if (g_ascii_tolower (a[i]) != g_ascii_tolower (b[i])) return false;
     return true;
 }
 
@@ -76,7 +75,7 @@ static bool
 parse_decimal_escape (const char *p, uint8_t *out)
 {
     for (int i = 0; i < 3; i++)
-        if (!ascii_isdigit (p[i])) return false;
+        if (!g_ascii_isdigit (p[i])) return false;
     unsigned v = (p[0] - '0') * 100 + (p[1] - '0') * 10 + (p[2] - '0');
     if (255 < v) return false;
     *out = v;
@@ -95,7 +94,7 @@ dns_label_from_string (uint8_t *self, const char **str)
         uint8_t c = (uint8_t)*p;
         if ('\\' == c)
         {
-            if (ascii_isdigit (p[1]))
+            if (g_ascii_isdigit (p[1]))
             {
                 if (!parse_decimal_escape (p + 1, &c)) return DNS_ERR_BAD_TEXT;
                 p += 3;

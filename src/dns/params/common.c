@@ -21,19 +21,10 @@ generic_from_string (const params_table_t *t, const char *str, uint32_t *out)
 {
     size_t prefix_len = strlen (t->prefix);
     if (0 != g_ascii_strncasecmp (str, t->prefix, prefix_len)) return false;
-    str += prefix_len;
 
-    if ('\0' == *str) return false;
-
-    uint32_t value = 0;
-    for (; *str; str++)
-    {
-        if (!g_ascii_isdigit (*str)) return false;
-        uint32_t digit = (uint32_t)(*str - '0');
-        if (t->max < digit || (t->max - digit) / 10 < value) return false;
-        value = value * 10 + digit;
-    }
-    *out = value;
+    guint64 value;
+    if (!g_ascii_string_to_unsigned (str + prefix_len, 10, 0, t->max, &value, NULL)) return false;
+    *out = (uint32_t)value;
     return true;
 }
 

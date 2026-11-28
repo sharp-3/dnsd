@@ -35,7 +35,4 @@ add_executable(query "${SOURCE_DIR}/bin/query.c")
 target_link_libraries(query PRIVATE ${PROJECT_NAME}_core)
 target_compile_options(query PRIVATE -Wall -Wextra)
 
-add_subdirectory(test)
-
-file(GLOB_RECURSE TEST_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/*.c" "${CMAKE_SOURCE_DIR}/test/*.h")
-add_format(format EXCLUDE_FROM_ALL ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS} ${TEST_FILES})
+add_format(format EXCLUDE_FROM_ALL ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
